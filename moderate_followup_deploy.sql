@@ -1,0 +1,507 @@
+-- =====================================================================
+-- GULONG.PH — MODERATE-INTENT FOLLOW-UP REPORTING LAYER
+-- Project: gulong-chatbot-459723
+-- Dataset: gulong_reporting
+--
+-- RUN ORDER MATTERS. Statement 3 reads the TABLE built in Statement 2.
+-- Statement 3 also depends on the CURRENT contents of
+-- v_looker_first_reply_detail. If that upstream view changes, rerun
+-- Statements 3 and 4 at minimum so the coverage table stays aligned.
+--   1. VIEW   v_looker_moderate_followup_detail
+--   2. TABLE  t_moderate_followup_detail
+--   3. VIEW   v_looker_moderate_followup_coverage
+--   4. TABLE  t_moderate_followup_coverage
+--
+-- Statements 2 and 4 go into ONE scheduled query, in this order.
+-- Full rebuild only. Booking attribution looks forward 14 days.
+-- =====================================================================
+
+
+-- =====================================================================
+-- STATEMENT 1 — TRUE FOLLOW-UP DETAIL VIEW
+-- Grain: silver_session_id + followup_at
+--
+-- Purpose:
+--   Event-level source for "which follow-ups happened" and
+--   "which follow-ups converted to bookings".
+--
+-- Important:
+--   This view EXCLUDES the first CS reply itself. Only true follow-ups
+--   remain, so there are no synthetic zero rows here.
+-- =====================================================================
+
+CREATE OR REPLACE VIEW `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_followup_detail`
+OPTIONS (
+  description = "One row per TRUE CS follow-up matched to a replied moderate-intent session. GRAIN: silver_session_id + followup_at. BASE COHORT: v_looker_first_reply_detail where reply_status = 'Has CS Reply'. MATCH RULE: same manychat_id, followup_at > first_cs_reply_at, followup_date <= moderate_report_date + 7 days, then each follow-up is attributed to the most recent prior replied moderate for that manychat_id. Use this table for event-level follow-up analysis. Use COUNT_DISTINCT(attributed_order_id) for booking counts. Use t_moderate_followup_coverage for the moderate denominator and NO CS FOLLOWUP reporting."
+)
+AS
+WITH replied_moderates AS (
+  SELECT
+    report_date AS moderate_report_date,
+    DATE_TRUNC(report_date, WEEK(MONDAY)) AS moderate_week,
+    DATE_TRUNC(report_date, MONTH)        AS moderate_month,
+    silver_session_id,
+    manychat_id,
+    user_name AS moderate_user_name,
+    contact_number,
+    reply_agent_name,
+    LOWER(TRIM(reply_agent_name)) AS reply_agent_name_norm,
+    first_cs_reply_at,
+    minutes_to_first_reply
+  FROM `gulong-chatbot-459723.gulong_reporting.v_looker_first_reply_detail`
+  WHERE reply_status = 'Has CS Reply'
+    AND manychat_id IS NOT NULL
+),
+followups AS (
+  SELECT
+    report_date AS followup_date,
+    manychat_id,
+    agent_name AS followup_agent_name,
+    LOWER(TRIM(agent_name)) AS followup_agent_name_norm,
+    user_name AS followup_user_name,
+    followup_at,
+    followup_type,
+    followup_text
+  FROM `gulong-chatbot-459723.gulong_reporting.v_looker_cs_followup_detail`
+),
+matched_followups AS (
+  SELECT
+    m.moderate_report_date,
+    m.moderate_week,
+    m.moderate_month,
+    m.silver_session_id,
+    m.manychat_id,
+    m.moderate_user_name,
+    m.contact_number,
+    m.reply_agent_name,
+    m.reply_agent_name_norm,
+    m.first_cs_reply_at,
+    m.minutes_to_first_reply,
+    f.followup_date,
+    f.followup_agent_name,
+    f.followup_agent_name_norm,
+    f.followup_user_name,
+    f.followup_at,
+    f.followup_type,
+    f.followup_text,
+    DATE_DIFF(f.followup_date, m.moderate_report_date, DAY) AS days_from_moderate_to_followup,
+    DATETIME_DIFF(f.followup_at, m.first_cs_reply_at, MINUTE) AS minutes_from_reply_to_followup
+  FROM replied_moderates m
+  JOIN followups f
+    ON f.manychat_id = m.manychat_id
+   AND f.followup_at > m.first_cs_reply_at
+   AND f.followup_date <= DATE_ADD(m.moderate_report_date, INTERVAL 7 DAY)
+  QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY f.manychat_id, f.followup_at
+    ORDER BY m.first_cs_reply_at DESC, m.silver_session_id DESC
+  ) = 1
+),
+with_booking AS (
+  SELECT
+    mf.*,
+    b.order_id,
+    b.booking_at,
+    b.booking_day,
+    COUNT(b.order_id) OVER (
+      PARTITION BY mf.silver_session_id, mf.followup_at
+    ) AS raw_booking_count_within_14d
+  FROM matched_followups mf
+  LEFT JOIN `gulong-chatbot-459723.gulong_core.orders_booked` b
+    ON b.manychat_user_id = mf.manychat_id
+   AND b.booking_at >= mf.followup_at
+   AND b.booking_day <= DATE_ADD(mf.followup_date, INTERVAL 14 DAY)
+  QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY mf.silver_session_id, mf.followup_at
+    ORDER BY b.booking_at ASC, b.order_id ASC
+  ) = 1
+)
+SELECT
+  -- ---------- cohort dates ----------
+  moderate_report_date,
+  moderate_week,
+  moderate_month,
+
+  -- ---------- follow-up dates ----------
+  followup_date,
+  DATE_TRUNC(followup_date, WEEK(MONDAY)) AS followup_week,
+  DATE_TRUNC(followup_date, MONTH)        AS followup_month,
+
+  -- ---------- identity ----------
+  silver_session_id,
+  manychat_id,
+  COALESCE(followup_user_name, moderate_user_name) AS user_name,
+  contact_number,
+
+  -- ---------- reply / follow-up ownership ----------
+  reply_agent_name,
+  reply_agent_name_norm,
+  followup_agent_name,
+  followup_agent_name_norm,
+
+  -- ---------- timestamps ----------
+  first_cs_reply_at,
+  followup_at,
+  booking_at,
+  booking_day,
+
+  -- ---------- attributes ----------
+  followup_type,
+  followup_text,
+  days_from_moderate_to_followup,
+  minutes_to_first_reply,
+  minutes_from_reply_to_followup,
+  DATE_DIFF(booking_day, followup_date, DAY) AS days_followup_to_booking,
+
+  CASE
+    WHEN minutes_from_reply_to_followup <= 240  THEN 'A. 0-4 hrs'
+    WHEN minutes_from_reply_to_followup <= 1440 THEN 'B. 4-24 hrs'
+    WHEN minutes_from_reply_to_followup <= 2880 THEN 'C. 24-48 hrs'
+    ELSE 'D. 48+ hrs'
+  END AS followup_speed_bucket,
+
+  CASE
+    WHEN order_id IS NOT NULL THEN 'Yes'
+    ELSE 'No'
+  END AS is_booked,
+  COALESCE(contact_number, '—')              AS contact_display,
+  COALESCE(CAST(booking_day AS STRING), '—') AS booking_day_display,
+  COALESCE(order_id, '—')                    AS order_display,
+
+  -- ---------- flags ----------
+  CAST(1 AS INT64) AS is_true_followup,
+  CAST(days_from_moderate_to_followup = 0 AS INT64) AS is_same_day_followup,
+  CAST(days_from_moderate_to_followup = 1 AS INT64) AS is_next_day_followup,
+
+  -- ---------- measures ----------
+  CAST(1 AS INT64) AS row_count,
+  CAST(1 AS INT64) AS followed_up_moderate_count,
+  CAST(order_id IS NOT NULL AS INT64) AS booked_from_followup_count,
+  CAST(raw_booking_count_within_14d AS INT64) AS booking_count_within_14d,
+  order_id AS attributed_order_id,
+  minutes_from_reply_to_followup AS followup_gap_minutes_true_only
+FROM with_booking;
+
+
+-- =====================================================================
+-- STATEMENT 2 — DETAIL TABLE
+-- =====================================================================
+
+CREATE OR REPLACE TABLE `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_detail`
+CLUSTER BY followup_date
+AS SELECT * FROM `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_followup_detail`;
+
+
+-- =====================================================================
+-- STATEMENT 3 — SESSION STATUS / COVERAGE VIEW
+-- Grain: silver_session_id
+--
+-- Purpose:
+--   One row per replied moderate session, including sessions that never
+--   received any true follow-up.
+--
+-- Dependency note:
+--   This view is the session-level denominator. If
+--   v_looker_first_reply_detail is rebuilt or its reply logic changes,
+--   rerun this statement and Statement 4 or the coverage table can go
+--   stale versus the source view.
+-- =====================================================================
+
+CREATE OR REPLACE VIEW `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_followup_coverage`
+OPTIONS (
+  description = "One row per moderate-intent session from v_looker_first_reply_detail. GRAIN: silver_session_id. BASE COHORT: all moderate sessions with manychat_id present. This is the source of truth for the moderate denominator, replied vs no-reply splits, WITH CS FOLLOWUP vs NO CS FOLLOWUP, total chatbot-cohort bookings, chatbot-only bookings, and booked-from-followup session counts. Use moderate_report_date as the primary date range dimension for coverage reporting."
+)
+AS
+WITH moderates AS (
+  SELECT
+    report_date AS moderate_report_date,
+    DATE_TRUNC(report_date, WEEK(MONDAY)) AS moderate_week,
+    DATE_TRUNC(report_date, MONTH)        AS moderate_month,
+    silver_session_id,
+    manychat_id,
+    user_name,
+    contact_number,
+    reply_status,
+    reply_agent_name,
+    LOWER(TRIM(reply_agent_name)) AS reply_agent_name_norm,
+    first_customer_message_at,
+    first_cs_reply_at,
+    minutes_to_first_reply
+  FROM `gulong-chatbot-459723.gulong_reporting.v_looker_first_reply_detail`
+  WHERE manychat_id IS NOT NULL
+),
+followup_ranked AS (
+  SELECT
+    d.*,
+    ROW_NUMBER() OVER (
+      PARTITION BY d.silver_session_id
+      ORDER BY d.followup_at, d.followup_agent_name, d.followup_type
+    ) AS rn
+  FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_detail` d
+),
+followup_rollup AS (
+  SELECT
+    silver_session_id,
+    COUNT(*) AS followup_count,
+    MIN(followup_at) AS first_followup_at,
+    DATE(MIN(followup_at)) AS first_followup_date,
+    MAX(followup_at) AS last_followup_at,
+    COUNT(DISTINCT attributed_order_id) AS booking_count_from_followup,
+    COUNTIF(attributed_order_id IS NOT NULL) AS followup_rows_with_booking,
+    MIN(minutes_from_reply_to_followup) AS minutes_to_first_followup,
+    ROUND(MIN(minutes_from_reply_to_followup) / 60, 2) AS hours_to_first_followup
+  FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_detail`
+  GROUP BY 1
+),
+direct_booking_ranked AS (
+  SELECT
+    m.silver_session_id,
+    b.order_id,
+    b.booking_at,
+    b.booking_day,
+    ROW_NUMBER() OVER (
+      PARTITION BY m.silver_session_id
+      ORDER BY b.booking_at, b.order_id
+    ) AS rn
+  FROM moderates m
+  LEFT JOIN `gulong-chatbot-459723.gulong_core.orders_booked` b
+    ON b.manychat_user_id = m.manychat_id
+   AND b.booking_at >= m.first_customer_message_at
+),
+direct_booking_rollup AS (
+  SELECT
+    silver_session_id,
+    COUNT(DISTINCT order_id) AS booking_count_total_chatbot,
+    MIN(booking_at) AS first_chatbot_booking_at,
+    DATE(MIN(booking_at)) AS first_chatbot_booking_date
+  FROM direct_booking_ranked
+  GROUP BY 1
+),
+first_direct_booking_dim AS (
+  SELECT
+    silver_session_id,
+    order_id AS first_chatbot_order_id
+  FROM direct_booking_ranked
+  WHERE rn = 1
+),
+first_followup_dim AS (
+  SELECT
+    silver_session_id,
+    followup_agent_name AS first_followup_agent_name,
+    followup_agent_name_norm AS first_followup_agent_name_norm,
+    followup_type AS first_followup_type,
+    followup_text AS first_followup_text,
+    followup_speed_bucket AS first_followup_speed_bucket,
+    is_booked AS first_followup_is_booked,
+    attributed_order_id AS first_attributed_order_id
+  FROM followup_ranked
+  WHERE rn = 1
+)
+SELECT
+  m.moderate_report_date,
+  m.moderate_week,
+  m.moderate_month,
+  m.silver_session_id,
+  m.manychat_id,
+  m.user_name,
+  m.contact_number,
+  m.reply_status,
+  m.reply_agent_name,
+  m.reply_agent_name_norm,
+  m.first_customer_message_at,
+  m.first_cs_reply_at,
+  m.minutes_to_first_reply,
+
+  db.first_chatbot_booking_date,
+  db.first_chatbot_booking_at,
+  bd.first_chatbot_order_id,
+  fu.first_followup_date,
+  fu.first_followup_at,
+  fu.last_followup_at,
+  fr.first_followup_agent_name,
+  fr.first_followup_agent_name_norm,
+  fr.first_followup_type,
+  fr.first_followup_text,
+  fr.first_followup_speed_bucket,
+  fr.first_followup_is_booked,
+  fr.first_attributed_order_id,
+
+  COALESCE(db.booking_count_total_chatbot, 0) AS booking_count_total_chatbot,
+  GREATEST(
+    COALESCE(db.booking_count_total_chatbot, 0) - COALESCE(fu.booking_count_from_followup, 0),
+    0
+  ) AS booking_count_chatbot_only,
+  COALESCE(fu.followup_count, 0) AS followup_count,
+  COALESCE(fu.booking_count_from_followup, 0) AS booking_count_from_followup,
+  COALESCE(fu.followup_rows_with_booking, 0) AS followup_rows_with_booking,
+  fu.minutes_to_first_followup,
+  fu.hours_to_first_followup,
+
+  CASE
+    WHEN COALESCE(fu.followup_count, 0) > 0 THEN 'WITH CS FOLLOWUP'
+    ELSE 'NO CS FOLLOWUP'
+  END AS cs_followup_status,
+
+  CASE
+    WHEN COALESCE(fu.booking_count_from_followup, 0) > 0 THEN 'Yes'
+    ELSE 'No'
+  END AS booked_from_followup,
+
+  CASE
+    WHEN COALESCE(db.booking_count_total_chatbot, 0) > 0 THEN 'Yes'
+    ELSE 'No'
+  END AS booked_in_chatbot_cohort,
+
+  CASE
+    WHEN COALESCE(fu.booking_count_from_followup, 0) > 0 THEN 'CS-ASSISTED BOOKING'
+    WHEN COALESCE(db.booking_count_total_chatbot, 0) > 0 THEN 'CHATBOT-ONLY BOOKING'
+    ELSE 'NO BOOKING'
+  END AS booking_ownership_status,
+
+  CASE
+    WHEN COALESCE(fu.booking_count_from_followup, 0) > 0 THEN 'CS Assisted'
+    WHEN COALESCE(db.booking_count_total_chatbot, 0) > 0 THEN 'Chatbot Only'
+    ELSE 'No Booking'
+  END AS booking_owner_bucket,
+
+  CAST(COALESCE(db.booking_count_total_chatbot, 0) > 0 AS INT64) AS was_booked_in_chatbot_cohort,
+  CAST(COALESCE(fu.followup_count, 0) > 0 AS INT64) AS was_followed_up,
+  CAST(COALESCE(fu.followup_count, 0) = 0 AS INT64) AS never_followed_up,
+  CAST(COALESCE(fu.followup_count, 0) > 1 AS INT64) AS had_multiple_followups,
+  CAST(
+    COALESCE(db.booking_count_total_chatbot, 0) > 0
+    AND COALESCE(fu.booking_count_from_followup, 0) = 0
+    AS INT64
+  ) AS was_booked_chatbot_only,
+  CAST(COALESCE(fu.booking_count_from_followup, 0) > 0 AS INT64) AS was_booked_from_followup,
+  CAST(m.moderate_report_date <= DATE_SUB(CURRENT_DATE('Asia/Manila'), INTERVAL 2 DAY) AS INT64)
+    AS is_mature_cohort,
+
+  CAST(1 AS INT64) AS moderate_session_count,
+  CAST(m.reply_status = 'Has CS Reply' AS INT64) AS replied_session_count,
+  CAST(m.reply_status = 'No CS Reply' AS INT64) AS no_reply_session_count,
+  CAST(COALESCE(db.booking_count_total_chatbot, 0) > 0 AS INT64) AS chatbot_total_booked_session_count,
+  CAST(
+    COALESCE(db.booking_count_total_chatbot, 0) > 0
+    AND COALESCE(fu.booking_count_from_followup, 0) = 0
+    AS INT64
+  ) AS chatbot_only_booked_session_count,
+  CAST(COALESCE(fu.followup_count, 0) > 0 AS INT64) AS followed_up_session_count,
+  CAST(
+    m.reply_status = 'Has CS Reply' AND COALESCE(fu.followup_count, 0) = 0
+    AS INT64
+  ) AS no_followup_session_count,
+  CAST(COALESCE(fu.booking_count_from_followup, 0) > 0 AS INT64) AS cs_assisted_booked_session_count,
+  CAST(COALESCE(fu.booking_count_from_followup, 0) > 0 AS INT64) AS booked_session_count
+FROM moderates m
+LEFT JOIN direct_booking_rollup db
+  USING (silver_session_id)
+LEFT JOIN first_direct_booking_dim bd
+  USING (silver_session_id)
+LEFT JOIN followup_rollup fu
+  USING (silver_session_id)
+LEFT JOIN first_followup_dim fr
+  USING (silver_session_id);
+
+
+-- =====================================================================
+-- STATEMENT 4 — COVERAGE TABLE
+-- =====================================================================
+
+CREATE OR REPLACE TABLE `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_coverage`
+CLUSTER BY moderate_report_date
+AS SELECT * FROM `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_followup_coverage`;
+
+
+-- =====================================================================
+-- QA — run after deploying
+-- =====================================================================
+
+-- QA 0: denominator reconciliation against v_looker_first_reply_detail
+-- If these do not match, t_moderate_followup_coverage is stale and
+-- Statements 3 and 4 must be rerun.
+SELECT
+  f.moderate_report_date,
+  f.moderates_first_reply,
+  c.moderates_coverage,
+  c.with_followup,
+  c.no_followup,
+  c.with_followup + c.no_followup AS coverage_recon,
+  f.moderates_first_reply - c.moderates_coverage AS moderate_diff
+FROM (
+  SELECT
+    report_date AS moderate_report_date,
+    COUNT(*) AS moderates_first_reply
+  FROM `gulong-chatbot-459723.gulong_reporting.v_looker_first_reply_detail`
+  WHERE reply_status = 'Has CS Reply'
+    AND manychat_id IS NOT NULL
+  GROUP BY 1
+) f
+LEFT JOIN (
+  SELECT
+    moderate_report_date,
+    SUM(moderate_session_count) AS moderates_coverage,
+    SUM(followed_up_session_count) AS with_followup,
+    SUM(no_followup_session_count) AS no_followup
+  FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_coverage`
+  GROUP BY 1
+) c
+  USING (moderate_report_date)
+WHERE f.moderates_first_reply != c.moderates_coverage
+   OR f.moderates_first_reply != c.with_followup + c.no_followup
+ORDER BY 1 DESC;
+
+-- QA 1: detail view must contain only true follow-ups
+SELECT
+  MIN(minutes_from_reply_to_followup) AS min_minutes_from_reply,
+  COUNTIF(minutes_from_reply_to_followup <= 0) AS non_true_followup_rows,
+  COUNT(*) AS total_followup_rows
+FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_detail`;
+
+-- QA 2: coverage reconciliation
+SELECT
+  SUM(moderate_session_count) AS moderate_sessions,
+  SUM(chatbot_total_booked_session_count) AS chatbot_total_booked_sessions,
+  SUM(chatbot_only_booked_session_count) AS chatbot_only_booked_sessions,
+  SUM(cs_assisted_booked_session_count) AS cs_assisted_booked_sessions,
+  SUM(followed_up_session_count) AS with_followup,
+  SUM(no_followup_session_count) AS no_followup,
+  SUM(booked_session_count) AS booked_sessions
+FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_coverage`
+WHERE is_mature_cohort = 1;
+
+-- QA 3: every mature moderate session should land in exactly one status
+SELECT
+  COUNT(*) AS bad_rows
+FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_coverage`
+WHERE is_mature_cohort = 1
+  AND followed_up_session_count + no_followup_session_count != 1;
+
+-- QA 4: sample day check — replace date / agent as needed
+SELECT
+  followup_date,
+  followup_agent_name,
+  COUNT(*) AS followup_rows,
+  COUNT(DISTINCT attributed_order_id) AS distinct_bookings
+FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_detail`
+WHERE followup_date = DATE '2026-07-22'
+GROUP BY 1, 2
+ORDER BY followup_rows DESC;
+
+-- QA 5: cohort-day coverage
+SELECT
+  moderate_report_date,
+  SUM(moderate_session_count) AS moderates,
+  SUM(chatbot_total_booked_session_count) AS chatbot_total_booked,
+  SUM(chatbot_only_booked_session_count) AS chatbot_only_booked,
+  SUM(cs_assisted_booked_session_count) AS cs_assisted_booked,
+  SUM(followed_up_session_count) AS with_followup,
+  SUM(no_followup_session_count) AS no_followup,
+  SUM(booked_session_count) AS booked,
+  ROUND(
+    SAFE_DIVIDE(SUM(followed_up_session_count), SUM(moderate_session_count)) * 100,
+    1
+  ) AS coverage_pct
+FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_coverage`
+WHERE is_mature_cohort = 1
+GROUP BY 1
+ORDER BY 1 DESC;

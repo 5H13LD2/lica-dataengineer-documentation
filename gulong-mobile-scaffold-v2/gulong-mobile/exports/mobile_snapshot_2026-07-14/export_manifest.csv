@@ -1,0 +1,11 @@
+file_name,source_tables,row_grain,row_count,exported_at,source_max_updated_at,filters_applied,contains_sensitive_data,notes
+brands.csv,gulong_backend.price_current,one row per normalized brand,31,2026-07-14T07:05:16Z,2026-07-14T06:10:45,brand nonblank; source table already current active snapshot,false,brand_id is deterministic hash because no native brand_id is exposed
+products.csv,gulong_backend.price_current,one row per current product_id,3294,2026-07-14T07:05:16Z,2026-07-14T06:10:45,product_id nonnull; source table already current active snapshot,false,sku uses dot_sku fallback to product_slug because explicit SKU is not populated
+tire_sizes.csv,gulong_backend.price_current,one row per current product_id,3294,2026-07-14T07:05:16Z,2026-07-14T06:10:45,product_id nonnull; invalid measurements kept as blanks and flagged in validation_report.csv,false,size_display emitted only when all size components are valid
+product_prices.csv,gulong_backend.price_current,one row per current product_id,3294,2026-07-14T07:05:16Z,2026-07-14T06:10:45,product_id nonnull; source table already current active snapshot,true,commercially sensitive product pricing; promo start/end timestamps unavailable
+branches.csv,unavailable,not exported,0,2026-07-14T07:05:16Z,,omitted,false,no reliable accessible branch master source
+branch_services.csv,unavailable,not exported,0,2026-07-14T07:05:16Z,,omitted,false,no reliable accessible branch-service source
+inventory.csv,unavailable,not exported,0,2026-07-14T07:05:16Z,,omitted,false,no reliable accessible inventory source
+appointment_capacity.csv,gulong_reporting.v_appointment_installation_analytics,not exported,0,2026-07-14T07:05:16Z,,omitted,false,"view is order history, not capacity availability"
+vehicle_fitments.csv,unavailable,not exported,0,2026-07-14T07:05:16Z,,omitted,false,no authoritative fitment source available
+validation_report.csv,gulong_backend.price_current,one row per validation finding,6754,2026-07-14T07:05:16Z,2026-07-14T06:10:45,validation only,false,includes unavailability warnings for omitted datasets
