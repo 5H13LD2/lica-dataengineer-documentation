@@ -7,12 +7,20 @@
 -- Statement 3 also depends on the CURRENT contents of
 -- v_looker_first_reply_detail. If that upstream view changes, rerun
 -- Statements 3 and 4 at minimum so the coverage table stays aligned.
+-- As of July 25, 2026:
+--   - the moderate denominator should align to the updated
+--     v_looker_first_reply_detail after Statements 3 and 4 are rebuilt
+--   - the booking fields in this coverage layer are still a direct
+--     session-window rebuild from orders_booked and are NOT the official
+--     booking source of truth used by p_looker_agent_daily_conversion
 --   1. VIEW   v_looker_moderate_followup_detail
 --   2. TABLE  t_moderate_followup_detail
 --   3. VIEW   v_looker_moderate_followup_coverage
 --   4. TABLE  t_moderate_followup_coverage
+--   5. VIEW   v_looker_moderate_booking_reconstruction
+--   6. TABLE  t_moderate_booking_reconstruction
 --
--- Statements 2 and 4 go into ONE scheduled query, in this order.
+-- Statements 2, 4, and 6 go into ONE scheduled query, in this order.
 -- Full rebuild only. Booking attribution looks forward 14 days.
 -- =====================================================================
 
@@ -204,6 +212,20 @@ AS SELECT * FROM `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_follo
 --   v_looker_first_reply_detail is rebuilt or its reply logic changes,
 --   rerun this statement and Statement 4 or the coverage table can go
 --   stale versus the source view.
+--
+-- Current business note:
+--   The denominator in this view inherits the cohort already selected by
+--   v_looker_first_reply_detail. If that upstream view was updated to use
+--   the official Chatbot/JCo row-level cohort basis, this coverage view
+--   will inherit that denominator after rebuild.
+--
+-- Booking note:
+--   booking_count_total_chatbot / first_chatbot_order_id are now rebuilt
+--   from the official Chatbot/JCo booking universe in orders_booked
+--   (sales_reporting_agent_name + is_reportable_booked_order), then
+--   matched back to the nearest eligible moderate session.
+--   This improves order-id coverage, but booking-day totals from official
+--   reporting are still a different date basis from moderate_report_date.
 -- =====================================================================
 
 CREATE OR REPLACE VIEW `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_followup_coverage`
@@ -252,34 +274,79 @@ followup_rollup AS (
   FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_detail`
   GROUP BY 1
 ),
-direct_booking_ranked AS (
+official_bookings AS (
+  SELECT
+    order_id,
+    booking_at,
+    booking_day,
+    manychat_user_id AS manychat_id,
+    customer_name AS booking_customer_name,
+    inquiry_silver_session_id,
+    inquiry_day
+  FROM `gulong-chatbot-459723.gulong_core.orders_booked`
+  WHERE sales_reporting_agent_name = 'Chatbot/JCo'
+    AND is_reportable_booked_order = TRUE
+    AND manychat_user_id IS NOT NULL
+),
+matched_official_bookings AS (
   SELECT
     m.silver_session_id,
     b.order_id,
     b.booking_at,
     b.booking_day,
+    b.booking_customer_name,
+    CASE
+      WHEN b.inquiry_silver_session_id = m.silver_session_id THEN 'EXACT INQUIRY SESSION'
+      ELSE 'LATEST PRIOR MODERATE'
+    END AS booking_match_rule,
     ROW_NUMBER() OVER (
-      PARTITION BY m.silver_session_id
-      ORDER BY b.booking_at, b.order_id
-    ) AS rn
+      PARTITION BY b.order_id
+      ORDER BY
+        CASE WHEN b.inquiry_silver_session_id = m.silver_session_id THEN 0 ELSE 1 END,
+        m.first_customer_message_at DESC,
+        m.moderate_report_date DESC,
+        m.silver_session_id DESC
+    ) AS booking_match_rn
   FROM moderates m
-  LEFT JOIN `gulong-chatbot-459723.gulong_core.orders_booked` b
-    ON b.manychat_user_id = m.manychat_id
-   AND b.booking_at >= m.first_customer_message_at
+  JOIN official_bookings b
+    ON b.manychat_id = m.manychat_id
+   AND (
+     b.inquiry_silver_session_id = m.silver_session_id
+     OR m.first_customer_message_at <= b.booking_at
+   )
+),
+direct_booking_ranked AS (
+  SELECT
+    silver_session_id,
+    order_id,
+    booking_at,
+    booking_day,
+    booking_customer_name,
+    booking_match_rule,
+    ROW_NUMBER() OVER (
+      PARTITION BY silver_session_id
+      ORDER BY booking_at, order_id
+    ) AS rn
+  FROM matched_official_bookings
+  WHERE booking_match_rn = 1
 ),
 direct_booking_rollup AS (
   SELECT
     silver_session_id,
     COUNT(DISTINCT order_id) AS booking_count_total_chatbot,
     MIN(booking_at) AS first_chatbot_booking_at,
-    DATE(MIN(booking_at)) AS first_chatbot_booking_date
+    DATE(MIN(booking_at)) AS first_chatbot_booking_date,
+    COUNTIF(booking_match_rule = 'EXACT INQUIRY SESSION') AS exact_session_booking_count,
+    COUNTIF(booking_match_rule = 'LATEST PRIOR MODERATE') AS fallback_prior_moderate_booking_count
   FROM direct_booking_ranked
   GROUP BY 1
 ),
 first_direct_booking_dim AS (
   SELECT
     silver_session_id,
-    order_id AS first_chatbot_order_id
+    order_id AS first_chatbot_order_id,
+    booking_customer_name AS first_chatbot_booking_customer_name,
+    booking_match_rule AS first_chatbot_booking_match_rule
   FROM direct_booking_ranked
   WHERE rn = 1
 ),
@@ -314,6 +381,8 @@ SELECT
   db.first_chatbot_booking_date,
   db.first_chatbot_booking_at,
   bd.first_chatbot_order_id,
+  bd.first_chatbot_booking_customer_name,
+  bd.first_chatbot_booking_match_rule,
   fu.first_followup_date,
   fu.first_followup_at,
   fu.last_followup_at,
@@ -326,6 +395,8 @@ SELECT
   fr.first_attributed_order_id,
 
   COALESCE(db.booking_count_total_chatbot, 0) AS booking_count_total_chatbot,
+  COALESCE(db.exact_session_booking_count, 0) AS exact_session_booking_count,
+  COALESCE(db.fallback_prior_moderate_booking_count, 0) AS fallback_prior_moderate_booking_count,
   GREATEST(
     COALESCE(db.booking_count_total_chatbot, 0) - COALESCE(fu.booking_count_from_followup, 0),
     0
@@ -410,6 +481,165 @@ LEFT JOIN first_followup_dim fr
 CREATE OR REPLACE TABLE `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_coverage`
 CLUSTER BY moderate_report_date
 AS SELECT * FROM `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_followup_coverage`;
+
+
+-- =====================================================================
+-- STATEMENT 5 — ORDER-LEVEL BOOKING RECONSTRUCTION VIEW
+-- Grain: order_id
+--
+-- Purpose:
+--   One row per official Chatbot/JCo booked order from orders_booked,
+--   matched back to the nearest eligible moderate session.
+--
+-- Use this when the business question starts from source-of-truth booking
+-- counts / order ids and needs to know which moderate session they trace to.
+-- Date range dimension for booking-side reporting should be booking_day.
+-- =====================================================================
+
+CREATE OR REPLACE VIEW `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_booking_reconstruction`
+OPTIONS (
+  description = "One row per official Chatbot/JCo booked order from orders_booked, matched back to the nearest eligible moderate session from v_looker_first_reply_detail. GRAIN: order_id. BOOKING SOURCE: orders_booked where sales_reporting_agent_name = 'Chatbot/JCo' and is_reportable_booked_order = TRUE. MATCH RULE: prefer exact inquiry_silver_session_id match; otherwise use the latest prior moderate session for the same manychat_id where first_customer_message_at <= booking_at. Use booking_day as the primary date range dimension when reconciling official booking counts."
+)
+AS
+WITH moderates AS (
+  SELECT
+    report_date AS moderate_report_date,
+    DATE_TRUNC(report_date, WEEK(MONDAY)) AS moderate_week,
+    DATE_TRUNC(report_date, MONTH)        AS moderate_month,
+    silver_session_id,
+    manychat_id,
+    user_name,
+    contact_number,
+    reply_status,
+    reply_agent_name,
+    LOWER(TRIM(reply_agent_name)) AS reply_agent_name_norm,
+    first_customer_message_at,
+    first_cs_reply_at,
+    minutes_to_first_reply
+  FROM `gulong-chatbot-459723.gulong_reporting.v_looker_first_reply_detail`
+  WHERE manychat_id IS NOT NULL
+),
+official_bookings AS (
+  SELECT
+    order_id,
+    booking_at,
+    booking_day,
+    manychat_user_id AS manychat_id,
+    customer_name AS booking_customer_name,
+    sales_reporting_agent_name,
+    inquiry_silver_session_id,
+    inquiry_day,
+    order_status_norm
+  FROM `gulong-chatbot-459723.gulong_core.orders_booked`
+  WHERE sales_reporting_agent_name = 'Chatbot/JCo'
+    AND is_reportable_booked_order = TRUE
+    AND manychat_user_id IS NOT NULL
+),
+followup_booking_flags AS (
+  SELECT
+    attributed_order_id AS order_id,
+    MIN(followup_date) AS first_followup_date,
+    MIN(followup_at) AS first_followup_at
+  FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_detail`
+  WHERE attributed_order_id IS NOT NULL
+  GROUP BY 1
+),
+matched_orders AS (
+  SELECT
+    b.order_id,
+    b.booking_at,
+    b.booking_day,
+    b.manychat_id,
+    b.booking_customer_name,
+    b.sales_reporting_agent_name,
+    b.inquiry_silver_session_id,
+    b.inquiry_day,
+    b.order_status_norm,
+    m.moderate_report_date,
+    m.moderate_week,
+    m.moderate_month,
+    m.silver_session_id,
+    m.user_name,
+    m.contact_number,
+    m.reply_status,
+    m.reply_agent_name,
+    m.reply_agent_name_norm,
+    m.first_customer_message_at,
+    m.first_cs_reply_at,
+    m.minutes_to_first_reply,
+    CASE
+      WHEN b.inquiry_silver_session_id = m.silver_session_id THEN 'EXACT INQUIRY SESSION'
+      ELSE 'LATEST PRIOR MODERATE'
+    END AS booking_match_rule,
+    ROW_NUMBER() OVER (
+      PARTITION BY b.order_id
+      ORDER BY
+        CASE WHEN b.inquiry_silver_session_id = m.silver_session_id THEN 0 ELSE 1 END,
+        m.first_customer_message_at DESC,
+        m.moderate_report_date DESC,
+        m.silver_session_id DESC
+    ) AS booking_match_rn
+  FROM official_bookings b
+  JOIN moderates m
+    ON m.manychat_id = b.manychat_id
+   AND (
+     b.inquiry_silver_session_id = m.silver_session_id
+     OR m.first_customer_message_at <= b.booking_at
+   )
+)
+SELECT
+  mo.booking_day,
+  DATE_TRUNC(mo.booking_day, WEEK(MONDAY)) AS booking_week,
+  DATE_TRUNC(mo.booking_day, MONTH)        AS booking_month,
+  mo.order_id,
+  mo.booking_at,
+  mo.manychat_id,
+  mo.booking_customer_name,
+  mo.sales_reporting_agent_name,
+  mo.order_status_norm,
+  mo.inquiry_silver_session_id,
+  mo.inquiry_day,
+  mo.moderate_report_date,
+  mo.moderate_week,
+  mo.moderate_month,
+  mo.silver_session_id,
+  mo.user_name,
+  mo.contact_number,
+  mo.reply_status,
+  mo.reply_agent_name,
+  mo.reply_agent_name_norm,
+  mo.first_customer_message_at,
+  mo.first_cs_reply_at,
+  mo.minutes_to_first_reply,
+  mo.booking_match_rule,
+  fb.first_followup_date,
+  fb.first_followup_at,
+  CASE
+    WHEN fb.order_id IS NOT NULL THEN 'CS Assisted'
+    ELSE 'Chatbot Only'
+  END AS booking_owner_bucket,
+  CASE
+    WHEN fb.order_id IS NOT NULL THEN 'CS-ASSISTED BOOKING'
+    ELSE 'CHATBOT-ONLY BOOKING'
+  END AS booking_ownership_status,
+  DATETIME_DIFF(mo.booking_at, mo.first_customer_message_at, MINUTE) AS minutes_from_first_customer_to_booking,
+  DATE_DIFF(mo.booking_day, mo.moderate_report_date, DAY) AS days_from_moderate_to_booking,
+  CAST(fb.order_id IS NOT NULL AS INT64) AS cs_assisted_booking_count,
+  CAST(fb.order_id IS NULL AS INT64) AS chatbot_only_booking_count,
+  CAST(1 AS INT64) AS booked_order_count
+FROM matched_orders mo
+LEFT JOIN followup_booking_flags fb
+  USING (order_id)
+WHERE mo.booking_match_rn = 1;
+
+
+-- =====================================================================
+-- STATEMENT 6 — ORDER-LEVEL BOOKING RECONSTRUCTION TABLE
+-- =====================================================================
+
+CREATE OR REPLACE TABLE `gulong-chatbot-459723.gulong_reporting.t_moderate_booking_reconstruction`
+CLUSTER BY booking_day
+AS SELECT * FROM `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_booking_reconstruction`;
 
 
 -- =====================================================================
@@ -505,3 +735,23 @@ FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_coverage`
 WHERE is_mature_cohort = 1
 GROUP BY 1
 ORDER BY 1 DESC;
+
+-- QA 6: compare coverage-booking rebuild vs official p_looker bookings
+-- Use this to quantify the current booking gap before relying on the
+-- coverage-layer booking fields for KPI parity.
+SELECT
+  p.report_date,
+  p.total_bookings AS official_total_bookings,
+  COALESCE(c.coverage_total_bookings, 0) AS coverage_total_bookings,
+  p.total_bookings - COALESCE(c.coverage_total_bookings, 0) AS booking_diff
+FROM `gulong-chatbot-459723.gulong_reporting.p_looker_agent_daily_conversion` p
+LEFT JOIN (
+  SELECT
+    moderate_report_date,
+    SUM(booking_count_total_chatbot) AS coverage_total_bookings
+  FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_followup_coverage`
+  GROUP BY 1
+) c
+  ON c.moderate_report_date = p.report_date
+WHERE p.agent_name = 'Chatbot/JCo'
+ORDER BY p.report_date DESC;
