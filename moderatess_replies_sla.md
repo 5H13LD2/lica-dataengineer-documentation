@@ -10,7 +10,8 @@ This note documents the investigation for the mismatch between:
 Target discrepancy discussed in this thread:
 
 - official `p_looker_agent_daily_conversion`: `571 moderates`, `25 bookings`
-- rebuilt detail query from [v_looker_first_reply_detail.sql](/home/jerico/Desktop/gulong-mobile/v_looker_first_reply_detail.sql): `569` rows
+- live production `gulong_reporting.v_looker_first_reply_detail`: `569` rows
+- local deploy-ready [v_looker_first_reply_detail.sql](/home/jerico/Desktop/gulong-mobile/v_looker_first_reply_detail.sql): intended to align to `571`
 
 This document covers:
 
@@ -39,15 +40,122 @@ where:
 - `c` = corrected chatbot moderate count
 - `b` = base moderate count from the original reporting pipeline
 
-By contrast, [v_looker_first_reply_detail.sql](/home/jerico/Desktop/gulong-mobile/v_looker_first_reply_detail.sql) builds only the corrected chatbot cohort and emits one row per `report_date + manychat_id`.
+By contrast, the currently deployed production view still builds only the corrected chatbot cohort and emits one row per `report_date + manychat_id`.
 
 So the most likely explanation for `571` vs `569` is:
 
 - there are `2` user-day rows that survive in the official base/staged aggregate path
 - but do not survive in the rebuilt corrected-detail path
 
+The current local SQL has now been updated to fix this denominator mismatch without changing the production view name. It does this by selecting the same cohort basis the official aggregate effectively uses per day.
+
 The `22 bookings` number is also not computed inside [v_looker_first_reply_detail.sql](/home/jerico/Desktop/gulong-mobile/v_looker_first_reply_detail.sql).
 That view only exposes `b.total_bookings` by joining the already-aggregated `p_looker_agent_daily_conversion` table at the end, so the bookings metric there is inherited, not rebuilt.
+
+## Current Cohort Logic
+
+This section documents the current production-ready logic in [v_looker_first_reply_detail.sql](/home/jerico/Desktop/gulong-mobile/v_looker_first_reply_detail.sql).
+
+### Goal
+
+Keep the existing production object name:
+
+- `gulong_reporting.v_looker_first_reply_detail`
+
+while aligning the moderate denominator to the official `p_looker_agent_daily_conversion` behavior.
+
+### Cohort sources
+
+The SQL now has two candidate cohort paths.
+
+#### 1. Corrected chatbot cohort
+
+This is the chatbot-specific rebuilt cohort from:
+
+- `gulong_core.inquiry_assignments`
+- `chat_analysis.chat_analysis_data`
+- `gulong_chatbot_live.turn_trace_log`
+
+Rules:
+
+- filter `agent_reporting_group = 'chatbot_jeanel'`
+- filter `agent_reporting_name = 'Chatbot/JCo'`
+- dedupe to one assignment row per `business_unit + user_id + assignment_date`
+- mark moderate if:
+  - latest same-day `chat_analysis` row has `top_intent IN ('moderate intent', 'high intent')`
+  - or same-day v7 runtime tagging contains moderate/high intent
+
+This produces `corrected_chatbot_cohort`.
+
+#### 2. Base moderate cohort
+
+This is the official reporting-style base path from:
+
+- `gulong_core.inquiry_sessions`
+- `gulong_core.moderate_intent_sessions`
+- `gulong_core.agent_aliases`
+
+Rules:
+
+- start from validated moderates in `moderate_intent_sessions`
+- join to `inquiry_sessions`
+- map `original_assigned_agent_name` into reporting ownership using the same alias logic as the official pipeline
+- treat `Jeanel Co` as `Chatbot/JCo`
+- keep only rows mapped to `Chatbot/JCo`
+
+This produces `base_chatbot_cohort`.
+
+### Per-date cohort selection
+
+The SQL computes per-date distinct-user counts for both paths:
+
+- `corrected_chatbot_counts`
+- `base_chatbot_counts`
+
+Then it selects one path per day:
+
+- if `corrected >= base`, use `corrected_chatbot_cohort`
+- if `base > corrected`, use `base_chatbot_cohort`
+
+This produces `selected_chatbot_cohort`.
+
+This is the row-level equivalent of the official aggregate behavior:
+
+```sql
+GREATEST(c.total_moderate_intents, b.total_moderate_intents)
+```
+
+### Why this fixes the `571 vs 569`
+
+For `2026-07-01`:
+
+- official moderates = `14`
+- corrected chatbot users = `12`
+- base mapped `Chatbot/JCo` users = `14`
+
+Because base is greater than corrected on that date, the current local SQL will use the base path for `2026-07-01`.
+
+Across `2026-07-01` to `2026-07-24`, that closes the gap from:
+
+- official `571`
+- live production view `569`
+
+to the intended aligned result:
+
+- local deploy-ready SQL `571`
+
+### Important implementation detail
+
+The production-facing view name is unchanged.
+
+The denominator fix is implemented internally through CTEs:
+
+- `base_chatbot_cohort`
+- `corrected_chatbot_counts`
+- `base_chatbot_counts`
+- `selected_chatbot_cohort`
+
+No rename of the production view is required.
 
 ## Live Validation Results
 
@@ -105,9 +213,18 @@ Operational meaning:
 
 ## Findings
 
-### 1. `v_looker_first_reply_detail.sql` is a detail rebuild, not the official denominator
+### 1. The live production view is still on the old denominator logic
 
-The detail view starts from `inquiry_assignments`, filters `Chatbot/JCo`, corrects the cohort through `chat_analysis` and `turn_trace_log`, then keeps one row per `report_date + manychat_id + silver_session_id` before first-reply enrichment. See [v_looker_first_reply_detail.sql](/home/jerico/Desktop/gulong-mobile/v_looker_first_reply_detail.sql#L5) and [v_looker_first_reply_detail.sql](/home/jerico/Desktop/gulong-mobile/v_looker_first_reply_detail.sql#L107).
+The current deployed BigQuery definition of `gulong_reporting.v_looker_first_reply_detail` does not yet contain:
+
+- `base_chatbot_cohort`
+- `selected_chatbot_cohort`
+
+It still builds from `corrected_chatbot_cohort` only, which is why the live production result remains `569` for `2026-07-01` to `2026-07-24`.
+
+### 2. `v_looker_first_reply_detail.sql` is now production-ready and denominator-aligned locally
+
+The local SQL now starts from the two-path denominator model described above, then keeps one row per `report_date + manychat_id` after first-reply attribution. It preserves the same production object name and keeps the main downstream field names stable.
 
 Its final grain is effectively one row per `report_date + manychat_id` because of:
 
@@ -120,7 +237,7 @@ QUALIFY ROW_NUMBER() OVER (
 
 See [v_looker_first_reply_detail.sql](/home/jerico/Desktop/gulong-mobile/v_looker_first_reply_detail.sql#L381).
 
-### 2. The official `p_looker_agent_daily_conversion` moderate count is a staged reporting metric
+### 3. The official `p_looker_agent_daily_conversion` moderate count is a staged reporting metric
 
 The existing engineering notes explicitly state that the official table is built from:
 
@@ -136,7 +253,7 @@ GREATEST(c.total_moderate_intents, b.total_moderate_intents)
 
 This means the official denominator can be higher than a pure corrected-cohort rebuild. See [chatbotjco_sarah_reporting_notes.md](/home/jerico/Desktop/gulong-mobile/chatbotjco_sarah_reporting_notes.md#L120) and [customer_reply_booking_funnel_gold_investigation_summary.md](/home/jerico/Desktop/gulong-mobile/customer_reply_booking_funnel_gold_investigation_summary.md#L61).
 
-### 3. The `571` vs `569` gap is most likely caused upstream of first-reply matching
+### 4. The `571` vs `569` gap is caused upstream of first-reply matching
 
 The first-reply logic only affects:
 
@@ -162,7 +279,7 @@ Live validation now confirms this is not just theory. On `2026-07-01`:
 
 That means the gap on that date is definitively upstream of the first-reply logic.
 
-### 4. `total_bookings = 22` is inherited from the official aggregate table
+### 5. `total_bookings` is inherited from the official aggregate table
 
 The detail SQL does not calculate booking rows from `orders_booked`.
 
@@ -186,7 +303,7 @@ So if you are looking at `22 bookings` in the detail dataset, that value is not 
 
 Live validation also showed that the current `2026-07-01` to `2026-07-24` official total bookings is `25`, which confirms that `22 bookings` was a point-in-time result, not a stable truth built by the detail view.
 
-### 5. The current detail SQL has no refresh cutoff protection
+### 6. The current detail SQL has no refresh cutoff protection
 
 The local notes say same-day parity with `p_looker_agent_daily_conversion` requires applying the latest reporting cutoff from `p_dashboard_physical_refresh_log`.
 
@@ -200,7 +317,7 @@ See the recommendation in [chatbotjco_sarah_reporting_notes.md](/home/jerico/Des
 
 If the `571` vs `569` comparison was done on or near the refresh boundary, snapshot-vs-live drift remains a valid explanation.
 
-### 6. The detail view uses CS working-hours + lunch-break logic for reply SLA anchoring
+### 7. The detail view uses CS working-hours + lunch-break logic for reply SLA anchoring
 
 CS working hours: **9:00 AM – 6:00 PM, Monday–Sunday**, with a **simultaneous lunch break 12:00 PM – 1:00 PM** (all agents off at once, so no one replies during lunch). There is no weekend exception — CS works all 7 days.
 

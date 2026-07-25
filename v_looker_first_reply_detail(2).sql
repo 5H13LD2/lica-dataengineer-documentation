@@ -204,7 +204,7 @@ selected_chatbot_cohort AS (
     c.agent_reporting_group,
     c.corrected_source,
     c.moderate_tagged_at
-  FROM selected_chatbot_cohort c
+  FROM corrected_chatbot_cohort c
   LEFT JOIN corrected_chatbot_counts cc
     ON cc.report_date = c.report_date
   LEFT JOIN base_chatbot_counts bc
@@ -364,7 +364,7 @@ message_first_customer AS (
     c.manychat_id,
     c.silver_session_id,
     MIN(m.datetime) AS first_customer_message_at
-  FROM corrected_chatbot_cohort c
+  FROM selected_chatbot_cohort c
   JOIN `gulong-chatbot-459723.manychat_data.messages` m
     ON m.business_unit = 'gulong'
    AND m.user_id = c.manychat_id
