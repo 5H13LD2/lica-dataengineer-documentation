@@ -122,6 +122,116 @@ corrected_chatbot_cohort AS (
   GROUP BY report_date, manychat_id, silver_session_id
 ),
 
+agent_aliases_normalized AS (
+  SELECT
+    alias_norm,
+    canonical_agent_name
+  FROM (
+    SELECT
+      UPPER(REGEXP_REPLACE(TRIM(alias_value), r'[^A-Za-z0-9]+', '')) AS alias_norm,
+      canonical_agent_name,
+      ROW_NUMBER() OVER (
+        PARTITION BY UPPER(REGEXP_REPLACE(TRIM(alias_value), r'[^A-Za-z0-9]+', ''))
+        ORDER BY
+          IF(alias_type = 'manychat_agent_name', 0, 1),
+          updated_at DESC
+      ) AS rn
+    FROM `gulong-chatbot-459723.gulong_core.agent_aliases`
+    WHERE business_unit = 'gulong'
+      AND active
+      AND alias_type IN ('manychat_agent_name', 'agent_key', 'added_by_normalized')
+  )
+  WHERE rn = 1
+    AND alias_norm IS NOT NULL
+    AND alias_norm != ''
+),
+
+base_chatbot_cohort AS (
+  SELECT
+    s.inquiry_day AS report_date,
+    s.user_id AS manychat_id,
+    s.silver_session_id,
+    ANY_VALUE(s.original_assigned_agent_name) AS assigned_agent_name,
+    'Chatbot/JCo' AS agent_reporting_name,
+    'chatbot_jeanel' AS agent_reporting_group,
+    'base_moderate' AS corrected_source,
+    MIN(m.first_moderate_at) AS moderate_tagged_at
+  FROM `gulong-chatbot-459723.gulong_core.inquiry_sessions` s
+  JOIN `gulong-chatbot-459723.gulong_core.moderate_intent_sessions` m
+    ON m.business_unit = s.business_unit
+   AND m.channel = s.channel
+   AND m.user_id = s.user_id
+   AND m.silver_session_id = s.silver_session_id
+   AND m.validated_moderate = TRUE
+  LEFT JOIN agent_aliases_normalized aa
+    ON aa.alias_norm = UPPER(
+      REGEXP_REPLACE(TRIM(COALESCE(s.original_assigned_agent_name, '')), r'[^A-Za-z0-9]+', '')
+    )
+  WHERE s.business_unit = 'gulong'
+    AND s.channel = 'manychat'
+    AND COALESCE(
+      aa.canonical_agent_name,
+      IF(LOWER(TRIM(s.original_assigned_agent_name)) = 'jeanel co', 'Chatbot/JCo', NULL),
+      s.original_assigned_agent_name,
+      'Unassigned'
+    ) = 'Chatbot/JCo'
+  GROUP BY s.inquiry_day, s.user_id, s.silver_session_id
+),
+
+corrected_chatbot_counts AS (
+  SELECT
+    report_date,
+    COUNT(DISTINCT manychat_id) AS total_moderate_intents
+  FROM corrected_chatbot_cohort
+  GROUP BY report_date
+),
+
+base_chatbot_counts AS (
+  SELECT
+    report_date,
+    COUNT(DISTINCT manychat_id) AS total_moderate_intents
+  FROM base_chatbot_cohort
+  GROUP BY report_date
+),
+
+selected_chatbot_cohort AS (
+  SELECT
+    c.report_date,
+    c.manychat_id,
+    c.silver_session_id,
+    c.assigned_agent_name,
+    c.agent_reporting_name,
+    c.agent_reporting_group,
+    c.corrected_source,
+    c.moderate_tagged_at,
+    'corrected_chatbot' AS cohort_basis
+  FROM corrected_chatbot_cohort c
+  LEFT JOIN corrected_chatbot_counts cc
+    ON cc.report_date = c.report_date
+  LEFT JOIN base_chatbot_counts bc
+    ON bc.report_date = c.report_date
+  WHERE COALESCE(bc.total_moderate_intents, 0) <= COALESCE(cc.total_moderate_intents, 0)
+
+  UNION ALL
+
+  SELECT
+    b.report_date,
+    b.manychat_id,
+    b.silver_session_id,
+    b.assigned_agent_name,
+    b.agent_reporting_name,
+    b.agent_reporting_group,
+    b.corrected_source,
+    b.moderate_tagged_at,
+    'base_moderate' AS cohort_basis
+  FROM base_chatbot_cohort b
+  LEFT JOIN corrected_chatbot_counts cc
+    ON cc.report_date = b.report_date
+  LEFT JOIN base_chatbot_counts bc
+    ON bc.report_date = b.report_date
+  WHERE COALESCE(bc.total_moderate_intents, 0) > COALESCE(cc.total_moderate_intents, 0)
+),
+
 session_dedup AS (
   SELECT
     s.silver_session_id,
@@ -289,6 +399,7 @@ cohort AS (
     c.agent_reporting_name AS source_agent_name,
     c.agent_reporting_group,
     c.corrected_source,
+    c.cohort_basis,
     c.moderate_tagged_at,
     CASE
       WHEN c.moderate_tagged_at IS NULL THEN NULL
@@ -325,7 +436,7 @@ cohort AS (
     sbd.first_customer_message_at,
     sbd.next_customer_message_at,
     mb.first_moderate_at
-  FROM corrected_chatbot_cohort c
+  FROM selected_chatbot_cohort c
   LEFT JOIN session_base_exact se
     ON se.silver_session_id = c.silver_session_id
    AND se.manychat_id = c.manychat_id
@@ -387,6 +498,7 @@ first_reply AS (
     source_agent_name,
     agent_reporting_group,
     corrected_source,
+    cohort_basis,
     moderate_tagged_at,
     effective_moderate_tagged_at,
     manychat_id,
@@ -415,6 +527,7 @@ SELECT
   fr.source_agent_name,
   fr.agent_reporting_group,
   fr.corrected_source,
+  fr.cohort_basis,
   fr.moderate_tagged_at,
   fr.effective_moderate_tagged_at,
   DATE(fr.moderate_tagged_at) AS moderate_tagged_date,
