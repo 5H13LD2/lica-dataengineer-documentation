@@ -526,6 +526,7 @@ first_reply AS (
     contact_source,
     inquiry_date,
     first_customer_message_at,
+    next_customer_message_at,
     first_moderate_at,
     agent_reply_at AS first_cs_reply_at,
     agent_reply_sender AS first_cs_reply_sender
@@ -534,6 +535,62 @@ first_reply AS (
     PARTITION BY report_date, manychat_id
     ORDER BY agent_reply_at, agent_reply_sender
   ) = 1
+),
+
+official_bookings AS (
+  SELECT
+    order_id,
+    booking_at,
+    booking_day,
+    manychat_user_id AS manychat_id,
+    inquiry_silver_session_id,
+    order_status_norm
+  FROM `gulong-chatbot-459723.gulong_core.orders_booked`
+  WHERE sales_reporting_agent_name = 'Chatbot/JCo'
+    AND is_reportable_booked_order = TRUE
+    AND manychat_user_id IS NOT NULL
+),
+
+matched_bookings AS (
+  SELECT
+    fr.report_date,
+    fr.manychat_id,
+    fr.silver_session_id,
+    b.order_id,
+    b.booking_at,
+    b.booking_day,
+    b.order_status_norm,
+    ROW_NUMBER() OVER (
+      PARTITION BY fr.report_date, fr.manychat_id, fr.silver_session_id
+      ORDER BY
+        CASE WHEN b.inquiry_silver_session_id = fr.silver_session_id THEN 0 ELSE 1 END,
+        b.booking_at,
+        b.order_id
+    ) AS booking_rn
+  FROM first_reply fr
+  LEFT JOIN official_bookings b
+    ON b.manychat_id = fr.manychat_id
+   AND (
+     b.inquiry_silver_session_id = fr.silver_session_id
+     OR COALESCE(fr.first_customer_message_at, fr.moderate_tagged_at) <= b.booking_at
+   )
+   AND (
+     fr.next_customer_message_at IS NULL
+     OR b.inquiry_silver_session_id = fr.silver_session_id
+     OR b.booking_at < fr.next_customer_message_at
+   )
+),
+
+first_booking AS (
+  SELECT
+    report_date,
+    manychat_id,
+    silver_session_id,
+    order_id,
+    booking_day,
+    order_status_norm
+  FROM matched_bookings
+  WHERE booking_rn = 1
 )
 
 SELECT
@@ -564,6 +621,7 @@ SELECT
   fr.contact_source,
   fr.inquiry_date,
   fr.first_customer_message_at,
+  fr.next_customer_message_at,
   fr.first_moderate_at,
   fr.first_cs_reply_at,
   DATE(fr.first_cs_reply_at) AS first_cs_reply_date,
@@ -606,11 +664,19 @@ SELECT
   IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS replied_session_count,
   IF(fr.first_cs_reply_at IS NULL, 1, 0) AS no_reply_session_count,
   IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS agent_first_reply_count,
+  fb.booking_day,
+  fb.order_id,
+  fb.order_status_norm,
+  DATE_DIFF(fb.booking_day, fr.report_date, DAY) AS days_from_moderate_to_booking,
   SAFE_DIVIDE(
     COUNTIF(fr.first_cs_reply_at IS NOT NULL) OVER (PARTITION BY fr.report_date),
     COUNT(*) OVER (PARTITION BY fr.report_date)
   ) AS daily_response_rate
 FROM first_reply fr
+LEFT JOIN first_booking fb
+  ON fb.report_date = fr.report_date
+ AND fb.manychat_id = fr.manychat_id
+ AND fb.silver_session_id = fr.silver_session_id
 LEFT JOIN `gulong-chatbot-459723.gulong_reporting.p_looker_agent_daily_conversion` b
   ON b.report_date = fr.report_date
  AND b.agent_name = fr.source_agent_name;
