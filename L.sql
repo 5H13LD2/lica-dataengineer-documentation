@@ -76,7 +76,7 @@ base_chatbot_moderates AS (
     s.user_id AS manychat_id,
     COALESCE(sc.user_name, sf.user_name) AS user_name,
     sc.contact_number,
-    CAST(NULL AS STRING) AS reply_status,
+    'No CS Reply' AS reply_status,
     'Chatbot/JCo' AS reply_agent_name,
     'chatbot/jco' AS reply_agent_name_norm,
     COALESCE(sc.first_user_message_at, m.first_moderate_at) AS first_customer_message_at,
@@ -350,7 +350,7 @@ unmatched_official_bookings AS (
     COALESCE(pi.inquiry_fallback_silver_session_id, b.inquiry_silver_session_id) AS silver_session_id,
     pi.inquiry_fallback_user_name AS user_name,
     pi.inquiry_fallback_contact_number AS contact_number,
-    CAST(NULL AS STRING) AS reply_status,
+    'No CS Reply' AS reply_status,
     CAST(NULL AS STRING) AS reply_agent_name,
     CAST(NULL AS STRING) AS reply_agent_name_norm,
     pi.inquiry_fallback_first_customer_message_at AS first_customer_message_at,
@@ -372,6 +372,40 @@ resolved_orders AS (
   SELECT * FROM best_matched_orders
   UNION ALL
   SELECT * FROM unmatched_official_bookings
+),
+reply_backfill_candidates AS (
+  SELECT
+    ro.order_id,
+    m.datetime AS candidate_first_cs_reply_at,
+    m.sender AS candidate_reply_agent_name,
+    ROW_NUMBER() OVER (
+      PARTITION BY ro.order_id
+      ORDER BY
+        CASE WHEN m.datetime <= ro.booking_at THEN 0 ELSE 1 END,
+        m.datetime,
+        m.message_id
+  ) AS rn
+  FROM resolved_orders ro
+  JOIN `gulong-chatbot-459723.manychat_data.messages` m
+    ON m.datetime >= DATETIME '2025-01-01 00:00:00'
+   AND m.datetime < DATETIME '2030-01-01 00:00:00'
+   AND m.user_id = ro.manychat_id
+   AND m.business_unit = 'gulong'
+   AND m.role = 'agent'
+   AND m.type = 'msgout_lc'
+   AND m.datetime >= ro.first_customer_message_at
+  WHERE ro.first_cs_reply_at IS NULL
+    AND ro.manychat_id IS NOT NULL
+    AND ro.first_customer_message_at IS NOT NULL
+),
+reply_backfills AS (
+  SELECT
+    order_id,
+    candidate_first_cs_reply_at AS backfilled_first_cs_reply_at,
+    candidate_reply_agent_name AS backfilled_reply_agent_name,
+    LOWER(TRIM(candidate_reply_agent_name)) AS backfilled_reply_agent_name_norm
+  FROM reply_backfill_candidates
+  WHERE rn = 1
 )
 SELECT
   ro.booking_day,
@@ -391,13 +425,20 @@ SELECT
   ro.silver_session_id,
   ro.user_name,
   ro.contact_number,
-  ro.reply_status,
-  ro.reply_agent_name,
-  ro.reply_agent_name_norm,
+  CASE
+    WHEN COALESCE(ro.first_cs_reply_at, rb.backfilled_first_cs_reply_at) IS NOT NULL THEN 'Has CS Reply'
+    ELSE COALESCE(ro.reply_status, 'No CS Reply')
+  END AS reply_status,
+  COALESCE(ro.reply_agent_name, rb.backfilled_reply_agent_name) AS reply_agent_name,
+  COALESCE(ro.reply_agent_name_norm, rb.backfilled_reply_agent_name_norm) AS reply_agent_name_norm,
   ro.first_customer_message_at,
   ro.next_customer_message_at,
-  ro.first_cs_reply_at,
-  ro.minutes_to_first_reply,
+  COALESCE(ro.first_cs_reply_at, rb.backfilled_first_cs_reply_at) AS first_cs_reply_at,
+  DATETIME_DIFF(
+    COALESCE(ro.first_cs_reply_at, rb.backfilled_first_cs_reply_at),
+    ro.first_customer_message_at,
+    MINUTE
+  ) AS minutes_to_first_reply,
   ro.booking_match_rule,
   fb.first_followup_date,
   fb.first_followup_at,
@@ -418,6 +459,8 @@ SELECT
   CAST(ro.booking_match_rule = 'UNMATCHED OFFICIAL BOOKING' AS INT64) AS unmatched_official_booking_count,
   CAST(1 AS INT64) AS booked_order_count
 FROM resolved_orders ro
+LEFT JOIN reply_backfills rb
+  USING (order_id)
 LEFT JOIN followup_booking_flags fb
   USING (order_id);
 
