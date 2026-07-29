@@ -95,7 +95,7 @@ Purpose:
 - make the transformation readable before materializing
 
 Local file:
-- [actual_inquiry_booking_conversion_views.sql](/home/jerico/Desktop/gulong-mobile/actual_inquiry_booking_conversion_views.sql)
+- [create_actual_inquiry_booking_conversion_live_views.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_actual_inquiry_booking_conversion_live_views.sql)
 
 What it contains:
 - logical detail view
@@ -112,7 +112,7 @@ Purpose:
 - support repeatable downstream reporting
 
 Local file:
-- [actual_inquiry_booking_conversion_deploy.sql](/home/jerico/Desktop/gulong-mobile/actual_inquiry_booking_conversion_deploy.sql)
+- [build_actual_inquiry_booking_conversion_tables.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/build_actual_inquiry_booking_conversion_tables.sql)
 
 BigQuery tables created:
 - `gulong_reporting.t_actual_inquiry_booking_conversion_detail`
@@ -138,8 +138,8 @@ Purpose:
 - preserve freedom to rebuild staging independently
 
 Local files:
-- [actual_inquiry_booking_conversion_looker_views.sql](/home/jerico/Desktop/gulong-mobile/actual_inquiry_booking_conversion_looker_views.sql)
-- [looker_actual_inquiry_booking_conversion_report.sql](/home/jerico/Desktop/gulong-mobile/looker_actual_inquiry_booking_conversion_report.sql)
+- [create_looker_actual_inquiry_booking_conversion_views.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_looker_actual_inquiry_booking_conversion_views.sql)
+- [create_looker_actual_inquiry_booking_conversion_views_documented.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_looker_actual_inquiry_booking_conversion_views_documented.sql)
 
 BigQuery views created:
 - `gulong_reporting.v_looker_actual_inquiry_booking_conversion_detail`
@@ -176,30 +176,30 @@ If someone needs to edit this stack later, these are the files that matter.
 
 ### Core logic files
 
-- [actual_inquiry_booking_conversion_views.sql](/home/jerico/Desktop/gulong-mobile/actual_inquiry_booking_conversion_views.sql)
+- [create_actual_inquiry_booking_conversion_live_views.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_actual_inquiry_booking_conversion_live_views.sql)
   - readable logical SQL version
   - edit here if you want to rethink business logic before materialization
 
-- [actual_inquiry_booking_conversion_deploy.sql](/home/jerico/Desktop/gulong-mobile/actual_inquiry_booking_conversion_deploy.sql)
+- [build_actual_inquiry_booking_conversion_tables.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/build_actual_inquiry_booking_conversion_tables.sql)
   - materialized staging deploy script
   - edit here if you want to change the real source-of-truth tables
 
-- [actual_inquiry_booking_conversion_looker_views.sql](/home/jerico/Desktop/gulong-mobile/actual_inquiry_booking_conversion_looker_views.sql)
+- [create_looker_actual_inquiry_booking_conversion_views.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_looker_actual_inquiry_booking_conversion_views.sql)
   - Looker-facing views on top of staging
   - edit here if you want to rename/expose fields for BI only
 
-- [looker_actual_inquiry_booking_conversion_report.sql](/home/jerico/Desktop/gulong-mobile/looker_actual_inquiry_booking_conversion_report.sql)
+- [create_looker_actual_inquiry_booking_conversion_views_documented.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_looker_actual_inquiry_booking_conversion_views_documented.sql)
   - single-file Looker reporting layer deploy
   - useful as the handoff file for BI/report users
 
 ### Supporting documentation files
 
-- [actual_inquiry_booking_conversion_notes_2026-07-29.md](/home/jerico/Desktop/gulong-mobile/actual_inquiry_booking_conversion_notes_2026-07-29.md)
+- [actual_inquiry_booking_conversion_notes_2026-07-29.md](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/actual_inquiry_booking_conversion_notes_2026-07-29.md)
   - business notes
   - workbook alignment notes
   - key caveats
 
-- [DT-2026-07-29_Updates.md](/home/jerico/Desktop/gulong-mobile/DT-2026-07-29_Updates.md)
+- [DT-2026-07-29_Updates.md](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/DT-2026-07-29_Updates.md)
   - management readout context
   - narrative findings using the same workbook logic family
 
@@ -210,12 +210,12 @@ If someone needs to edit this stack later, these are the files that matter.
 Use this rule of thumb:
 
 - if business logic changes:
-  - edit `actual_inquiry_booking_conversion_deploy.sql`
-  - usually also update `actual_inquiry_booking_conversion_views.sql`
+  - edit `build_actual_inquiry_booking_conversion_tables.sql`
+  - usually also update `create_actual_inquiry_booking_conversion_live_views.sql`
 
 - if only dashboard field naming or BI shape changes:
-  - edit `actual_inquiry_booking_conversion_looker_views.sql`
-  - or `looker_actual_inquiry_booking_conversion_report.sql`
+  - edit `create_looker_actual_inquiry_booking_conversion_views.sql`
+  - or `create_looker_actual_inquiry_booking_conversion_views_documented.sql`
 
 - if the narrative/readout changes:
   - edit the `.md` notes files only
@@ -229,15 +229,15 @@ Use this order when rebuilding or deploying the stack.
 ### Full rebuild
 
 1. Review business-logic edits in:
-   - `actual_inquiry_booking_conversion_deploy.sql`
-   - optionally `actual_inquiry_booking_conversion_views.sql` if you want the readable logical version to stay in sync
+   - `build_actual_inquiry_booking_conversion_tables.sql`
+   - optionally `create_actual_inquiry_booking_conversion_live_views.sql` if you want the readable logical version to stay in sync
 
 2. Run:
-   - `actual_inquiry_booking_conversion_deploy.sql`
+   - `build_actual_inquiry_booking_conversion_tables.sql`
 
 3. Refresh the Looker-facing layer by running:
-   - `looker_actual_inquiry_booking_conversion_report.sql`
-   - or `actual_inquiry_booking_conversion_looker_views.sql`
+   - `create_looker_actual_inquiry_booking_conversion_views_documented.sql`
+   - or `create_looker_actual_inquiry_booking_conversion_views.sql`
 
 4. Validate the outputs in BigQuery:
    - monthly total inquiries
@@ -254,13 +254,13 @@ Use this order when rebuilding or deploying the stack.
 Run in this order:
 
 1. Update:
-   - `actual_inquiry_booking_conversion_deploy.sql`
+   - `build_actual_inquiry_booking_conversion_tables.sql`
 
 2. Run:
-   - `actual_inquiry_booking_conversion_deploy.sql`
+   - `build_actual_inquiry_booking_conversion_tables.sql`
 
 3. Then run:
-   - `looker_actual_inquiry_booking_conversion_report.sql`
+   - `create_looker_actual_inquiry_booking_conversion_views_documented.sql`
 
 Reason:
 - the Looker views sit on top of the `t_...` tables
@@ -271,8 +271,8 @@ Reason:
 Run:
 
 1. Update:
-   - `actual_inquiry_booking_conversion_looker_views.sql`
-   - or `looker_actual_inquiry_booking_conversion_report.sql`
+   - `create_looker_actual_inquiry_booking_conversion_views.sql`
+   - or `create_looker_actual_inquiry_booking_conversion_views_documented.sql`
 
 2. Run only the Looker file you changed
 
@@ -297,7 +297,7 @@ At a practical level, the deployment sequence is:
 ### Statement group A — staging tables
 
 Run from:
-- `actual_inquiry_booking_conversion_deploy.sql`
+- `build_actual_inquiry_booking_conversion_tables.sql`
 
 Order:
 1. `t_actual_inquiry_booking_conversion_detail`
@@ -312,7 +312,7 @@ Why this order:
 ### Statement group B — Looker views
 
 Run from:
-- `looker_actual_inquiry_booking_conversion_report.sql`
+- `create_looker_actual_inquiry_booking_conversion_views_documented.sql`
 
 Order:
 1. `v_looker_actual_inquiry_booking_conversion_detail`

@@ -75,7 +75,7 @@ If one line is needed for leadership:
 ## What the new views do
 
 File:
-- `actual_inquiry_booking_conversion_views.sql`
+- `create_actual_inquiry_booking_conversion_live_views.sql`
 
 Views created:
 - `gulong_reporting.v_actual_inquiry_booking_conversion_detail`
