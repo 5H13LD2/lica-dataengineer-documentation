@@ -149,6 +149,26 @@ BigQuery views created:
 Recommended Looker source:
 - `gulong_reporting.v_looker_actual_inquiry_booking_conversion_monthly`
 
+### 4. Flexible Looker base layer
+
+Purpose:
+- support exploratory Looker filtering without hardcoding the booking universe
+- let report users toggle broader vs locked booking scope
+- preserve the official KPI views for fixed management reporting
+
+Local file:
+- [create_looker_actual_inquiry_booking_filterable_base_views.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_looker_actual_inquiry_booking_filterable_base_views.sql)
+
+BigQuery views created:
+- `gulong_reporting.v_looker_actual_inquiry_base`
+- `gulong_reporting.v_looker_actual_inquiry_booking_attribution_base`
+
+How to use:
+- use `v_looker_actual_inquiry_base` for inquiry counts and denominator reporting
+- use `v_looker_actual_inquiry_booking_attribution_base` for booking/revenue analysis with Looker-side filters
+- use `approx_matches_locked_booking_scope = TRUE` when you want the current locked KPI booking universe
+- remove or relax those approximation filters in Looker when you want broader exploratory totals
+
 ---
 
 ## Engineering Flow
@@ -191,6 +211,10 @@ If someone needs to edit this stack later, these are the files that matter.
 - [create_looker_actual_inquiry_booking_conversion_views_documented.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_looker_actual_inquiry_booking_conversion_views_documented.sql)
   - single-file Looker reporting layer deploy
   - useful as the handoff file for BI/report users
+
+- [create_looker_actual_inquiry_booking_filterable_base_views.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_looker_actual_inquiry_booking_filterable_base_views.sql)
+  - flexible Looker base views for inquiry and booking filtering
+  - edit here if Looker users need more toggles or broader booking scope
 
 ### Supporting documentation files
 
