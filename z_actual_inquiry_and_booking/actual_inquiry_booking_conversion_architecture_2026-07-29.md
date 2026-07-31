@@ -169,6 +169,27 @@ How to use:
 - use `approx_matches_locked_booking_scope = TRUE` when you want the current locked KPI booking universe
 - remove or relax those approximation filters in Looker when you want broader exploratory totals
 
+### 5. PDF card snapshot layer
+
+Purpose:
+- match the numbers printed in `DT-2026-07-29_Updates.md`
+- keep the PDF-card source separate from the live dashboard conversion source
+- provide a stable Looker source when exact report-pack parity matters more than live refresh
+
+Local file:
+- [build_pdf_cards_2026_07_29_snapshot.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/build_pdf_cards_2026_07_29_snapshot.sql)
+
+BigQuery objects created:
+- `gulong_reporting.t_pdf_cards_agent_conversion_2026_07_29`
+- `gulong_reporting.v_looker_pdf_cards_agent_conversion_2026_07_29`
+
+How to use:
+- use `v_looker_pdf_cards_agent_conversion_2026_07_29` for cards that must match the PDF exactly
+- use `period_label = 'Jul 1-28'` for the MTD cards shown in the PDF
+- use `dashboard_card_name = 'CS Performance'` for the Four-CS total
+- use `dashboard_card_name = 'Taira Performance'` for the chatbot total
+- keep using `v_looker_actual_inquiry_booking_conversion_*` only for live dashboard reporting
+
 ---
 
 ## Engineering Flow
@@ -215,6 +236,10 @@ If someone needs to edit this stack later, these are the files that matter.
 - [create_looker_actual_inquiry_booking_filterable_base_views.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/create_looker_actual_inquiry_booking_filterable_base_views.sql)
   - flexible Looker base views for inquiry and booking filtering
   - edit here if Looker users need more toggles or broader booking scope
+
+- [build_pdf_cards_2026_07_29_snapshot.sql](/home/jerico/Desktop/gulong-data/z_actual_inquiry_and_booking/build_pdf_cards_2026_07_29_snapshot.sql)
+  - frozen PDF-card source for the 2026-07-29 report pack
+  - edit here only when intentionally changing the report-pack snapshot source
 
 ### Supporting documentation files
 

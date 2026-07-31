@@ -134,6 +134,20 @@ Important note:
 
 ## Looker Studio Setup
 
+## Refresh Runbook
+
+If the `t_` tables fall behind the live `v_` views, rerun:
+
+- [refresh_moderate_reporting_tables.sql](/home/jerico/Desktop/gulong-data/followups_manual/refresh_moderate_reporting_tables.sql)
+
+This refreshes, in order:
+
+- `gulong_reporting.t_moderate_followup_detail`
+- `gulong_reporting.t_moderate_followup_coverage`
+- `gulong_reporting.t_moderate_booking_reconstruction`
+
+Use this when new moderate, follow-up, or booking rows are visible in the live views but missing in Looker Studio.
+
 ### A. Booked Orders Table
 
 Recommended source:
