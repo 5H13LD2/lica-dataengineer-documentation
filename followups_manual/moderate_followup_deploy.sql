@@ -204,6 +204,7 @@ SELECT
   moderate_month,
 
   -- ---------- follow-up dates ----------
+  followup_date AS report_date,
   followup_date,
   DATE_TRUNC(followup_date, WEEK(MONDAY)) AS followup_week,
   DATE_TRUNC(followup_date, MONTH)        AS followup_month,
@@ -438,6 +439,7 @@ first_followup_dim AS (
   WHERE rn = 1
 )
 SELECT
+  m.moderate_report_date AS report_date,
   m.moderate_report_date,
   m.moderate_week,
   m.moderate_month,
@@ -460,13 +462,19 @@ SELECT
   fu.first_followup_date,
   fu.first_followup_at,
   fu.last_followup_at,
-  fr.first_followup_agent_name,
-  fr.first_followup_agent_name_norm,
-  fr.first_followup_type,
-  fr.first_followup_text,
-  fr.first_followup_speed_bucket,
-  fr.first_followup_is_booked,
-  fr.first_attributed_order_id,
+  COALESCE(fr.first_followup_agent_name, 'NO FOLLOWUP') AS first_followup_agent_name,
+  COALESCE(fr.first_followup_agent_name_norm, 'no followup') AS first_followup_agent_name_norm,
+  COALESCE(fr.first_followup_type, 'NO FOLLOWUP') AS first_followup_type,
+  COALESCE(fr.first_followup_text, 'NO FOLLOWUP') AS first_followup_text,
+  COALESCE(fr.first_followup_speed_bucket, 'NO FOLLOWUP') AS first_followup_speed_bucket,
+  CASE
+    WHEN COALESCE(fu.followup_count, 0) = 0 THEN 'NO FOLLOWUP'
+    ELSE COALESCE(fr.first_followup_is_booked, 'No')
+  END AS first_followup_is_booked,
+  CASE
+    WHEN COALESCE(fu.followup_count, 0) = 0 THEN 'NO FOLLOWUP'
+    ELSE COALESCE(fr.first_attributed_order_id, '—')
+  END AS first_attributed_order_id,
 
   COALESCE(db.booking_count_total_chatbot, 0) AS booking_count_total_chatbot,
   COALESCE(db.exact_session_booking_count, 0) AS exact_session_booking_count,
