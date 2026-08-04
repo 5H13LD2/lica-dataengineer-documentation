@@ -2,12 +2,29 @@
 
 Date: 2026-07-28
 
+Refreshed note: 2026-08-04
+
 ## Goal
 
 I-verify kung bakit may discrepancy sa `2026-07-27` bookings:
 
 - `gulong_reporting.p_looker_agent_daily_conversion` = `5`
 - `gulong_reporting.t_moderate_booking_reconstruction` = `2`
+
+## Status Today
+
+This document is a historical reconciliation note for the `2026-07-27` booking-day incident.
+
+It should not be read as the current live state for all later dates.
+
+As of `2026-08-04`, the current separate issue for `2026-07-28` is:
+
+- `gulong_core.orders_booked` = `2`
+- `gulong_reporting.t_moderate_booking_reconstruction` = `2`
+- `gulong_reporting.p_looker_agent_daily_conversion` = `1`
+
+So for the current live discrepancy, the lag is no longer in `t_moderate_booking_reconstruction`.
+The remaining mismatch is in `p_looker_agent_daily_conversion`.
 
 ## Ginawa
 
@@ -118,6 +135,9 @@ Hindi sira ang SQL matching logic ng booking reconstruction view. Ang discrepanc
 
 - live view had `5`
 - physical table still had `2`
+
+This root cause applies to the `2026-07-27` incident documented here.
+It is not the current root cause of the separate `2026-07-28` mismatch checked on `2026-08-04`.
 
 ## Second Issue: Null `first_cs_reply_at`
 
@@ -243,6 +263,12 @@ Kapag may ganitong discrepancy ulit:
 4. Compare `t_moderate_booking_reconstruction`
 5. If view is correct and table is behind, rerun the table rebuild
 6. If `first_cs_reply_at` is still null on rows with valid session lineage, run the raw ManyChat backfill update
+
+Current practical note for `2026-08-04`:
+
+- do not rebuild `t_moderate_booking_reconstruction` just because `p_looker_agent_daily_conversion` is still `1`
+- the reconstruction table already matches `orders_booked` for `2026-07-28`
+- investigate or refresh the `p_looker_agent_daily_conversion` pipeline instead
 
 ## Related Files
 

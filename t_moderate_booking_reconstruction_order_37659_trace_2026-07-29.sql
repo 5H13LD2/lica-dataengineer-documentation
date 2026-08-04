@@ -1,11 +1,12 @@
 -- Trace for order_id = 37659
--- Date: 2026-07-29
+-- Original trace date: 2026-07-29
+-- Refreshed: 2026-08-04
 --
 -- Purpose:
--- 1. Confirm official booking existence
--- 2. Confirm matching replied session in v_looker_first_reply_detail
--- 3. Replay reconstruction match logic directly
--- 4. Compare downstream reporting tables
+-- 1. Confirm official booking existence.
+-- 2. Confirm matching replied session in v_looker_first_reply_detail.
+-- 3. Replay the current reconstruction match logic directly.
+-- 4. Compare physical table, view, and downstream reporting tables.
 
 
 -- =====================================================================
@@ -28,7 +29,8 @@ SELECT
   COUNT(DISTINCT order_id) AS distinct_orders,
   COUNTIF(booked_order_count = 1) AS booked_order_rows,
   COUNTIF(booking_owner_bucket = 'CS Assisted') AS cs_assisted_rows,
-  COUNTIF(booking_owner_bucket = 'Chatbot Only') AS chatbot_only_rows
+  COUNTIF(booking_owner_bucket = 'Chatbot Only') AS chatbot_only_rows,
+  COUNTIF(booking_owner_bucket = 'Unmatched Official Booking') AS unmatched_rows
 FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_booking_reconstruction`
 WHERE booking_day = DATE '2026-07-28'
 GROUP BY 1;
@@ -93,17 +95,21 @@ ORDER BY report_date DESC, first_customer_message_at DESC;
 
 
 -- =====================================================================
--- D. Replay deployed reconstruction match logic for 37659
+-- D. Replay current reconstruction match logic for 37659
 -- =====================================================================
 
-WITH moderates AS (
+WITH primary_moderates AS (
   SELECT
     report_date AS moderate_report_date,
     silver_session_id,
     manychat_id,
     user_name,
     reply_status,
-    first_customer_message_at,
+    COALESCE(first_customer_message_at, moderate_tagged_at) AS first_customer_message_at,
+    LEAD(COALESCE(first_customer_message_at, moderate_tagged_at)) OVER (
+      PARTITION BY manychat_id
+      ORDER BY COALESCE(first_customer_message_at, moderate_tagged_at), silver_session_id
+    ) AS next_customer_message_at,
     first_cs_reply_at
   FROM `gulong-chatbot-459723.gulong_reporting.v_looker_first_reply_detail`
   WHERE manychat_id IS NOT NULL
@@ -129,21 +135,35 @@ SELECT
   m.user_name,
   m.reply_status,
   m.first_customer_message_at,
+  m.next_customer_message_at,
   m.first_cs_reply_at,
   CASE
     WHEN b.inquiry_silver_session_id = m.silver_session_id THEN 'EXACT INQUIRY SESSION'
+    WHEN m.first_customer_message_at <= b.booking_at
+     AND (
+       m.next_customer_message_at IS NULL
+       OR b.booking_at < m.next_customer_message_at
+     ) THEN 'SESSION WINDOW'
     ELSE 'LATEST PRIOR MODERATE'
   END AS booking_match_rule,
   ROW_NUMBER() OVER (
     PARTITION BY b.order_id
     ORDER BY
       CASE WHEN b.inquiry_silver_session_id = m.silver_session_id THEN 0 ELSE 1 END,
+      CASE
+        WHEN m.first_customer_message_at <= b.booking_at
+         AND (
+           m.next_customer_message_at IS NULL
+           OR b.booking_at < m.next_customer_message_at
+         ) THEN 0
+        ELSE 1
+      END,
       m.first_customer_message_at DESC,
       m.moderate_report_date DESC,
       m.silver_session_id DESC
   ) AS booking_match_rn
 FROM official_booking b
-JOIN moderates m
+JOIN primary_moderates m
   ON m.manychat_id = b.manychat_id
  AND (
    b.inquiry_silver_session_id = m.silver_session_id
@@ -177,6 +197,35 @@ SELECT
   booking_owner_bucket,
   reply_status
 FROM `gulong-chatbot-459723.gulong_reporting.t_moderate_booking_reconstruction`
+WHERE order_id = '37659'
+LIMIT 1;
+
+
+-- =====================================================================
+-- E2. Current reconstruction view rows
+-- =====================================================================
+
+SELECT
+  order_id,
+  booking_day,
+  moderate_report_date,
+  silver_session_id,
+  booking_match_rule,
+  booking_owner_bucket,
+  reply_status
+FROM `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_booking_reconstruction`
+WHERE booking_day = DATE '2026-07-28'
+ORDER BY order_id;
+
+SELECT
+  order_id,
+  booking_day,
+  moderate_report_date,
+  silver_session_id,
+  booking_match_rule,
+  booking_owner_bucket,
+  reply_status
+FROM `gulong-chatbot-459723.gulong_reporting.v_looker_moderate_booking_reconstruction`
 WHERE order_id = '37659'
 LIMIT 1;
 

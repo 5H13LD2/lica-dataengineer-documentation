@@ -4,6 +4,11 @@
 
 This guide explains which tables to use for Chatbot/JCo moderate reporting, how the booking reconstruction works, and how to set up the reporting in Looker Studio.
 
+Current note as of `2026-08-04`:
+- `t_moderate_booking_reconstruction` is a refreshable physical copy of the live reconstruction view
+- if `orders_booked` and `t_moderate_booking_reconstruction` already agree, do not assume a reconstruction code issue
+- a mismatch against `p_looker_agent_daily_conversion` can be a separate downstream refresh or logic issue
+
 
 ## Reporting Objects
 
@@ -73,6 +78,10 @@ Best for:
 - Booked orders table
 - Conversion date table
 - Booking export
+
+Important operational note:
+- this is a physical table and can temporarily lag behind the live view until refreshed
+- if refreshed and it already matches `orders_booked`, the remaining discrepancy is somewhere else
 
 
 ## Which Table To Use
@@ -147,6 +156,16 @@ This refreshes, in order:
 - `gulong_reporting.t_moderate_booking_reconstruction`
 
 Use this when new moderate, follow-up, or booking rows are visible in the live views but missing in Looker Studio.
+
+Do not use this as the default fix for every booking mismatch.
+
+Check in this order:
+- `orders_booked`
+- `v_looker_moderate_booking_reconstruction`
+- `t_moderate_booking_reconstruction`
+- `p_looker_agent_daily_conversion`
+
+If `orders_booked = view = table`, then the issue is not a reconstruction refresh problem.
 
 ### A. Booked Orders Table
 
@@ -238,6 +257,7 @@ If the KPI is about official booked orders:
 Important:
 - Do not use `first_chatbot_order_id` from the coverage table as the official booking source of truth.
 - Use `t_moderate_booking_reconstruction` for order-level official booking reporting.
+- Do not use `p_looker_agent_daily_conversion` as the row-level order-ID source of truth.
 
 
 ## Field Reference
@@ -278,6 +298,10 @@ If you need:
 - exact booked orders -> use `t_moderate_booking_reconstruction`
 - official order ID validation -> use `t_moderate_booking_reconstruction`
 - strict moderate conversion rows only -> filter `moderate_report_date is not null`
+
+If counts disagree:
+- `orders_booked` and `t_moderate_booking_reconstruction` together usually answer the official order-level question
+- `p_looker_agent_daily_conversion` is a separate aggregated reporting layer and may need its own refresh or logic review
 
 
 ## Validation Query Example
