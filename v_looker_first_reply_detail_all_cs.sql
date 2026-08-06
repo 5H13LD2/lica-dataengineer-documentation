@@ -1,8 +1,8 @@
 #standardSQL
 CREATE OR REPLACE VIEW
-  `gulong-chatbot-459723.gulong_reporting.v_looker_first_reply_detail`
+  `gulong-chatbot-459723.gulong_reporting.v_looker_first_reply_detail_all_cs`
 AS
-WITH chatbot_assignments AS (
+WITH cs_assignments AS (
   SELECT * EXCEPT(rn)
   FROM (
     SELECT
@@ -10,224 +10,62 @@ WITH chatbot_assignments AS (
       a.user_id AS manychat_id,
       a.assignment_date AS report_date,
       COALESCE(
-        a.silver_session_id,
-        CONCAT('assignment:', CAST(a.user_id AS STRING), ':', CAST(a.assignment_date AS STRING))
+        NULLIF(TRIM(a.silver_session_id), ''),
+        CONCAT('assignment:', CAST(a.user_id AS STRING), ':', CAST(a.assignment_at AS STRING))
       ) AS silver_session_id,
       a.assignment_at,
       a.assignment_event_id,
       a.assigned_agent_name,
       a.agent_reporting_name,
       a.agent_reporting_group,
+      CASE
+        WHEN LOWER(TRIM(COALESCE(a.agent_reporting_name, a.assigned_agent_name, ''))) IN ('rem reyes') THEN 'Rem Reyes'
+        WHEN LOWER(TRIM(COALESCE(a.agent_reporting_name, a.assigned_agent_name, ''))) IN ('aira l. garcia', 'aira') THEN 'Aira L. Garcia'
+        WHEN LOWER(TRIM(COALESCE(a.agent_reporting_name, a.assigned_agent_name, ''))) IN ('rolyn ang') THEN 'Rolyn Ang'
+        WHEN LOWER(TRIM(COALESCE(a.agent_reporting_name, a.assigned_agent_name, ''))) IN ('sarah gulongph', 'sarah mae manansala', 'sarah') THEN 'Sarah'
+        ELSE NULL
+      END AS canonical_cs_name,
       ROW_NUMBER() OVER (
-        PARTITION BY a.business_unit, a.user_id, a.assignment_date
-        ORDER BY
-          IF(a.silver_session_id IS NOT NULL, 0, 1),
-          a.assignment_at,
-          a.assignment_event_id
+        PARTITION BY
+          a.business_unit,
+          a.assignment_date,
+          COALESCE(
+            NULLIF(TRIM(a.silver_session_id), ''),
+            CONCAT('assignment:', CAST(a.user_id AS STRING), ':', CAST(a.assignment_at AS STRING))
+          )
+        ORDER BY a.assignment_at, a.assignment_event_id
       ) AS rn
     FROM `gulong-chatbot-459723.gulong_core.inquiry_assignments` a
     WHERE a.business_unit = 'gulong'
-      AND a.agent_reporting_group = 'chatbot_jeanel'
-      AND a.agent_reporting_name = 'Chatbot/JCo'
   )
   WHERE rn = 1
+    AND canonical_cs_name IS NOT NULL
 ),
 
-chat_analysis_chatbot_intents AS (
-  SELECT DISTINCT
-    a.business_unit,
+moderate_cohort AS (
+  SELECT
+    a.report_date,
     a.manychat_id,
     a.silver_session_id,
-    a.report_date,
     a.assigned_agent_name,
-    a.agent_reporting_name,
+    a.canonical_cs_name AS agent_reporting_name,
     a.agent_reporting_group,
-    ca.evaluation_datetime AS moderate_tagged_at,
-    'chat_analysis' AS corrected_source
-  FROM chatbot_assignments a
-  JOIN (
-    SELECT
-      user_id,
-      DATE(evaluation_datetime) AS analysis_date,
-      evaluation_datetime,
-      intent_rating.top_intent AS top_intent,
-      ROW_NUMBER() OVER (
-        PARTITION BY user_id, DATE(evaluation_datetime)
-        ORDER BY evaluation_datetime DESC
-      ) AS rn
-    FROM `gulong-chatbot-459723.chat_analysis.chat_analysis_data`
-    WHERE platform = 'manychat'
-  ) ca
-    ON ca.user_id = a.manychat_id
-   AND ca.analysis_date = a.report_date
-   AND ca.rn = 1
-  WHERE LOWER(TRIM(ca.top_intent)) IN ('moderate intent', 'high intent')
-),
-
-v7_runtime_chatbot_intents AS (
-  SELECT
-    a.business_unit,
-    a.manychat_id,
-    a.silver_session_id,
-    a.report_date,
-    a.assigned_agent_name,
-    a.agent_reporting_name,
-    a.agent_reporting_group,
-    MIN(t.ts) AS moderate_tagged_at,
-    'runtime_v7' AS corrected_source
-  FROM chatbot_assignments a
-  JOIN `gulong-chatbot-459723.gulong_chatbot_live.turn_trace_log` t
-    ON t.business_unit = a.business_unit
-   AND t.user_id = a.manychat_id
-   AND t.runtime_version = 'v7'
-   AND DATE(t.ts) = a.report_date
-  WHERE
-    REGEXP_CONTAINS(
-      LOWER(TO_JSON_STRING(JSON_QUERY(t.tagging, '$.tags_applied'))),
-      r'(moderate|high)[ _-]?intent'
-    )
-    OR REGEXP_CONTAINS(
-      LOWER(TO_JSON_STRING(JSON_QUERY(t.tagging, '$.tags_to_add'))),
-      r'(moderate|high)[ _-]?intent'
-    )
-    OR REGEXP_CONTAINS(
-      LOWER(TO_JSON_STRING(JSON_QUERY(t.tagging, '$.tags_skipped_existing'))),
-      r'(moderate|high)[ _-]?intent'
-    )
-  GROUP BY
-    a.business_unit,
-    a.manychat_id,
-    a.silver_session_id,
-    a.report_date,
-    a.assigned_agent_name,
-    a.agent_reporting_name,
-    a.agent_reporting_group
-),
-
-corrected_chatbot_cohort AS (
-  SELECT
-    report_date,
-    manychat_id,
-    silver_session_id,
-    ANY_VALUE(assigned_agent_name) AS assigned_agent_name,
-    ANY_VALUE(agent_reporting_name) AS agent_reporting_name,
-    ANY_VALUE(agent_reporting_group) AS agent_reporting_group,
-    STRING_AGG(DISTINCT corrected_source ORDER BY corrected_source) AS corrected_source,
-    MIN(moderate_tagged_at) AS moderate_tagged_at
-  FROM (
-    SELECT * FROM chat_analysis_chatbot_intents
-    UNION ALL
-    SELECT * FROM v7_runtime_chatbot_intents
-  )
-  GROUP BY report_date, manychat_id, silver_session_id
-),
-
-agent_aliases_normalized AS (
-  SELECT
-    alias_norm,
-    canonical_agent_name
-  FROM (
-    SELECT
-      UPPER(REGEXP_REPLACE(TRIM(alias_value), r'[^A-Za-z0-9]+', '')) AS alias_norm,
-      canonical_agent_name,
-      ROW_NUMBER() OVER (
-        PARTITION BY UPPER(REGEXP_REPLACE(TRIM(alias_value), r'[^A-Za-z0-9]+', ''))
-        ORDER BY
-          IF(alias_type = 'manychat_agent_name', 0, 1),
-          updated_at DESC
-      ) AS rn
-    FROM `gulong-chatbot-459723.gulong_core.agent_aliases`
-    WHERE business_unit = 'gulong'
-      AND active
-      AND alias_type IN ('manychat_agent_name', 'agent_key', 'added_by_normalized')
-  )
-  WHERE rn = 1
-    AND alias_norm IS NOT NULL
-    AND alias_norm != ''
-),
-
-base_chatbot_cohort AS (
-  SELECT
-    s.inquiry_day AS report_date,
-    s.user_id AS manychat_id,
-    s.silver_session_id,
-    ANY_VALUE(s.original_assigned_agent_name) AS assigned_agent_name,
-    'Chatbot/JCo' AS agent_reporting_name,
-    'chatbot_jeanel' AS agent_reporting_group,
     'base_moderate' AS corrected_source,
     MIN(m.first_moderate_at) AS moderate_tagged_at
-  FROM `gulong-chatbot-459723.gulong_core.inquiry_sessions` s
+  FROM cs_assignments a
   JOIN `gulong-chatbot-459723.gulong_core.moderate_intent_sessions` m
-    ON m.business_unit = s.business_unit
-   AND m.channel = s.channel
-   AND m.user_id = s.user_id
-   AND m.silver_session_id = s.silver_session_id
+    ON m.business_unit = a.business_unit
+   AND m.channel = 'manychat'
+   AND m.user_id = a.manychat_id
+   AND m.silver_session_id = a.silver_session_id
    AND m.validated_moderate = TRUE
-  LEFT JOIN agent_aliases_normalized aa
-    ON aa.alias_norm = UPPER(
-      REGEXP_REPLACE(TRIM(COALESCE(s.original_assigned_agent_name, '')), r'[^A-Za-z0-9]+', '')
-    )
-  WHERE s.business_unit = 'gulong'
-    AND s.channel = 'manychat'
-    AND COALESCE(
-      aa.canonical_agent_name,
-      IF(LOWER(TRIM(s.original_assigned_agent_name)) = 'jeanel co', 'Chatbot/JCo', NULL),
-      s.original_assigned_agent_name,
-      'Unassigned'
-    ) = 'Chatbot/JCo'
-  GROUP BY s.inquiry_day, s.user_id, s.silver_session_id
-),
-
-corrected_chatbot_counts AS (
-  SELECT
-    report_date,
-    COUNT(DISTINCT manychat_id) AS total_moderate_intents
-  FROM corrected_chatbot_cohort
-  GROUP BY report_date
-),
-
-base_chatbot_counts AS (
-  SELECT
-    report_date,
-    COUNT(DISTINCT manychat_id) AS total_moderate_intents
-  FROM base_chatbot_cohort
-  GROUP BY report_date
-),
-
-selected_chatbot_cohort AS (
-  SELECT
-    c.report_date,
-    c.manychat_id,
-    c.silver_session_id,
-    c.assigned_agent_name,
-    c.agent_reporting_name,
-    c.agent_reporting_group,
-    c.corrected_source,
-    c.moderate_tagged_at
-  FROM selected_chatbot_cohort c
-  LEFT JOIN corrected_chatbot_counts cc
-    ON cc.report_date = c.report_date
-  LEFT JOIN base_chatbot_counts bc
-    ON bc.report_date = c.report_date
-  WHERE COALESCE(bc.total_moderate_intents, 0) <= COALESCE(cc.total_moderate_intents, 0)
-
-  UNION ALL
-
-  SELECT
-    b.report_date,
-    b.manychat_id,
-    b.silver_session_id,
-    b.assigned_agent_name,
-    b.agent_reporting_name,
-    b.agent_reporting_group,
-    b.corrected_source,
-    b.moderate_tagged_at
-  FROM base_chatbot_cohort b
-  LEFT JOIN corrected_chatbot_counts cc
-    ON cc.report_date = b.report_date
-  LEFT JOIN base_chatbot_counts bc
-    ON bc.report_date = b.report_date
-  WHERE COALESCE(bc.total_moderate_intents, 0) > COALESCE(cc.total_moderate_intents, 0)
+  GROUP BY
+    a.report_date,
+    a.manychat_id,
+    a.silver_session_id,
+    a.assigned_agent_name,
+    a.canonical_cs_name,
+    a.agent_reporting_group
 ),
 
 session_dedup AS (
@@ -296,7 +134,7 @@ contact_from_analysis AS (
       ORDER BY a.evaluation_datetime DESC
       LIMIT 1
     )[SAFE_OFFSET(0)] AS contact_number
-  FROM selected_chatbot_cohort c
+  FROM moderate_cohort c
   JOIN `gulong-chatbot-459723.chat_analysis.chat_analysis_data` a
     ON a.user_id = c.manychat_id
    AND LOWER(COALESCE(a.platform, 'manychat')) = 'manychat'
@@ -319,7 +157,7 @@ contact_from_messages AS (
       ORDER BY m.datetime DESC
       LIMIT 1
     )[SAFE_OFFSET(0)] AS contact_number
-  FROM selected_chatbot_cohort c
+  FROM moderate_cohort c
   JOIN `gulong-chatbot-459723.manychat_data.messages` m
     ON m.business_unit = 'gulong'
    AND m.user_id = c.manychat_id
@@ -364,7 +202,7 @@ message_first_customer AS (
     c.manychat_id,
     c.silver_session_id,
     MIN(m.datetime) AS first_customer_message_at
-  FROM corrected_chatbot_cohort c
+  FROM moderate_cohort c
   JOIN `gulong-chatbot-459723.manychat_data.messages` m
     ON m.business_unit = 'gulong'
    AND m.user_id = c.manychat_id
@@ -452,7 +290,7 @@ cohort AS (
     sbd.first_customer_message_at,
     sbd.next_customer_message_at,
     mb.first_moderate_at
-  FROM selected_chatbot_cohort c
+  FROM moderate_cohort c
   LEFT JOIN session_base_exact se
     ON se.silver_session_id = c.silver_session_id
    AND se.manychat_id = c.manychat_id
@@ -526,14 +364,87 @@ first_reply AS (
     contact_source,
     inquiry_date,
     first_customer_message_at,
+    next_customer_message_at,
     first_moderate_at,
     agent_reply_at AS first_cs_reply_at,
     agent_reply_sender AS first_cs_reply_sender
   FROM agent_messages
   QUALIFY ROW_NUMBER() OVER (
-    PARTITION BY report_date, manychat_id
+    PARTITION BY report_date, manychat_id, silver_session_id
     ORDER BY agent_reply_at, agent_reply_sender
   ) = 1
+),
+
+official_bookings AS (
+  SELECT
+    order_id,
+    booking_at,
+    booking_day,
+    manychat_user_id AS manychat_id,
+    inquiry_silver_session_id,
+    order_status_norm,
+    CASE
+      WHEN LOWER(TRIM(sales_reporting_agent_name)) IN ('rem reyes') THEN 'Rem Reyes'
+      WHEN LOWER(TRIM(sales_reporting_agent_name)) IN ('aira l. garcia', 'aira') THEN 'Aira L. Garcia'
+      WHEN LOWER(TRIM(sales_reporting_agent_name)) IN ('rolyn ang') THEN 'Rolyn Ang'
+      WHEN LOWER(TRIM(sales_reporting_agent_name)) IN ('sarah gulongph', 'sarah mae manansala', 'sarah') THEN 'Sarah'
+      ELSE sales_reporting_agent_name
+    END AS booking_agent_name
+  FROM `gulong-chatbot-459723.gulong_core.orders_booked`
+  WHERE is_reportable_booked_order = TRUE
+    AND LOWER(TRIM(sales_reporting_agent_name)) IN (
+      'rem reyes',
+      'aira l. garcia',
+      'aira',
+      'rolyn ang',
+      'sarah gulongph',
+      'sarah mae manansala',
+      'sarah'
+    )
+    AND manychat_user_id IS NOT NULL
+),
+
+matched_bookings AS (
+  SELECT
+    fr.report_date,
+    fr.manychat_id,
+    fr.silver_session_id,
+    b.order_id,
+    b.booking_at,
+    b.booking_day,
+    b.order_status_norm,
+    ROW_NUMBER() OVER (
+      PARTITION BY fr.report_date, fr.manychat_id, fr.silver_session_id
+      ORDER BY
+        CASE WHEN b.inquiry_silver_session_id = fr.silver_session_id THEN 0 ELSE 1 END,
+        b.booking_at,
+        b.order_id
+    ) AS booking_rn
+  FROM first_reply fr
+  LEFT JOIN official_bookings b
+    ON b.manychat_id = fr.manychat_id
+   AND b.booking_agent_name = fr.source_agent_name
+   AND (
+     b.inquiry_silver_session_id = fr.silver_session_id
+     OR COALESCE(fr.first_customer_message_at, fr.moderate_tagged_at) <= b.booking_at
+   )
+   AND (
+     fr.next_customer_message_at IS NULL
+     OR b.inquiry_silver_session_id = fr.silver_session_id
+     OR b.booking_at < fr.next_customer_message_at
+   )
+),
+
+first_booking AS (
+  SELECT
+    report_date,
+    manychat_id,
+    silver_session_id,
+    order_id,
+    booking_day,
+    order_status_norm
+  FROM matched_bookings
+  WHERE booking_rn = 1
 )
 
 SELECT
@@ -564,6 +475,7 @@ SELECT
   fr.contact_source,
   fr.inquiry_date,
   fr.first_customer_message_at,
+  fr.next_customer_message_at,
   fr.first_moderate_at,
   fr.first_cs_reply_at,
   DATE(fr.first_cs_reply_at) AS first_cs_reply_date,
@@ -630,11 +542,19 @@ SELECT
   IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS replied_session_count,
   IF(fr.first_cs_reply_at IS NULL, 1, 0) AS no_reply_session_count,
   IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS agent_first_reply_count,
+  fb.booking_day,
+  fb.order_id,
+  fb.order_status_norm,
+  DATE_DIFF(fb.booking_day, fr.report_date, DAY) AS days_from_moderate_to_booking,
   SAFE_DIVIDE(
-    COUNTIF(fr.first_cs_reply_at IS NOT NULL) OVER (PARTITION BY fr.report_date),
-    COUNT(*) OVER (PARTITION BY fr.report_date)
+    COUNTIF(fr.first_cs_reply_at IS NOT NULL) OVER (PARTITION BY fr.report_date, fr.source_agent_name),
+    COUNT(*) OVER (PARTITION BY fr.report_date, fr.source_agent_name)
   ) AS daily_response_rate
 FROM first_reply fr
+LEFT JOIN first_booking fb
+  ON fb.report_date = fr.report_date
+ AND fb.manychat_id = fr.manychat_id
+ AND fb.silver_session_id = fr.silver_session_id
 LEFT JOIN `gulong-chatbot-459723.gulong_reporting.p_looker_agent_daily_conversion` b
   ON b.report_date = fr.report_date
  AND b.agent_name = fr.source_agent_name;

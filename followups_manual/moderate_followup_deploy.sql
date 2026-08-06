@@ -178,16 +178,54 @@ matched_followups AS (
     ORDER BY m.first_cs_reply_at DESC, m.silver_session_id DESC
   ) = 1
 ),
+matched_followups_with_window AS (
+  SELECT
+    mf.*,
+    LEAD(mf.followup_at) OVER (
+      PARTITION BY mf.silver_session_id
+      ORDER BY mf.followup_at, mf.followup_agent_name, mf.followup_type
+    ) AS next_followup_at
+  FROM matched_followups mf
+),
+customer_responses AS (
+  SELECT
+    mf.silver_session_id,
+    mf.followup_at,
+    COUNT(*) AS customer_response_count_after_followup,
+    MIN(m.datetime) AS first_customer_response_at,
+    ARRAY_AGG(m.text_content IGNORE NULLS ORDER BY m.datetime ASC LIMIT 1)[SAFE_OFFSET(0)]
+      AS first_customer_response_text
+  FROM matched_followups_with_window mf
+  JOIN `gulong-chatbot-459723.manychat_data.messages` m
+    ON m.business_unit = 'gulong'
+   AND m.user_id = mf.manychat_id
+   AND m.role = 'user'
+   AND m.datetime >= DATETIME '2026-06-01 00:00:00'
+   AND m.datetime > mf.followup_at
+   AND (
+     mf.next_followup_at IS NULL
+     OR m.datetime < mf.next_followup_at
+   )
+   AND DATE(TIMESTAMP(m.datetime, 'Asia/Manila'), 'Asia/Manila')
+       <= DATE_ADD(mf.followup_date, INTERVAL 7 DAY)
+  GROUP BY 1, 2
+),
 with_booking AS (
   SELECT
     mf.*,
+    cr.customer_response_count_after_followup,
+    cr.first_customer_response_at,
+    cr.first_customer_response_text,
     b.order_id,
     b.booking_at,
     b.booking_day,
     COUNT(b.order_id) OVER (
       PARTITION BY mf.silver_session_id, mf.followup_at
     ) AS raw_booking_count_within_14d
-  FROM matched_followups mf
+  FROM matched_followups_with_window mf
+  LEFT JOIN customer_responses cr
+    ON cr.silver_session_id = mf.silver_session_id
+   AND cr.followup_at = mf.followup_at
   LEFT JOIN `gulong-chatbot-459723.gulong_core.orders_booked` b
     ON b.manychat_user_id = mf.manychat_id
    AND b.booking_at >= mf.followup_at
@@ -224,15 +262,18 @@ SELECT
   -- ---------- timestamps ----------
   first_cs_reply_at,
   followup_at,
+  first_customer_response_at,
   booking_at,
   booking_day,
 
   -- ---------- attributes ----------
   followup_type,
   followup_text,
+  first_customer_response_text,
   days_from_moderate_to_followup,
   minutes_to_first_reply,
   minutes_from_reply_to_followup,
+  DATETIME_DIFF(first_customer_response_at, followup_at, MINUTE) AS minutes_from_followup_to_first_response,
   DATE_DIFF(booking_day, followup_date, DAY) AS days_followup_to_booking,
 
   CASE
@@ -254,10 +295,14 @@ SELECT
   CAST(1 AS INT64) AS is_true_followup,
   CAST(days_from_moderate_to_followup = 0 AS INT64) AS is_same_day_followup,
   CAST(days_from_moderate_to_followup = 1 AS INT64) AS is_next_day_followup,
+  CAST(COALESCE(customer_response_count_after_followup, 0) > 0 AS INT64) AS responded_to_followup,
 
   -- ---------- measures ----------
   CAST(1 AS INT64) AS row_count,
   CAST(1 AS INT64) AS followed_up_moderate_count,
+  COALESCE(customer_response_count_after_followup, 0) AS customer_response_count_after_followup,
+  CAST(COALESCE(customer_response_count_after_followup, 0) > 0 AS INT64)
+    AS responded_followup_count,
   CAST(order_id IS NOT NULL AS INT64) AS booked_from_followup_count,
   CAST(raw_booking_count_within_14d AS INT64) AS booking_count_within_14d,
   order_id AS attributed_order_id,
@@ -342,6 +387,10 @@ followup_rollup AS (
     MIN(followup_at) AS first_followup_at,
     DATE(MIN(followup_at)) AS first_followup_date,
     MAX(followup_at) AS last_followup_at,
+    SUM(customer_response_count_after_followup) AS customer_response_count_after_followup,
+    SUM(responded_followup_count) AS responded_followup_count,
+    COUNTIF(responded_to_followup = 1) AS followup_rows_with_response,
+    MIN(IF(responded_to_followup = 1, first_customer_response_at, NULL)) AS first_customer_response_at,
     COUNT(DISTINCT attributed_order_id) AS booking_count_from_followup,
     COUNTIF(attributed_order_id IS NOT NULL) AS followup_rows_with_booking,
     MIN(minutes_from_reply_to_followup) AS minutes_to_first_followup,
@@ -462,6 +511,7 @@ SELECT
   fu.first_followup_date,
   fu.first_followup_at,
   fu.last_followup_at,
+  fu.first_customer_response_at,
   COALESCE(fr.first_followup_agent_name, 'NO FOLLOWUP') AS first_followup_agent_name,
   COALESCE(fr.first_followup_agent_name_norm, 'no followup') AS first_followup_agent_name_norm,
   COALESCE(fr.first_followup_type, 'NO FOLLOWUP') AS first_followup_type,
@@ -484,10 +534,18 @@ SELECT
     0
   ) AS booking_count_chatbot_only,
   COALESCE(fu.followup_count, 0) AS followup_count,
+  COALESCE(fu.customer_response_count_after_followup, 0) AS customer_response_count_after_followup,
+  COALESCE(fu.responded_followup_count, 0) AS responded_followup_count,
+  COALESCE(fu.followup_rows_with_response, 0) AS followup_rows_with_response,
   COALESCE(fu.booking_count_from_followup, 0) AS booking_count_from_followup,
   COALESCE(fu.followup_rows_with_booking, 0) AS followup_rows_with_booking,
   fu.minutes_to_first_followup,
   fu.hours_to_first_followup,
+
+  CASE
+    WHEN COALESCE(fu.responded_followup_count, 0) > 0 THEN 'Yes'
+    ELSE 'No'
+  END AS responded_to_followup,
 
   CASE
     WHEN COALESCE(fu.followup_count, 0) > 0 THEN 'WITH CS FOLLOWUP'
@@ -518,6 +576,7 @@ SELECT
 
   CAST(COALESCE(db.booking_count_total_chatbot, 0) > 0 AS INT64) AS was_booked_in_chatbot_cohort,
   CAST(COALESCE(fu.followup_count, 0) > 0 AS INT64) AS was_followed_up,
+  CAST(COALESCE(fu.responded_followup_count, 0) > 0 AS INT64) AS was_responded_to_followup,
   CAST(COALESCE(fu.followup_count, 0) = 0 AS INT64) AS never_followed_up,
   CAST(COALESCE(fu.followup_count, 0) > 1 AS INT64) AS had_multiple_followups,
   CAST(
@@ -539,6 +598,7 @@ SELECT
     AS INT64
   ) AS chatbot_only_booked_session_count,
   CAST(COALESCE(fu.followup_count, 0) > 0 AS INT64) AS followed_up_session_count,
+  CAST(COALESCE(fu.responded_followup_count, 0) > 0 AS INT64) AS responded_session_count,
   CAST(
     m.reply_status = 'Has CS Reply' AND COALESCE(fu.followup_count, 0) = 0
     AS INT64
@@ -621,6 +681,35 @@ matched_followups AS (
   )
   WHERE match_rank = 1
 ),
+matched_followups_with_window AS (
+  SELECT
+    mf.*,
+    LEAD(mf.followup_at) OVER (
+      PARTITION BY mf.silver_session_id
+      ORDER BY mf.followup_at, mf.followup_agent_name, mf.followup_type
+    ) AS next_followup_at
+  FROM matched_followups mf
+),
+customer_responses AS (
+  SELECT
+    mf.silver_session_id,
+    mf.followup_at,
+    COUNT(*) AS customer_response_count_after_followup
+  FROM matched_followups_with_window mf
+  JOIN `gulong-chatbot-459723.manychat_data.messages` m
+    ON m.business_unit = 'gulong'
+   AND m.user_id = mf.manychat_id
+   AND m.role = 'user'
+   AND m.datetime >= DATETIME '2026-06-01 00:00:00'
+   AND m.datetime > mf.followup_at
+   AND (
+     mf.next_followup_at IS NULL
+     OR m.datetime < mf.next_followup_at
+   )
+   AND DATE(TIMESTAMP(m.datetime, 'Asia/Manila'), 'Asia/Manila')
+       <= DATE_ADD(mf.followup_date, INTERVAL 7 DAY)
+  GROUP BY 1, 2
+),
 first_booking AS (
   SELECT * EXCEPT(booking_rank)
   FROM (
@@ -654,8 +743,13 @@ base AS (
     mf.days_from_reply_to_followup,
     CAST(mf.days_from_moderate_to_followup = 1 AS INT64) AS is_next_day_followup,
     CAST(1 AS INT64) AS followups_from_moderate,
+    COALESCE(cr.customer_response_count_after_followup, 0) AS customer_response_count_after_followup,
+    CAST(COALESCE(cr.customer_response_count_after_followup, 0) > 0 AS INT64) AS responded_followup_count,
     CAST(fb.order_id IS NOT NULL AS INT64) AS bookings_from_followups
-  FROM matched_followups mf
+  FROM matched_followups_with_window mf
+  LEFT JOIN customer_responses cr
+    ON cr.silver_session_id = mf.silver_session_id
+   AND cr.followup_at = mf.followup_at
   LEFT JOIN first_booking fb
     ON fb.silver_session_id = mf.silver_session_id
    AND fb.followup_at = mf.followup_at
@@ -671,6 +765,9 @@ SELECT
   COUNT(DISTINCT manychat_id) AS matched_manychat_ids,
   COUNT(DISTINCT silver_session_id) AS matched_sessions,
   SUM(followups_from_moderate) AS followups_from_moderate,
+  SUM(customer_response_count_after_followup) AS customer_response_count_after_followup,
+  SUM(responded_followup_count) AS responded_followups,
+  COUNT(DISTINCT IF(responded_followup_count = 1, silver_session_id, NULL)) AS matched_sessions_with_response,
   SUM(bookings_from_followups) AS bookings_from_followups,
   SAFE_DIVIDE(SUM(bookings_from_followups), SUM(followups_from_moderate)) AS booking_rate
 FROM base

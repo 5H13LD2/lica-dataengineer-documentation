@@ -653,6 +653,30 @@ SELECT
       ),
     0
   ) AS minutes_to_reply_sla,
+  CASE
+    WHEN fr.first_cs_reply_at IS NOT NULL
+      AND fr.reporting_agent_name != 'Unassigned'
+      AND DATE(fr.first_cs_reply_at) = fr.report_date
+    THEN GREATEST(
+      DATETIME_DIFF(fr.first_cs_reply_at, fr.effective_moderate_tagged_at, MINUTE)
+      - GREATEST(
+          DATETIME_DIFF(
+            LEAST(
+              fr.first_cs_reply_at,
+              DATETIME(DATE(fr.effective_moderate_tagged_at), TIME '13:00:00')
+            ),
+            GREATEST(
+              fr.effective_moderate_tagged_at,
+              DATETIME(DATE(fr.effective_moderate_tagged_at), TIME '12:00:00')
+            ),
+            MINUTE
+          ),
+          0
+        ),
+      0
+    )
+    ELSE NULL
+  END AS minutes_to_reply_sla_today,
   IF(
     fr.first_cs_reply_at IS NOT NULL
     AND fr.first_cs_reply_at < fr.effective_moderate_tagged_at,

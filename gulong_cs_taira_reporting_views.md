@@ -48,6 +48,8 @@ These patterns are applied consistently across the views so numbers stay compara
 | `reply_status` | 'Has CS Reply' / 'No CS Reply' |
 | `minutes_to_first_reply` | first customer msg → first CS reply |
 | `minutes_from_moderate_to_first_reply` | moderate trigger → first CS reply |
+| `minutes_to_reply_sla` | business-hours reply minutes, even if reply happened the next day |
+| `minutes_to_reply_sla_today` | same as SLA minutes but only when reply happened on `report_date`; next-day replies return `NULL` so they do not affect same-day averages |
 | `moderate_count`, `replied_session_count`, `no_reply_session_count` | 1/0 metric flags (INT64) |
 | `daily_response_rate` | window-function rate — **do not aggregate in Looker** |
 

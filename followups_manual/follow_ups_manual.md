@@ -54,6 +54,7 @@ Grain:
 Use it for:
 - matched follow-up events
 - follow-up text, type, agent
+- whether the customer responded after each follow-up
 - bookings attributed to follow-up events
 
 Important logic:
@@ -80,6 +81,7 @@ Use it for:
 - moderate denominator
 - replied vs no-reply
 - followed-up vs not-followed-up
+- sessions with at least one customer response after follow-up
 - session-level booked-from-follow-up flags
 
 ### Statement 4
@@ -96,6 +98,7 @@ Builds:
 
 Use it for:
 - agent-day matched follow-up counts
+- agent-day responded follow-up counts
 - matched `manychat_id` counts
 - matched session counts
 - bookings from those matched follow-ups
@@ -106,7 +109,26 @@ Key fields:
 - `matched_manychat_ids`
 - `matched_sessions`
 - `followups_from_moderate`
+- `responded_followups`
+- `matched_sessions_with_response`
 - `bookings_from_followups`
+
+## Follow-Up Response Logic
+
+Definition:
+- a follow-up is marked as responded when the same `manychat_id` sends any `manychat_data.messages` row with `role = 'user'` after `followup_at`
+
+Attribution window:
+- response must happen before the next matched follow-up for the same `silver_session_id`
+- if there is no next matched follow-up, response is counted only up to `followup_date + 7 days`
+
+Important fields now available:
+- `t_moderate_followup_detail.responded_to_followup`
+- `t_moderate_followup_detail.customer_response_count_after_followup`
+- `t_moderate_followup_coverage.responded_to_followup`
+- `t_moderate_followup_coverage.responded_followup_count`
+- `t_moderate_followup_coverage.responded_session_count`
+- `v_looker_moderate_followup_booking_summary.responded_followups`
 
 ### Statement 6
 
