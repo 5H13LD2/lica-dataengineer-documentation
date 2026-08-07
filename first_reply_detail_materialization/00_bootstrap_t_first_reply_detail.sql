@@ -1,7 +1,7 @@
 #standardSQL
-CREATE OR REPLACE VIEW
-  `gulong-chatbot-459723.gulong_reporting.v_looker_first_reply_detail`
-AS
+CREATE OR REPLACE TABLE `gulong-chatbot-459723.gulong_reporting.t_first_reply_detail`
+PARTITION BY report_date
+CLUSTER BY source_agent_name, reporting_agent_name AS
 WITH chatbot_assignments AS (
   SELECT * EXCEPT(rn)
   FROM (
@@ -32,7 +32,6 @@ WITH chatbot_assignments AS (
   )
   WHERE rn = 1
 ),
-
 chat_analysis_chatbot_intents AS (
   SELECT DISTINCT
     a.business_unit,
@@ -63,7 +62,6 @@ chat_analysis_chatbot_intents AS (
    AND ca.rn = 1
   WHERE LOWER(TRIM(ca.top_intent)) IN ('moderate intent', 'high intent')
 ),
-
 v7_runtime_chatbot_intents AS (
   SELECT
     a.business_unit,
@@ -103,7 +101,6 @@ v7_runtime_chatbot_intents AS (
     a.agent_reporting_name,
     a.agent_reporting_group
 ),
-
 corrected_chatbot_cohort AS (
   SELECT
     report_date,
@@ -121,115 +118,12 @@ corrected_chatbot_cohort AS (
   )
   GROUP BY report_date, manychat_id, silver_session_id
 ),
-
-agent_aliases_normalized AS (
+cohort_date_bounds AS (
   SELECT
-    alias_norm,
-    canonical_agent_name
-  FROM (
-    SELECT
-      UPPER(REGEXP_REPLACE(TRIM(alias_value), r'[^A-Za-z0-9]+', '')) AS alias_norm,
-      canonical_agent_name,
-      ROW_NUMBER() OVER (
-        PARTITION BY UPPER(REGEXP_REPLACE(TRIM(alias_value), r'[^A-Za-z0-9]+', ''))
-        ORDER BY
-          IF(alias_type = 'manychat_agent_name', 0, 1),
-          updated_at DESC
-      ) AS rn
-    FROM `gulong-chatbot-459723.gulong_core.agent_aliases`
-    WHERE business_unit = 'gulong'
-      AND active
-      AND alias_type IN ('manychat_agent_name', 'agent_key', 'added_by_normalized')
-  )
-  WHERE rn = 1
-    AND alias_norm IS NOT NULL
-    AND alias_norm != ''
-),
-
-base_chatbot_cohort AS (
-  SELECT
-    s.inquiry_day AS report_date,
-    s.user_id AS manychat_id,
-    s.silver_session_id,
-    ANY_VALUE(s.original_assigned_agent_name) AS assigned_agent_name,
-    'Chatbot/JCo' AS agent_reporting_name,
-    'chatbot_jeanel' AS agent_reporting_group,
-    'base_moderate' AS corrected_source,
-    MIN(m.first_moderate_at) AS moderate_tagged_at
-  FROM `gulong-chatbot-459723.gulong_core.inquiry_sessions` s
-  JOIN `gulong-chatbot-459723.gulong_core.moderate_intent_sessions` m
-    ON m.business_unit = s.business_unit
-   AND m.channel = s.channel
-   AND m.user_id = s.user_id
-   AND m.silver_session_id = s.silver_session_id
-   AND m.validated_moderate = TRUE
-  LEFT JOIN agent_aliases_normalized aa
-    ON aa.alias_norm = UPPER(
-      REGEXP_REPLACE(TRIM(COALESCE(s.original_assigned_agent_name, '')), r'[^A-Za-z0-9]+', '')
-    )
-  WHERE s.business_unit = 'gulong'
-    AND s.channel = 'manychat'
-    AND COALESCE(
-      aa.canonical_agent_name,
-      IF(LOWER(TRIM(s.original_assigned_agent_name)) = 'jeanel co', 'Chatbot/JCo', NULL),
-      s.original_assigned_agent_name,
-      'Unassigned'
-    ) = 'Chatbot/JCo'
-  GROUP BY s.inquiry_day, s.user_id, s.silver_session_id
-),
-
-corrected_chatbot_counts AS (
-  SELECT
-    report_date,
-    COUNT(DISTINCT manychat_id) AS total_moderate_intents
+    DATE_SUB(MIN(report_date), INTERVAL 1 DAY) AS start_date,
+    DATE_ADD(MAX(report_date), INTERVAL 1 DAY) AS end_date
   FROM corrected_chatbot_cohort
-  GROUP BY report_date
 ),
-
-base_chatbot_counts AS (
-  SELECT
-    report_date,
-    COUNT(DISTINCT manychat_id) AS total_moderate_intents
-  FROM base_chatbot_cohort
-  GROUP BY report_date
-),
-
-selected_chatbot_cohort AS (
-  SELECT
-    c.report_date,
-    c.manychat_id,
-    c.silver_session_id,
-    c.assigned_agent_name,
-    c.agent_reporting_name,
-    c.agent_reporting_group,
-    c.corrected_source,
-    c.moderate_tagged_at
-  FROM selected_chatbot_cohort c
-  LEFT JOIN corrected_chatbot_counts cc
-    ON cc.report_date = c.report_date
-  LEFT JOIN base_chatbot_counts bc
-    ON bc.report_date = c.report_date
-  WHERE COALESCE(bc.total_moderate_intents, 0) <= COALESCE(cc.total_moderate_intents, 0)
-
-  UNION ALL
-
-  SELECT
-    b.report_date,
-    b.manychat_id,
-    b.silver_session_id,
-    b.assigned_agent_name,
-    b.agent_reporting_name,
-    b.agent_reporting_group,
-    b.corrected_source,
-    b.moderate_tagged_at
-  FROM base_chatbot_cohort b
-  LEFT JOIN corrected_chatbot_counts cc
-    ON cc.report_date = b.report_date
-  LEFT JOIN base_chatbot_counts bc
-    ON bc.report_date = b.report_date
-  WHERE COALESCE(bc.total_moderate_intents, 0) > COALESCE(cc.total_moderate_intents, 0)
-),
-
 session_dedup AS (
   SELECT
     s.silver_session_id,
@@ -245,7 +139,6 @@ session_dedup AS (
   WHERE s.business_unit = 'gulong'
     AND s.channel = 'manychat'
 ),
-
 session_base_exact AS (
   SELECT
     silver_session_id,
@@ -255,7 +148,6 @@ session_base_exact AS (
   FROM session_dedup
   WHERE rn = 1
 ),
-
 session_base_fallback AS (
   SELECT * EXCEPT(rn)
   FROM (
@@ -275,7 +167,6 @@ session_base_fallback AS (
   )
   WHERE rn = 1
 ),
-
 user_name_realtime AS (
   SELECT
     user_id,
@@ -285,7 +176,20 @@ user_name_realtime AS (
     AND user_name IS NOT NULL
     AND TRIM(user_name) != ''
 ),
-
+cohort_messages AS (
+  SELECT
+    m.user_id AS manychat_id,
+    m.datetime,
+    m.role,
+    m.type,
+    m.sender,
+    m.text_content
+  FROM `gulong-chatbot-459723.manychat_data.messages` m
+  CROSS JOIN cohort_date_bounds d
+  WHERE m.business_unit = 'gulong'
+    AND m.role IN ('user', 'agent')
+    AND DATE(m.datetime) BETWEEN d.start_date AND d.end_date
+),
 contact_from_analysis AS (
   SELECT
     c.report_date,
@@ -296,16 +200,17 @@ contact_from_analysis AS (
       ORDER BY a.evaluation_datetime DESC
       LIMIT 1
     )[SAFE_OFFSET(0)] AS contact_number
-  FROM selected_chatbot_cohort c
+  FROM corrected_chatbot_cohort c
+  CROSS JOIN cohort_date_bounds d
   JOIN `gulong-chatbot-459723.chat_analysis.chat_analysis_data` a
     ON a.user_id = c.manychat_id
    AND LOWER(COALESCE(a.platform, 'manychat')) = 'manychat'
+   AND DATE(a.evaluation_datetime) BETWEEN d.start_date AND d.end_date
    AND DATE(a.evaluation_datetime) BETWEEN DATE_SUB(c.report_date, INTERVAL 1 DAY)
                                        AND DATE_ADD(c.report_date, INTERVAL 1 DAY)
   WHERE NULLIF(TRIM(a.extracted_data.contact_number), '') IS NOT NULL
   GROUP BY c.report_date, c.manychat_id
 ),
-
 contact_from_messages AS (
   SELECT
     c.report_date,
@@ -319,12 +224,10 @@ contact_from_messages AS (
       ORDER BY m.datetime DESC
       LIMIT 1
     )[SAFE_OFFSET(0)] AS contact_number
-  FROM selected_chatbot_cohort c
-  JOIN `gulong-chatbot-459723.manychat_data.messages` m
-    ON m.business_unit = 'gulong'
-   AND m.user_id = c.manychat_id
+  FROM corrected_chatbot_cohort c
+  JOIN cohort_messages m
+    ON m.manychat_id = c.manychat_id
    AND m.role = 'user'
-   AND m.datetime >= DATETIME '2026-03-01 00:00:00'
    AND DATE(m.datetime) BETWEEN DATE_SUB(c.report_date, INTERVAL 1 DAY)
                             AND DATE_ADD(c.report_date, INTERVAL 1 DAY)
   WHERE REGEXP_CONTAINS(
@@ -333,7 +236,6 @@ contact_from_messages AS (
   )
   GROUP BY c.report_date, c.manychat_id
 ),
-
 moderate_event AS (
   SELECT
     m.silver_session_id,
@@ -348,7 +250,6 @@ moderate_event AS (
     AND m.channel = 'manychat'
     AND m.validated_moderate = TRUE
 ),
-
 moderate_base AS (
   SELECT
     silver_session_id,
@@ -357,7 +258,6 @@ moderate_base AS (
   FROM moderate_event
   WHERE rn = 1
 ),
-
 message_first_customer AS (
   SELECT
     c.report_date,
@@ -365,16 +265,13 @@ message_first_customer AS (
     c.silver_session_id,
     MIN(m.datetime) AS first_customer_message_at
   FROM corrected_chatbot_cohort c
-  JOIN `gulong-chatbot-459723.manychat_data.messages` m
-    ON m.business_unit = 'gulong'
-   AND m.user_id = c.manychat_id
+  JOIN cohort_messages m
+    ON m.manychat_id = c.manychat_id
    AND m.role = 'user'
-   AND m.datetime >= DATETIME '2026-03-01 00:00:00'
    AND DATE(m.datetime) BETWEEN DATE_SUB(c.report_date, INTERVAL 1 DAY)
                             AND DATE_ADD(c.report_date, INTERVAL 1 DAY)
   GROUP BY c.report_date, c.manychat_id, c.silver_session_id
 ),
-
 session_boundaries AS (
   SELECT
     fc.report_date,
@@ -387,7 +284,6 @@ session_boundaries AS (
     ) AS next_customer_message_at
   FROM message_first_customer fc
 ),
-
 cohort AS (
   SELECT
     c.report_date,
@@ -452,7 +348,7 @@ cohort AS (
     sbd.first_customer_message_at,
     sbd.next_customer_message_at,
     mb.first_moderate_at
-  FROM selected_chatbot_cohort c
+  FROM corrected_chatbot_cohort c
   LEFT JOIN session_base_exact se
     ON se.silver_session_id = c.silver_session_id
    AND se.manychat_id = c.manychat_id
@@ -474,19 +370,15 @@ cohort AS (
     ON mb.silver_session_id = c.silver_session_id
    AND mb.manychat_id = c.manychat_id
 ),
-
 messages_filtered AS (
   SELECT
-    user_id AS manychat_id,
+    manychat_id,
     datetime AS agent_reply_at,
     sender AS agent_reply_sender
-  FROM `gulong-chatbot-459723.manychat_data.messages`
-  WHERE business_unit = 'gulong'
-    AND role = 'agent'
+  FROM cohort_messages
+  WHERE role = 'agent'
     AND type = 'msgout_lc'
-    AND datetime >= DATETIME '2026-03-01 00:00:00'
 ),
-
 agent_messages AS (
   SELECT
     c.*,
@@ -504,7 +396,6 @@ agent_messages AS (
      OR m.agent_reply_at < c.next_customer_message_at
    )
 ),
-
 first_reply AS (
   SELECT
     report_date,
@@ -535,7 +426,6 @@ first_reply AS (
     ORDER BY agent_reply_at, agent_reply_sender
   ) = 1
 )
-
 SELECT
   fr.report_date,
   fr.report_week,
@@ -624,12 +514,12 @@ SELECT
     AND fr.first_cs_reply_at < fr.effective_moderate_tagged_at,
     1, 0
   ) AS replied_outside_hours,
-  1 AS moderate_count,
-  1 AS detail_row_count,
-  IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS reply_in_moderate_count,
-  IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS replied_session_count,
-  IF(fr.first_cs_reply_at IS NULL, 1, 0) AS no_reply_session_count,
-  IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS agent_first_reply_count,
+  CAST(1 AS INT64) AS moderate_count,
+  CAST(1 AS INT64) AS detail_row_count,
+  CAST(IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS INT64) AS reply_in_moderate_count,
+  CAST(IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS INT64) AS replied_session_count,
+  CAST(IF(fr.first_cs_reply_at IS NULL, 1, 0) AS INT64) AS no_reply_session_count,
+  CAST(IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS INT64) AS agent_first_reply_count,
   SAFE_DIVIDE(
     COUNTIF(fr.first_cs_reply_at IS NOT NULL) OVER (PARTITION BY fr.report_date),
     COUNT(*) OVER (PARTITION BY fr.report_date)
