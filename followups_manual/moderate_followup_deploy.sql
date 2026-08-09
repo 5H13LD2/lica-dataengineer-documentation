@@ -362,6 +362,10 @@ WITH moderates AS (
     manychat_id,
     user_name,
     contact_number,
+    reporting_agent_name,
+    LOWER(TRIM(reporting_agent_name)) AS reporting_agent_name_norm,
+    source_agent_name,
+    LOWER(TRIM(source_agent_name)) AS source_agent_name_norm,
     reply_status,
     reply_agent_name,
     LOWER(TRIM(reply_agent_name)) AS reply_agent_name_norm,
@@ -370,6 +374,40 @@ WITH moderates AS (
     minutes_to_first_reply
   FROM `gulong-chatbot-459723.gulong_reporting.v_looker_first_reply_detail`
   WHERE manychat_id IS NOT NULL
+),
+manychat_label_flags AS (
+  SELECT
+    CAST(user_id AS INT64) AS manychat_id,
+    MAX(IF(LOWER(TRIM(label_name)) = 'moderate intent tag from chatbot', 1, 0))
+      AS has_moderate_intent_tag_from_chatbot_label,
+    MAX(IF(LOWER(TRIM(label_name)) = 'moderate intent cf from chatbot', 1, 0))
+      AS has_moderate_intent_cf_from_chatbot_label,
+    MAX(IF(LOWER(TRIM(label_name)) = 'booked', 1, 0)) AS has_booked_label,
+    MAX(IF(LOWER(TRIM(label_name)) = 'no need follow', 1, 0)) AS has_no_need_follow_label
+  FROM `gulong-chatbot-459723.manychat_data.labels_current`
+  WHERE business_unit = 'gulong'
+    AND LOWER(TRIM(label_name)) IN (
+      'moderate intent tag from chatbot',
+      'moderate intent cf from chatbot',
+      'booked',
+      'no need follow'
+    )
+  GROUP BY 1
+),
+manychat_tag_flags AS (
+  SELECT
+    CAST(user_id AS INT64) AS manychat_id,
+    MAX(IF(LOWER(TRIM(tag_name)) = 'followup - eligible', 1, 0)) AS has_followup_eligible_tag,
+    MAX(IF(LOWER(TRIM(tag_name)) IN ('stop follow up', 'stop chatbot'), 1, 0))
+      AS has_stop_followup_tag,
+    MAX(IF(REGEXP_CONTAINS(LOWER(TRIM(tag_name)), r'^booked($|-)'), 1, 0)) AS has_booked_tag
+  FROM `gulong-chatbot-459723.manychat_data.tags_current`
+  WHERE business_unit = 'gulong'
+    AND (
+      LOWER(TRIM(tag_name)) IN ('followup - eligible', 'stop follow up', 'stop chatbot')
+      OR REGEXP_CONTAINS(LOWER(TRIM(tag_name)), r'^booked($|-)')
+    )
+  GROUP BY 1
 ),
 followup_ranked AS (
   SELECT
@@ -496,6 +534,10 @@ SELECT
   m.manychat_id,
   m.user_name,
   m.contact_number,
+  m.reporting_agent_name,
+  m.reporting_agent_name_norm,
+  m.source_agent_name,
+  m.source_agent_name_norm,
   m.reply_status,
   m.reply_agent_name,
   m.reply_agent_name_norm,
@@ -562,6 +604,64 @@ SELECT
     ELSE 'No'
   END AS booked_in_chatbot_cohort,
 
+  COALESCE(lf.has_moderate_intent_tag_from_chatbot_label, 0)
+    AS has_moderate_intent_tag_from_chatbot_label,
+  COALESCE(lf.has_moderate_intent_cf_from_chatbot_label, 0)
+    AS has_moderate_intent_cf_from_chatbot_label,
+  CAST(
+    COALESCE(lf.has_moderate_intent_tag_from_chatbot_label, 0) = 1
+    OR COALESCE(lf.has_moderate_intent_cf_from_chatbot_label, 0) = 1
+    AS INT64
+  ) AS has_moderate_chatbot_label,
+  COALESCE(lf.has_booked_label, 0) AS has_booked_label,
+  COALESCE(tf.has_booked_tag, 0) AS has_booked_tag,
+  CAST(
+    COALESCE(lf.has_booked_label, 0) = 1
+    OR COALESCE(tf.has_booked_tag, 0) = 1
+    AS INT64
+  ) AS has_any_booked_marker,
+  COALESCE(lf.has_no_need_follow_label, 0) AS has_no_need_follow_label,
+  COALESCE(tf.has_stop_followup_tag, 0) AS has_stop_followup_tag,
+  CAST(
+    COALESCE(lf.has_no_need_follow_label, 0) = 1
+    OR COALESCE(tf.has_stop_followup_tag, 0) = 1
+    AS INT64
+  ) AS has_followup_stop_marker,
+  COALESCE(tf.has_followup_eligible_tag, 0) AS has_followup_eligible_tag,
+
+  CASE
+    WHEN m.source_agent_name = 'Chatbot/JCo'
+      AND m.reporting_agent_name_norm = 'sarah gulongph'
+      AND (
+        COALESCE(lf.has_moderate_intent_tag_from_chatbot_label, 0) = 1
+        OR COALESCE(lf.has_moderate_intent_cf_from_chatbot_label, 0) = 1
+      )
+      AND COALESCE(lf.has_booked_label, 0) = 0
+      AND COALESCE(tf.has_booked_tag, 0) = 0
+      AND COALESCE(lf.has_no_need_follow_label, 0) = 0
+      AND COALESCE(tf.has_stop_followup_tag, 0) = 0
+    THEN 'NEEDS FOLLOWUP'
+    WHEN m.source_agent_name = 'Chatbot/JCo'
+      AND m.reporting_agent_name_norm = 'sarah gulongph'
+      AND (
+        COALESCE(lf.has_booked_label, 0) = 1
+        OR COALESCE(tf.has_booked_tag, 0) = 1
+      )
+    THEN 'EXCLUDED - BOOKED'
+    WHEN m.source_agent_name = 'Chatbot/JCo'
+      AND m.reporting_agent_name_norm = 'sarah gulongph'
+      AND (
+        COALESCE(lf.has_no_need_follow_label, 0) = 1
+        OR COALESCE(tf.has_stop_followup_tag, 0) = 1
+      )
+    THEN 'EXCLUDED - NO NEED FOLLOWUP'
+    WHEN m.source_agent_name = 'Chatbot/JCo'
+      AND m.reporting_agent_name_norm = 'sarah gulongph'
+      AND COALESCE(tf.has_followup_eligible_tag, 0) = 1
+    THEN 'FOLLOWUP ELIGIBLE - CHECK MODERATE TAG'
+    ELSE 'OUT OF SARAH FOLLOWUP SCOPE'
+  END AS sarah_followup_tag_logic_status,
+
   CASE
     WHEN COALESCE(fu.booking_count_from_followup, 0) > 0 THEN 'CS-ASSISTED BOOKING'
     WHEN COALESCE(db.booking_count_total_chatbot, 0) > 0 THEN 'CHATBOT-ONLY BOOKING'
@@ -579,6 +679,19 @@ SELECT
   CAST(COALESCE(fu.responded_followup_count, 0) > 0 AS INT64) AS was_responded_to_followup,
   CAST(COALESCE(fu.followup_count, 0) = 0 AS INT64) AS never_followed_up,
   CAST(COALESCE(fu.followup_count, 0) > 1 AS INT64) AS had_multiple_followups,
+  CAST(
+    m.source_agent_name = 'Chatbot/JCo'
+    AND m.reporting_agent_name_norm = 'sarah gulongph'
+    AND (
+      COALESCE(lf.has_moderate_intent_tag_from_chatbot_label, 0) = 1
+      OR COALESCE(lf.has_moderate_intent_cf_from_chatbot_label, 0) = 1
+    )
+    AND COALESCE(lf.has_booked_label, 0) = 0
+    AND COALESCE(tf.has_booked_tag, 0) = 0
+    AND COALESCE(lf.has_no_need_follow_label, 0) = 0
+    AND COALESCE(tf.has_stop_followup_tag, 0) = 0
+    AS INT64
+  ) AS needs_followup_by_tag_logic,
   CAST(
     COALESCE(db.booking_count_total_chatbot, 0) > 0
     AND COALESCE(fu.booking_count_from_followup, 0) = 0
@@ -603,6 +716,19 @@ SELECT
     m.reply_status = 'Has CS Reply' AND COALESCE(fu.followup_count, 0) = 0
     AS INT64
   ) AS no_followup_session_count,
+  CAST(
+    m.source_agent_name = 'Chatbot/JCo'
+    AND m.reporting_agent_name_norm = 'sarah gulongph'
+    AND (
+      COALESCE(lf.has_moderate_intent_tag_from_chatbot_label, 0) = 1
+      OR COALESCE(lf.has_moderate_intent_cf_from_chatbot_label, 0) = 1
+    )
+    AND COALESCE(lf.has_booked_label, 0) = 0
+    AND COALESCE(tf.has_booked_tag, 0) = 0
+    AND COALESCE(lf.has_no_need_follow_label, 0) = 0
+    AND COALESCE(tf.has_stop_followup_tag, 0) = 0
+    AS INT64
+  ) AS needs_followup_by_tag_logic_session_count,
   CAST(COALESCE(fu.booking_count_from_followup, 0) > 0 AS INT64) AS cs_assisted_booked_session_count,
   CAST(COALESCE(fu.booking_count_from_followup, 0) > 0 AS INT64) AS booked_session_count
 FROM moderates m
@@ -613,7 +739,11 @@ LEFT JOIN first_direct_booking_dim bd
 LEFT JOIN followup_rollup fu
   USING (silver_session_id)
 LEFT JOIN first_followup_dim fr
-  USING (silver_session_id);
+  USING (silver_session_id)
+LEFT JOIN manychat_label_flags lf
+  USING (manychat_id)
+LEFT JOIN manychat_tag_flags tf
+  USING (manychat_id);
 
 
 -- =====================================================================
