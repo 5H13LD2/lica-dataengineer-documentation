@@ -1,13 +1,36 @@
 #standardSQL
+-- =============================================================================
+-- v_looker_cs_inquiry_reply_detail_tag_owned  (revised)
+--
+-- CHANGES vs previous version:
+--   [#3] manychat_id normalized to STRING at source -> all joins consistent.
+--   [#4 + new logic] message_first_customer now SAME-DAY only (DATE = report_date).
+--        Removes the +/-1 day overlap AND implements the "count only inquiries
+--        that actually came in on that report_date" requirement.
+--   inquiry_count / replied / no_reply now gated on a real same-day inquiry.
+--   [#1] SLA minutes guarded to same-day reply (no more cross-day inflation),
+--        computed ONCE in an enrichment step.
+--   [#2] reply sender canonicalized via agent_aliases before matching agent_name
+--        (Becca Armstrng vs Rolyn Ang etc. now resolve correctly).
+--
+-- VERIFY BEFORE DEPLOY:
+--   - manychat_data.messages partition column must be `datetime` (or DATE(datetime)).
+--     The literal `datetime >= '2026-03-01'` below is what satisfies
+--     require_partition_filter / enables pruning. If the partition col is a
+--     separate DATE column, swap the literal filters accordingly.
+--   - If you only need recent data in Looker, uncomment the rolling lower bound
+--     marked [COST] to cap scan growth (or materialize into a t_ table).
+-- =============================================================================
+
 CREATE OR REPLACE VIEW
-  `gulong-chatbot-459723.gulong_reporting.v_looker_cs_inquiry_reply_detail`
+  `gulong-chatbot-459723.gulong_reporting.v_looker_cs_inquiry_reply_detail_tag_owned`
 AS
 WITH cs_assignments AS (
   SELECT * EXCEPT(rn)
   FROM (
     SELECT
       a.business_unit,
-      a.user_id AS manychat_id,
+      CAST(a.user_id AS STRING) AS manychat_id,          -- [#3] STRING at source
       a.assignment_date AS report_date,
       COALESCE(
         a.silver_session_id,
@@ -56,10 +79,9 @@ agent_aliases_normalized AS (
     AND alias_norm != ''
 ),
 
--- real-time name mula sa ManyChat users_current
 user_name_realtime AS (
   SELECT
-    user_id,
+    CAST(user_id AS STRING) AS user_id,                  -- [#3] STRING
     user_name
   FROM `gulong-chatbot-459723.manychat_data.users_current`
   WHERE business_unit = 'gulong'
@@ -98,7 +120,9 @@ owner_agent_current AS (
   WHERE rn = 1
 ),
 
--- unang customer message sa araw ng assignment (±1 day window)
+-- SAME-DAY first customer message only. This defines the "inquiry na pumasok
+-- nung araw na yun". Literal lower bound kept for partition pruning; the
+-- correlated equality restricts to report_date.
 message_first_customer AS (
   SELECT
     c.report_date,
@@ -107,12 +131,13 @@ message_first_customer AS (
     MIN(m.datetime) AS first_customer_message_at
   FROM cs_assignments c
   JOIN `gulong-chatbot-459723.manychat_data.messages` m
-    ON m.business_unit = 'gulong'
-   AND m.user_id = c.manychat_id
+    ON CAST(m.user_id AS STRING) = c.manychat_id          -- [#3] STRING
+   AND m.business_unit = 'gulong'
    AND m.role = 'user'
-   AND m.datetime >= DATETIME '2026-03-01 00:00:00'
-   AND DATE(m.datetime) BETWEEN DATE_SUB(c.report_date, INTERVAL 1 DAY)
-                            AND DATE_ADD(c.report_date, INTERVAL 1 DAY)
+   AND m.datetime >= DATETIME '2026-03-01 00:00:00'        -- [COST] partition prune literal
+   -- [COST] rolling window option (uncomment to cap scan):
+   -- AND m.datetime >= DATETIME(DATE_SUB(CURRENT_DATE(), INTERVAL 120 DAY))
+   AND DATE(m.datetime) = c.report_date                    -- [#4 + new logic] same-day only
   GROUP BY c.report_date, c.manychat_id, c.silver_session_id
 ),
 
@@ -173,16 +198,16 @@ cohort AS (
     ) AS assigned_during_lunch,
     COALESCE(
       unr.user_name,
-      CONCAT('manychat:', CAST(c.manychat_id AS STRING))
+      CONCAT('manychat:', c.manychat_id)
     ) AS user_name,
     DATE(sbd.first_customer_message_at) AS inquiry_date,
     sbd.first_customer_message_at,
     sbd.next_customer_message_at
   FROM cs_assignments c
   LEFT JOIN user_name_realtime unr
-    ON unr.user_id = CAST(c.manychat_id AS STRING)
+    ON unr.user_id = c.manychat_id                        -- [#3] both STRING
   LEFT JOIN owner_agent_current oac
-    ON oac.manychat_id = CAST(c.manychat_id AS STRING)
+    ON oac.manychat_id = c.manychat_id                    -- [#3] both STRING
   LEFT JOIN session_boundaries sbd
     ON sbd.report_date = c.report_date
    AND sbd.silver_session_id = c.silver_session_id
@@ -191,14 +216,16 @@ cohort AS (
 
 messages_filtered AS (
   SELECT
-    user_id AS manychat_id,
+    CAST(user_id AS STRING) AS manychat_id,               -- [#3] STRING
     datetime AS agent_reply_at,
     sender AS agent_reply_sender
   FROM `gulong-chatbot-459723.manychat_data.messages`
   WHERE business_unit = 'gulong'
     AND role = 'agent'
     AND type = 'msgout_lc'
-    AND datetime >= DATETIME '2026-03-01 00:00:00'
+    AND datetime >= DATETIME '2026-03-01 00:00:00'         -- [COST] partition prune literal
+    -- [COST] rolling window option (uncomment to cap scan):
+    -- AND datetime >= DATETIME(DATE_SUB(CURRENT_DATE(), INTERVAL 120 DAY))
 ),
 
 agent_messages AS (
@@ -244,93 +271,103 @@ first_reply AS (
     PARTITION BY report_date, manychat_id
     ORDER BY agent_reply_at, agent_reply_sender
   ) = 1
+),
+
+-- Enrichment: same-day inquiry flag, canonical reply sender, SLA computed once.
+enriched AS (
+  SELECT
+    fr.*,
+    rs.canonical_agent_name AS reply_sender_canonical,     -- [#2]
+    -- Inquiry counts ONLY if a real customer message landed on report_date.
+    IF(
+      fr.first_customer_message_at IS NOT NULL
+      AND DATE(fr.first_customer_message_at) = fr.report_date,
+      1, 0
+    ) AS is_same_day_inquiry,
+    -- [#1] SLA minutes, guarded to same-day reply (else NULL). Computed once.
+    CASE
+      WHEN fr.first_cs_reply_at IS NOT NULL
+        AND DATE(fr.first_cs_reply_at) = fr.report_date
+      THEN GREATEST(
+        DATETIME_DIFF(fr.first_cs_reply_at, fr.effective_assignment_at, MINUTE)
+        - GREATEST(
+            DATETIME_DIFF(
+              LEAST(
+                fr.first_cs_reply_at,
+                DATETIME(DATE(fr.effective_assignment_at), TIME '13:00:00')
+              ),
+              GREATEST(
+                fr.effective_assignment_at,
+                DATETIME(DATE(fr.effective_assignment_at), TIME '12:00:00')
+              ),
+              MINUTE
+            ),
+            0
+          ),
+        0
+      )
+      ELSE NULL
+    END AS minutes_to_reply_sla_calc
+  FROM first_reply fr
+  LEFT JOIN agent_aliases_normalized rs
+    ON rs.alias_norm = UPPER(
+      REGEXP_REPLACE(TRIM(fr.first_cs_reply_sender), r'[^A-Za-z0-9]+', '')
+    )
 )
 
 SELECT
-  fr.report_date,
-  fr.report_week,
-  fr.report_month,
-  fr.agent_name,
-  LOWER(COALESCE(NULLIF(TRIM(fr.agent_name), ''), 'unassigned')) AS agent_name_norm,
-  fr.agent_name_source,
-  fr.agent_tag_name,
-  fr.manychat_id,
-  fr.silver_session_id,
-  fr.user_name,
-  fr.assignment_at,
-  fr.effective_assignment_at,
-  fr.assigned_outside_hours,
-  fr.assigned_during_lunch,
-  fr.inquiry_date,
-  fr.first_customer_message_at,
-  fr.first_cs_reply_at,
-  DATE(fr.first_cs_reply_at) AS first_cs_reply_date,
-  fr.first_cs_reply_sender,
-  COALESCE(NULLIF(TRIM(fr.first_cs_reply_sender), ''), 'No CS Reply') AS reply_agent_name,
+  en.report_date,
+  en.report_week,
+  en.report_month,
+  en.agent_name,
+  LOWER(COALESCE(NULLIF(TRIM(en.agent_name), ''), 'unassigned')) AS agent_name_norm,
+  en.agent_name_source,
+  en.agent_tag_name,
+  en.manychat_id,
+  en.silver_session_id,
+  en.user_name,
+  en.assignment_at,
+  en.effective_assignment_at,
+  en.assigned_outside_hours,
+  en.assigned_during_lunch,
+  en.inquiry_date,
+  en.first_customer_message_at,
+  en.first_cs_reply_at,
+  DATE(en.first_cs_reply_at) AS first_cs_reply_date,
+  en.first_cs_reply_sender,
+  -- canonical resolution of the reply sender for display + matching
+  COALESCE(en.reply_sender_canonical, NULLIF(TRIM(en.first_cs_reply_sender), ''), 'No CS Reply') AS reply_agent_name,
+  -- [#2] compare canonical-to-canonical so aliases (e.g. Becca Armstrng = Rolyn Ang) match
   IF(
-    LOWER(COALESCE(NULLIF(TRIM(fr.first_cs_reply_sender), ''), '')) =
-    LOWER(COALESCE(NULLIF(TRIM(fr.agent_name), ''), '')),
+    en.first_cs_reply_at IS NOT NULL
+    AND LOWER(TRIM(COALESCE(en.reply_sender_canonical, en.first_cs_reply_sender))) =
+        LOWER(TRIM(en.agent_name)),
     1, 0
   ) AS reply_matches_agent_name,
   CASE
-    WHEN fr.first_cs_reply_at IS NULL THEN 'No CS Reply'
+    WHEN en.first_cs_reply_at IS NULL THEN 'No CS Reply'
     ELSE 'Has CS Reply'
   END AS reply_status,
-  DATETIME_DIFF(fr.first_cs_reply_at, fr.first_customer_message_at, MINUTE) AS minutes_to_first_reply,
-  DATETIME_DIFF(fr.first_cs_reply_at, fr.assignment_at, MINUTE) AS minutes_from_assignment_to_reply,
-  GREATEST(
-    DATETIME_DIFF(fr.first_cs_reply_at, fr.effective_assignment_at, MINUTE)
-    - GREATEST(
-        DATETIME_DIFF(
-          LEAST(
-            fr.first_cs_reply_at,
-            DATETIME(DATE(fr.effective_assignment_at), TIME '13:00:00')
-          ),
-          GREATEST(
-            fr.effective_assignment_at,
-            DATETIME(DATE(fr.effective_assignment_at), TIME '12:00:00')
-          ),
-          MINUTE
-        ),
-        0
-      ),
-    0
-  ) AS minutes_to_reply_sla,
-  CASE
-    WHEN fr.first_cs_reply_at IS NOT NULL
-      AND fr.agent_name != 'Unassigned'
-      AND DATE(fr.first_cs_reply_at) = fr.report_date
-    THEN GREATEST(
-      DATETIME_DIFF(fr.first_cs_reply_at, fr.effective_assignment_at, MINUTE)
-      - GREATEST(
-          DATETIME_DIFF(
-            LEAST(
-              fr.first_cs_reply_at,
-              DATETIME(DATE(fr.effective_assignment_at), TIME '13:00:00')
-            ),
-            GREATEST(
-              fr.effective_assignment_at,
-              DATETIME(DATE(fr.effective_assignment_at), TIME '12:00:00')
-            ),
-            MINUTE
-          ),
-          0
-        ),
-      0
-    )
-    ELSE NULL
-  END AS minutes_to_reply_sla_today,
+  DATETIME_DIFF(en.first_cs_reply_at, en.first_customer_message_at, MINUTE) AS minutes_to_first_reply,
+  DATETIME_DIFF(en.first_cs_reply_at, en.assignment_at, MINUTE) AS minutes_from_assignment_to_reply,
+  -- [#1] now same-day guarded; NULL for cross-day replies (no inflation)
+  en.minutes_to_reply_sla_calc AS minutes_to_reply_sla,
+  -- same as above but also excludes Unassigned (original _today semantics)
+  IF(en.agent_name != 'Unassigned', en.minutes_to_reply_sla_calc, NULL) AS minutes_to_reply_sla_today,
   IF(
-    fr.first_cs_reply_at IS NOT NULL
-    AND fr.first_cs_reply_at < fr.effective_assignment_at,
+    en.first_cs_reply_at IS NOT NULL
+    AND en.first_cs_reply_at < en.effective_assignment_at,
     1, 0
   ) AS replied_outside_hours,
-  1 AS inquiry_count,
-  IF(fr.first_cs_reply_at IS NOT NULL, 1, 0) AS replied_inquiry_count,
-  IF(fr.first_cs_reply_at IS NULL, 1, 0) AS no_reply_inquiry_count,
+  -- ==== COUNTS: only real same-day inquiries ====
+  en.is_same_day_inquiry AS inquiry_count,
+  IF(en.is_same_day_inquiry = 1 AND en.first_cs_reply_at IS NOT NULL, 1, 0) AS replied_inquiry_count,
+  IF(en.is_same_day_inquiry = 1 AND en.first_cs_reply_at IS NULL, 1, 0) AS no_reply_inquiry_count,
   IF(
-    LOWER(COALESCE(NULLIF(TRIM(fr.first_cs_reply_sender), ''), '')) =
-    LOWER(COALESCE(NULLIF(TRIM(fr.agent_name), ''), '')),
+    en.is_same_day_inquiry = 1
+    AND en.first_cs_reply_at IS NOT NULL
+    AND LOWER(TRIM(COALESCE(en.reply_sender_canonical, en.first_cs_reply_sender))) =
+        LOWER(TRIM(en.agent_name)),
     1, 0
   ) AS reply_matches_agent_name_count
-FROM first_reply fr
+FROM enriched en
