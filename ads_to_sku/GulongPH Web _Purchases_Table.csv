@@ -1,0 +1,41 @@
+Order ID,SKU,quantity,Status,customer_source,Payment Status,Reason for Cancellation,Session campaign,Event name
+38132,ARIVO 185/65/R14 PREMIO COMFORT 6,5,Processing,-,Fully Paid,-,Michelin - PMax PH,purchase
+38491,MICHELIN 185/70/R14 ENERGY XM2+ 88H,4,Processing,Website,Partial Payment,-,Michelin - PMax PH,purchase
+38483,BFGOODRICH 175/65/R14 ADVANTAGE TOURING 82H,5,Processing,-,Fully Paid,-,Michelin - PMax PH,purchase
+38440,HANKOOK 205/55/R16 VENTUS PRIME 4 91W,4,Processing,-,Fully Paid,-,Michelin - PMax PH,purchase
+38409,BFGOODRICH 175/65/R14 ADVANTAGE TOURING 82H,4,Processing,CHAT,Partial Payment,-,Michelin - PMax PH,purchase
+38395,FRONWAY 175/65/R14 ECOGREEN ONE 82V,5,Processing,Website,Fully Paid,-,Michelin - PMax PH,purchase
+38392,ARIVO 165/65/R13 PREMIO ARZ1,2,Processing,Website,Fully Paid,-,Michelin - PMax PH,purchase
+38390,LAUFENN 185/60/R15 G FIT AS 84H,4,Processing,-,Fully Paid,-,Michelin - PMax PH,purchase
+38337,YOKOHAMA 255/50/R20 GEOLANDAR X-CV G057 109W,2,Processing,CALL,Fully Paid,-,Michelin - PMax PH,purchase
+38225,BRIDGESTONE 255/60/R18 DUELER H/T 684 RB 108S,4,Processing,Website,Partial Payment,-,Michelin - PMax PH,purchase
+38495,MICHELIN 225/55/R17 PRIMACY 5 101W,4,Pending,Website,Pending,-,Michelin - PMax PH,purchase
+38065,HANKOOK 265/65/R17 DYNAPRO HT2 RH14 112T,4,Pending,-,Pending,-,BFG Advantage Touring – PMax PH,purchase
+37844,ARIVO 205/45/R17 ULTRA ARZ5,4,Pending,-,Pending,-,Michelin - PMax PH,purchase
+38415,BFGOODRICH 185/65/R15 ADVANTAGE TOURING 88H,4,Pending,Website,Pending,-,Michelin - PMax PH,purchase
+38414,ARIVO 185/60/R15 PREMIO COMFORT 6 88H,4,Pending,-,Pending,-,Michelin - PMax PH,purchase
+38184,WESTLAKE 165/65/R13 RP36,4,Pending,-,Pending,-,Michelin - PMax PH,purchase
+37894,ARIVO 205/45/R17 ULTRA ARZ5,4,Pending,-,Pending,-,Michelin - PMax PH,purchase
+38405,BFGOODRICH 225/65/R17 ADVANTAGE TOURING 102H,4,Pending,-,Pending,-,Michelin - PMax PH,purchase
+38056,HANKOOK 265/65/R17 DYNAPRO HT2 RH14 112T,4,Pending,-,Pending,-,BFG Advantage Touring – PMax PH,purchase
+38397,ARIVO 195/55/R16 PREMIO COMFORT 6,4,Pending,-,Pending,-,Michelin - PMax PH,purchase
+38261,DUNLOP 215/60/R17 ENASAVE EC300+ 96H,4,Pending,Website,Pending,-,Michelin - PMax PH,purchase
+37982,MICHELIN 195/60/R16 PRIMACY 5 93V,4,Pending,Website,Pending,-,Michelin - PMax PH,purchase
+38362,FRONWAY 205/65/R16 ECOGREEN ONE 95H,2,Pending,Website,Pending,-,Michelin - PMax PH,purchase
+38279,BFGOODRICH 225/45/R18 ADVANTAGE TOURING 95V,4,Pending,Website,Pending,-,Michelin - PMax PH,purchase
+38317,DURATURN 225/40/R19 MOZZO SPORT 93W,4,Pending,-,Pending,-,Michelin - PMax PH,purchase
+37996,BFGOODRICH 225/60/R17 ADVANTAGE TOURING 99H,4,Fulfilled,Website,Fully Paid,-,BFG Advantage Touring – PMax PH,purchase
+38352,FRONWAY 175/65/R15 ECOGREEN ONE 84H,4,Fulfilled,-,Partial Payment,-,Michelin - PMax PH,purchase
+38267,BRIDGESTONE 185/65/R15 ECOPIA EP300 88H,4,Fulfilled,-,Partial Payment,-,BFG Advantage Touring – PMax PH,purchase
+38263,DUNLOP 215/60/R17 ENASAVE EC300+ 96H,4,Fulfilled,CHAT,Fully Paid,-,Michelin - PMax PH,purchase
+37947,MICHELIN 235/60/R18 PRIMACY SUV+ 103V,4,Fulfilled,-,Fully Paid,-,Michelin - PMax PH,purchase
+37928,ARIVO 205/45/R17 ULTRA ARZ5,4,Fulfilled,Website,Fully Paid,-,Michelin - PMax PH,purchase
+38234,BRIDGESTONE 215/60/R16 ECOPIA EP300 95V,2,Fulfilled,-,Fully Paid,-,Michelin - PMax PH,purchase
+38222,BRIDGESTONE 235/70/R15 ECOPIA H/L 001 103S,4,Fulfilled,-,Fully Paid,-,Michelin - PMax PH,purchase
+38205,YOKOHAMA 185/55/R16 BLUEARTH ES32 83V,1,Fulfilled,-,Fully Paid,-,Michelin - PMax PH,purchase
+38177,BFGOODRICH 235/55/R19 ADVANTAGE TOURING 101H,4,Fulfilled,-,Fully Paid,-,Michelin - PMax PH,purchase
+38133,CST 175/65/R14 MARQUIS MR-C5 82H,4,Fulfilled,Website,Fully Paid,-,BFG Advantage Touring – PMax PH,purchase
+37871,WESTLAKE 205/55/R16 SA37,4,Fulfilled,Website,Fully Paid,-,Michelin - PMax PH,purchase
+38064,APOLLO 185/65/R15 ALNAC 4G 88H,4,Fulfilled,-,Fully Paid,-,Michelin - PMax PH,purchase
+37822,BRIDGESTONE 215/55/R17 TURANZA ER33 94V,4,Fulfilled,-,Fully Paid,-,Michelin - PMax PH,purchase
+37849,BRIDGESTONE 185/55/R15 POTENZA RE030 82V,1,For Refund,Website,For Refund,No available stock,BFG Advantage Touring – PMax PH,purchase

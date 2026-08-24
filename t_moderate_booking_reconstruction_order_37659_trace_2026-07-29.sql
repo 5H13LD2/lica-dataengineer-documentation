@@ -1,12 +1,17 @@
 -- Trace for order_id = 37659
 -- Original trace date: 2026-07-29
--- Refreshed: 2026-08-04
+-- Refreshed: 2026-08-14
 --
 -- Purpose:
 -- 1. Confirm official booking existence.
 -- 2. Confirm matching replied session in v_looker_first_reply_detail.
 -- 3. Replay the current reconstruction match logic directly.
 -- 4. Compare physical table, view, and downstream reporting tables.
+--
+-- Current warehouse note on 2026-08-14:
+-- order_id 37659 no longer appears in orders_booked for 2026-07-28,
+-- so this trace now serves as a regression check for a previously valid
+-- order that has since disappeared from the official booking source.
 
 
 -- =====================================================================

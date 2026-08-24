@@ -1,0 +1,78 @@
+﻿Session campaign,Page path + query string,Encoded requestid,Decoded request_id,Ecommerce purchases,backend_match_status,order_date,order_status,payment_status,backend_customer_type,backend_customer_source,net_sales_amount,quantity,sku,purchased_brand
+All Brand - PMax PH,/complete-order?requestid=Mzc4MTI=,Mzc4MTI=,37812,2,Matched,2026-08-01 09:50:00,Fulfilled,Partial Payment,Fb,CHAT,30533.75,4,DEESTONE 245/75/R16 POWERCRUZ XT421 116/113Q,DEESTONE
+All Brand - PMax PH,/complete-order?requestid=Mzg0MDA=,Mzg0MDA=,38400,2,Matched,2026-08-16 13:07:00,Processing,Partial Payment,Fb,CHAT,19526.79,4,MICHELIN 185/60/R15 ENERGY XM2+ 88H,MICHELIN
+Michelin - PMax PH,/complete-order?requestid=Mzg0MDk%3D,Mzg0MDk%3D,38409,2,Matched,2026-08-16 18:30:00,Processing,Partial Payment,Website,CHAT,11386.96,4,BFGOODRICH 175/65/R14 ADVANTAGE TOURING 82H,BFGOODRICH
+SRC | All Brands | PH,/complete-order?requestid=Mzg0MTc%3D,Mzg0MTc%3D,38417,2,Matched,2026-08-16 21:32:00,Processing,Fully Paid,Website,Website,10001.16,2,LAUFENN 235/65/R17 X FIT HT 104T,LAUFENN
+Michelin - PMax PH,/complete-order?requestid=Mzg0NDA%3D,Mzg0NDA%3D,38440,2,Matched,2026-08-17 16:23:00,Processing,Fully Paid,Website,,16570.54,4,HANKOOK 205/55/R16 VENTUS PRIME 4 91W,HANKOOK
+BFG - PMax (Traffic),/complete-order?requestid=Mzg0NDg%3D,Mzg0NDg%3D,38448,2,Matched,2026-08-17 21:59:00,Processing,Fully Paid,Website,,19378.04,4,BFGOODRICH 215/55/R17 ADVANTAGE TOURING 94V,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=Mzg0ODM=,Mzg0ODM=,38483,2,Matched,2026-08-18 13:56:00,Processing,Fully Paid,Website,,13686.83,5,BFGOODRICH 175/65/R14 ADVANTAGE TOURING 82H,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=Mzg0OTE=,Mzg0OTE=,38491,2,Matched,2026-08-18 16:22:00,Processing,Partial Payment,Website,Website,18174.11,4,MICHELIN 185/70/R14 ENERGY XM2+ 88H,MICHELIN
+BFG - PMax (Traffic),/complete-order?requestid=Mzg1MzM%3D,Mzg1MzM%3D,38533,2,Matched,2026-08-19 15:11:00,New,Unpaid,Website,,6335.09,2,LINGLONG 205/50/R17 SPORT MASTER ,LINGLONG
+BFG - PMax (Traffic),/complete-order?requestid=Mzg1MzQ%3D,Mzg1MzQ%3D,38534,2,Matched,2026-08-19 15:19:00,Processing,Partial Payment,Website,,6424.38,2,LINGLONG 205/50/R17 SPORT MASTER ,LINGLONG
+All Brand - PMax PH,/complete-order?requestid=Mzg1NDQ%3D,Mzg1NDQ%3D,38544,2,Matched,2026-08-19 20:40:00,Pending,Partial Payment,Website,,20953.04,4,BFGOODRICH 225/60/R17 ADVANTAGE TOURING 99H,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=MzgyMDU=,MzgyMDU=,38205,2,Matched,2026-08-11 21:22:00,Fulfilled,Fully Paid,Website,,5156.25,1,YOKOHAMA 185/55/R16 BLUEARTH ES32 83V,YOKOHAMA
+Michelin - PMax PH,/complete-order?requestid=MzgyMjI%3D,MzgyMjI%3D,38222,2,Matched,2026-08-12 10:01:00,Fulfilled,Fully Paid,Website,,25807.5,4,BRIDGESTONE 235/70/R15 ECOPIA H/L 001 103S,BRIDGESTONE
+Michelin - PMax PH,/complete-order?requestid=MzgyMzQ%3D,MzgyMzQ%3D,38234,2,Matched,2026-08-12 13:56:00,Fulfilled,Fully Paid,Website,,11185.63,2,BRIDGESTONE 215/60/R16 ECOPIA EP300 95V,BRIDGESTONE
+Michelin - PMax PH,/complete-order?requestid=MzgyNjM=,MzgyNjM=,38263,2,Matched,2026-08-13 00:05:00,Fulfilled,Fully Paid,Website,CHAT,27988.75,4,DUNLOP 215/60/R17 ENASAVE EC300+ 96H,DUNLOP
+BFG Advantage Touring – PMax PH,/complete-order?requestid=MzgyNjc%3D,MzgyNjc%3D,38267,2,Matched,2026-08-13 04:27:00,Fulfilled,Partial Payment,Website,,16313.39,4,BRIDGESTONE 185/65/R15 ECOPIA EP300 88H,BRIDGESTONE
+All Brand - PMax PH,/complete-order?requestid=MzgyODQ=,MzgyODQ=,38284,2,Matched,2026-08-13 13:47:00,Fulfilled,Fully Paid,Website,Website,13258.93,4,BFGOODRICH 185/55/R15 ADVANTAGE TOURING 86V,BFGOODRICH
+All Brand - PMax PH,/complete-order?requestid=MzgyODY%3D,MzgyODY%3D,38286,2,Matched,2026-08-13 13:53:00,Processing,Fully Paid,Website,,34946.43,4,MICHELIN 205/45/R17 PILOT SPORT 5 88Y,MICHELIN
+Michelin - PMax PH,/complete-order?requestid=MzgzMzc%3D,MzgzMzc%3D,38337,2,Matched,2026-08-14 13:29:00,Processing,Fully Paid,Website,CALL,23064.11,2,YOKOHAMA 255/50/R20 GEOLANDAR X-CV G057 109W,YOKOHAMA
+Michelin - PMax PH,/complete-order?requestid=MzgzNTI=,MzgzNTI=,38352,2,Matched,2026-08-14 15:04:00,Fulfilled,Partial Payment,Website,,8932.5,4,FRONWAY 175/65/R15 ECOGREEN ONE 84H,FRONWAY
+Michelin - PMax PH,/complete-order?requestid=MzgzNTQ=,MzgzNTQ=,38354,2,Matched,2026-08-14 16:17:00,Pending,Partial Payment,Chatbot,Chatbot,23210,4,YOKOHAMA 215/45/R17 ADVAN FLEVA V701 91W,YOKOHAMA
+Michelin - PMax PH,/complete-order?requestid=MzgzOTA%3D,MzgzOTA%3D,38390,2,Matched,2026-08-15 18:58:00,Processing,Fully Paid,Website,,10871.79,4,LAUFENN 185/60/R15 G FIT AS 84H,LAUFENN
+Michelin - PMax PH,/complete-order?requestid=MzgzOTI=,MzgzOTI=,38392,2,Matched,2026-08-16 10:04:00,Processing,Fully Paid,Website,Website,3073.39,2,ARIVO 165/65/R13 PREMIO ARZ1,ARIVO
+Michelin - PMax PH,/complete-order?requestid=MzgzOTU%3D,MzgzOTU%3D,38395,2,Matched,2026-08-16 11:13:00,Processing,Fully Paid,Website,Website,8652.68,5,FRONWAY 175/65/R14 ECOGREEN ONE 82V,FRONWAY
+(cross-network),/complete-order?requestid=MzgzOTk%3D,MzgzOTk%3D,38399,2,Matched,2026-08-16 12:57:00,For Return,Fully Paid,Website,CALL,75348.21,4,MICHELIN 275/55/R20 PILOT SPORT EV 117V,MICHELIN
+Michelin - PMax PH,/complete-order?requestid=Mzc5Mjg=,Mzc5Mjg=,37928,1,Matched,2026-08-05 10:48:00,Fulfilled,Fully Paid,Website,Website,11571.96,4,ARIVO 205/45/R17 ULTRA ARZ5,ARIVO
+Michelin - PMax PH,/complete-order?requestid=MzgzOTc=,MzgzOTc=,38397,1,Matched,2026-08-16 12:43:00,Pending,Pending,Website,,11656.61,4,ARIVO 195/55/R16 PREMIO COMFORT 6,ARIVO
+Michelin - PMax PH,/complete-order?requestid=Mzc4MjI=,Mzc4MjI=,37822,1,Matched,2026-08-01 12:12:00,Fulfilled,Fully Paid,Website,,21927.5,4,BRIDGESTONE 215/55/R17 TURANZA ER33 94V,BRIDGESTONE
+Michelin - PMax PH,/complete-order?requestid=Mzc4MzI=,Mzc4MzI=,37832,1,Matched,2026-08-01 21:09:00,New,Unpaid,Website,,11621.25,4,HANKOOK 185/55/R15 KINERGY ECO2 82H,HANKOOK
+All Brand - PMax PH,/complete-order?requestid=Mzc4Mzc=,Mzc4Mzc=,37837,1,Matched,2026-08-02 11:10:00,New,Unpaid,Website,,15538.75,4,BFGOODRICH 205/65/R16 ADVANTAGE TOURING 95H,BFGOODRICH
+(cross-network),/complete-order?requestid=Mzc4NDI=,Mzc4NDI=,37842,1,Matched,2026-08-02 14:16:00,Fulfilled,Fully Paid,Website,Website,10291.52,2,HANKOOK 215/50/R17 VENTUS PRIME 4 95W,HANKOOK
+Michelin - PMax PH,/complete-order?requestid=Mzc4NDQ=,Mzc4NDQ=,37844,1,Matched,2026-08-02 19:24:00,Pending,Pending,Website,,12018.39,4,ARIVO 205/45/R17 ULTRA ARZ5,ARIVO
+BFG Advantage Touring – PMax PH,/complete-order?requestid=Mzc4NDg=,Mzc4NDg=,37848,1,Matched,2026-08-03 08:10:00,New,Unpaid,Website,,19659.82,4,HANKOOK 205/55/R17 VENTUS PRIME 4 95V,HANKOOK
+BFG Advantage Touring – PMax PH,/complete-order?requestid=Mzc4NDk%3D,Mzc4NDk%3D,37849,1,Matched,2026-08-03 08:41:00,For Refund,For Refund,Website,Website,5633.93,1,BRIDGESTONE 185/55/R15 POTENZA RE030 82V,BRIDGESTONE
+SRC | All Brands | PH,/complete-order?requestid=Mzc4NTE%3D,Mzc4NTE%3D,37851,1,Matched,2026-08-03 09:25:00,Fulfilled,Fully Paid,Website,,9146.96,4,ARIVO 185/60/R15 PREMIO COMFORT 6 88H,ARIVO
+Michelin - PMax PH,/complete-order?requestid=Mzc4NTg=,Mzc4NTg=,37858,1,Matched,2026-08-03 11:47:00,New,Unpaid,Website,Website,22861.07,4,BFGOODRICH 235/55/R18 ADVANTAGE TOURING 104H,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=Mzc4NzE%3D,Mzc4NzE%3D,37871,1,Matched,2026-08-03 17:37:00,Fulfilled,Fully Paid,Website,Website,12053.57,4,WESTLAKE 205/55/R16 SA37,WESTLAKE
+Michelin - PMax PH,/complete-order?requestid=Mzc4OTQ=,Mzc4OTQ=,37894,1,Matched,2026-08-04 15:44:00,Pending,Pending,Website,,11571.96,4,ARIVO 205/45/R17 ULTRA ARZ5,ARIVO
+Michelin - PMax PH,/complete-order?requestid=Mzc4MTk=,Mzc4MTk=,37819,1,Matched,2026-08-01 12:04:00,New,Unpaid,Website,,19518.04,4,BFGOODRICH 215/55/R17 ADVANTAGE TOURING 94V,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=Mzc5NDc=,Mzc5NDc=,37947,1,Matched,2026-08-05 14:25:00,Fulfilled,Fully Paid,Website,,43357.14,4,MICHELIN 235/60/R18 PRIMACY SUV+ 103V,MICHELIN
+Michelin - PMax PH,/complete-order?requestid=Mzc5NTU=,Mzc5NTU=,37955,1,Matched,2026-08-05 16:10:00,New,Unpaid,Website,Website,35937.5,8,BFGOODRICH 205/50/R17 ADVANTAGE TOURING 93V,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=Mzc5NTc=,Mzc5NTc=,37957,1,Matched,2026-08-05 16:18:00,New,Unpaid,Website,Website,17901.79,4,BFGOODRICH 205/50/R17 ADVANTAGE TOURING 93V,BFGOODRICH
+All Brand - PMax PH,/complete-order?requestid=Mzc5Nzc=,Mzc5Nzc=,37977,1,Matched,2026-08-06 08:48:00,Cancelled,Pending,Website,,2294.64,1,WESTLAKE 175/65/R15 RP26,WESTLAKE
+SRC | All Brands | PH,/complete-order?requestid=Mzc5Nzg=,Mzc5Nzg=,37978,1,Matched,2026-08-06 08:53:00,Pending,Pending,Website,,12928.57,4,APOLLO 185/60/R15 ALNAC 4G 84H,APOLLO
+Michelin - PMax PH,/complete-order?requestid=Mzc5ODI=,Mzc5ODI=,37982,1,Matched,2026-08-06 10:24:00,Pending,Pending,Website,Website,28303.57,4,MICHELIN 195/60/R16 PRIMACY 5 93V,MICHELIN
+Michelin - PMax PH,/complete-order?requestid=Mzc5OTA=,Mzc5OTA=,37990,1,Matched,2026-08-06 11:52:00,Fulfilled,Fully Paid,Chatbot,Chatbot,38280.36,4,DUNLOP 265/65/R17 GRANDTREK AT25 112S,DUNLOP
+BFG Advantage Touring – PMax PH,/complete-order?requestid=Mzc5OTY=,Mzc5OTY=,37996,1,Matched,2026-08-06 13:46:00,Fulfilled,Fully Paid,Website,Website,19196.43,4,BFGOODRICH 225/60/R17 ADVANTAGE TOURING 99H,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=Mzg0MDU=,Mzg0MDU=,38405,1,Matched,2026-08-16 17:03:00,Pending,Pending,Website,,23918.93,4,BFGOODRICH 225/65/R17 ADVANTAGE TOURING 102H,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=Mzg0MTQ=,Mzg0MTQ=,38414,1,Matched,2026-08-16 20:05:00,Pending,Pending,Website,,9504.11,4,ARIVO 185/60/R15 PREMIO COMFORT 6 88H,ARIVO
+Michelin - PMax PH,/complete-order?requestid=Mzg0MTU=,Mzg0MTU=,38415,1,Matched,2026-08-16 21:07:00,Pending,Pending,Website,Website,14474.82,4,BFGOODRICH 185/65/R15 ADVANTAGE TOURING 88H,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=Mzg0OTU=,Mzg0OTU=,38495,1,Matched,2026-08-18 18:34:00,Pending,Pending,Website,Website,33991.07,4,MICHELIN 225/55/R17 PRIMACY 5 101W,MICHELIN
+SRC | All Brands | PH,/complete-order?requestid=MzgwMDE=,MzgwMDE=,38001,1,Matched,2026-08-06 19:06:00,Fulfilled,Fully Paid,Website,Website,18701.25,4,BFGOODRICH 215/50/R17 ADVANTAGE TOURING 95V,BFGOODRICH
+All Brand - PMax PH,/complete-order?requestid=MzgwMjU=,MzgwMjU=,38025,1,Matched,2026-08-07 13:27:00,New,Unpaid,Website,,11966.43,4,HANKOOK 185/65/R15 KINERGY ECO2 88T,HANKOOK
+All Brand - PMax PH,/complete-order?requestid=MzgwMjc=,MzgwMjc=,38027,1,Matched,2026-08-07 14:08:00,New,Unpaid,Website,,11966.43,4,HANKOOK 185/65/R15 KINERGY ECO2 88T,HANKOOK
+All Brand - PMax PH,/complete-order?requestid=MzgwMzA=,MzgwMzA=,38030,1,Matched,2026-08-07 14:31:00,New,Unpaid,Website,,11966.43,4,HANKOOK 185/65/R15 KINERGY ECO2 88T,HANKOOK
+All Brand - PMax PH,/complete-order?requestid=MzgwMzE=,MzgwMzE=,38031,1,Matched,2026-08-07 14:32:00,New,Unpaid,Website,,11966.43,4,HANKOOK 185/65/R15 KINERGY ECO2 88T,HANKOOK
+All Brand - PMax PH,/complete-order?requestid=MzgwMzY%3D,MzgwMzY%3D,38036,1,Matched,2026-08-07 15:20:00,Fulfilled,Fully Paid,Website,,9748.57,4,WESTLAKE 185/65/R15 RP36,WESTLAKE
+Michelin - PMax PH,/complete-order?requestid=MzgwNDQ=,MzgwNDQ=,38044,1,Matched,2026-08-07 17:07:00,Fulfilled,Fully Paid,Fb,CHAT,20982.14,4,MICHELIN 205/65/R16 PRIMACY 5 95W,MICHELIN
+BFG Advantage Touring – PMax PH,/complete-order?requestid=MzgwNTY=,MzgwNTY=,38056,1,Matched,2026-08-08 00:42:00,Pending,Pending,Website,,26624.29,4,HANKOOK 265/65/R17 DYNAPRO HT2 RH14 112T,HANKOOK
+Michelin - PMax PH,/complete-order?requestid=MzgwNjQ%3D,MzgwNjQ%3D,38064,1,Matched,2026-08-08 07:03:00,Fulfilled,Fully Paid,Website,,14102.68,4,APOLLO 185/65/R15 ALNAC 4G 88H,APOLLO
+BFG Advantage Touring – PMax PH,/complete-order?requestid=MzgwNjU=,MzgwNjU=,38065,1,Matched,2026-08-08 07:44:00,Pending,Pending,Website,,27070.71,4,HANKOOK 265/65/R17 DYNAPRO HT2 RH14 112T,HANKOOK
+SRC | All Brands | PH,/complete-order?requestid=MzgwNjk=,MzgwNjk=,38069,1,Matched,2026-08-08 09:23:00,Pending,Pending,Website,,45281.25,4,MICHELIN 265/60/R18 PRIMACY SUV+ 110H,MICHELIN
+(cross-network),/complete-order?requestid=MzgxMTU=,MzgxMTU=,38115,1,Matched,2026-08-09 22:46:00,Pending,Pending,Website,,5863.93,4,WESTLAKE 155/65/R13 RP26,WESTLAKE
+Michelin - PMax PH,/complete-order?requestid=MzgxMzI=,MzgxMzI=,38132,1,Matched,2026-08-10 10:40:00,Processing,Fully Paid,Website,,10099.33,5,ARIVO 185/65/R14 PREMIO COMFORT 6,ARIVO
+BFG Advantage Touring – PMax PH,/complete-order?requestid=MzgxMzM=,MzgxMzM=,38133,1,Matched,2026-08-10 10:53:00,Fulfilled,Fully Paid,Website,Website,9048.39,4,CST 175/65/R14 MARQUIS MR-C5 82H,CST
+Michelin - PMax PH,/complete-order?requestid=MzgxNDM=,MzgxNDM=,38143,1,Matched,2026-08-10 15:31:00,New,Unpaid,Website,,32418.57,4,BFGOODRICH 265/60/R18 ADVANTAGE TOURING 110H,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=MzgxNzc%3D,MzgxNzc%3D,38177,1,Matched,2026-08-11 13:39:00,Fulfilled,Fully Paid,Website,,28610.36,4,BFGOODRICH 235/55/R19 ADVANTAGE TOURING 101H,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=MzgxODQ=,MzgxODQ=,38184,1,Matched,2026-08-11 16:35:00,Pending,Pending,Website,,6458.21,4,WESTLAKE 165/65/R13 RP36,WESTLAKE
+BFG - PMax (Traffic),/complete-order?requestid=MzgyMDY=,MzgyMDY=,38206,1,Matched,2026-08-11 21:40:00,Pending,Pending,Website,,15782.95,2,LAUFENN 235/50/R19 S FIT AS 103 XLV,LAUFENN
+Michelin - PMax PH,/complete-order?requestid=MzgyMjU=,MzgyMjU=,38225,1,Matched,2026-08-12 11:06:00,Processing,Partial Payment,Website,Website,40481.43,4,BRIDGESTONE 255/60/R18 DUELER H/T 684 RB 108S,BRIDGESTONE
+BFG - PMax (Traffic),/complete-order?requestid=MzgyNTY=,MzgyNTY=,38256,1,Matched,2026-08-12 22:07:00,Pending,Pending,Website,,5986.88,2,ARIVO 195/50/R16 ULTRA ARZ5 84V,ARIVO
+Michelin - PMax PH,/complete-order?requestid=MzgyNjE=,MzgyNjE=,38261,1,Matched,2026-08-13 00:02:00,Pending,Pending,Website,Website,27542.32,4,DUNLOP 215/60/R17 ENASAVE EC300+ 96H,DUNLOP
+Michelin - PMax PH,/complete-order?requestid=MzgyNzk=,MzgyNzk=,38279,1,Matched,2026-08-13 12:30:00,Pending,Pending,Website,Website,19138.21,4,BFGOODRICH 225/45/R18 ADVANTAGE TOURING 95V,BFGOODRICH
+Michelin - PMax PH,/complete-order?requestid=MzgzMTc=,MzgzMTc=,38317,1,Matched,2026-08-14 07:18:00,Pending,Pending,Website,,15412.68,4,DURATURN 225/40/R19 MOZZO SPORT 93W,DURATURN
+Michelin - PMax PH,/complete-order?requestid=MzgzNjI=,MzgzNjI=,38362,1,Matched,2026-08-14 23:32:00,Pending,Pending,Website,Website,6008.93,2,FRONWAY 205/65/R16 ECOGREEN ONE 95H,FRONWAY
+(cross-network),/complete-order?requestid=MzgzNjU=,MzgzNjU=,38365,1,Matched,2026-08-15 05:49:00,Pending,Pending,Website,,24147.32,5,GOODYEAR 175/70/R14 ASSURANCE DURAPLUS 2 84H,GOODYEAR
+Michelin - PMax PH,/complete-order?requestid=Mzc4MjA=,Mzc4MjA=,37820,1,Matched,2026-08-01 12:06:00,New,Unpaid,Website,,19518.04,4,BFGOODRICH 215/55/R17 ADVANTAGE TOURING 94V,BFGOODRICH

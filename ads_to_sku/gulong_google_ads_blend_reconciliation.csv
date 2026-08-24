@@ -1,0 +1,78 @@
+﻿order_id,decoded_campaign,ecommerce_purchases,blend_match_status,field_match_status,decoded_order_status,blend_order_status,decoded_payment_status,blend_payment_status,backend_customer_type,backend_customer_source,net_sales_amount,quantity,sku,purchased_brand,customer_source_in_blend
+37812,All Brand - PMax PH,2,Missing from blend,,Fulfilled,,Partial Payment,,Fb,CHAT,30533.75,4,DEESTONE 245/75/R16 POWERCRUZ XT421 116/113Q,DEESTONE,
+38400,All Brand - PMax PH,2,Missing from blend,,Processing,,Partial Payment,,Fb,CHAT,19526.79,4,MICHELIN 185/60/R15 ENERGY XM2+ 88H,MICHELIN,
+38409,Michelin - PMax PH,2,Matched,Matched,Processing,Processing,Partial Payment,Partial Payment,Website,CHAT,11386.96,4,BFGOODRICH 175/65/R14 ADVANTAGE TOURING 82H,BFGOODRICH,CHAT
+38417,SRC | All Brands | PH,2,Missing from blend,,Processing,,Fully Paid,,Website,Website,10001.16,2,LAUFENN 235/65/R17 X FIT HT 104T,LAUFENN,
+38440,Michelin - PMax PH,2,Matched,Matched,Processing,Processing,Fully Paid,Fully Paid,Website,,16570.54,4,HANKOOK 205/55/R16 VENTUS PRIME 4 91W,HANKOOK,-
+38448,BFG - PMax (Traffic),2,Missing from blend,,Processing,,Fully Paid,,Website,,19378.04,4,BFGOODRICH 215/55/R17 ADVANTAGE TOURING 94V,BFGOODRICH,
+38483,Michelin - PMax PH,2,Matched,Matched,Processing,Processing,Fully Paid,Fully Paid,Website,,13686.83,5,BFGOODRICH 175/65/R14 ADVANTAGE TOURING 82H,BFGOODRICH,-
+38491,Michelin - PMax PH,2,Matched,Matched,Processing,Processing,Partial Payment,Partial Payment,Website,Website,18174.11,4,MICHELIN 185/70/R14 ENERGY XM2+ 88H,MICHELIN,Website
+38533,BFG - PMax (Traffic),2,Missing from blend,,New,,Unpaid,,Website,,6335.09,2,LINGLONG 205/50/R17 SPORT MASTER ,LINGLONG,
+38534,BFG - PMax (Traffic),2,Missing from blend,,Processing,,Partial Payment,,Website,,6424.38,2,LINGLONG 205/50/R17 SPORT MASTER ,LINGLONG,
+38544,All Brand - PMax PH,2,Missing from blend,,Pending,,Partial Payment,,Website,,20953.04,4,BFGOODRICH 225/60/R17 ADVANTAGE TOURING 99H,BFGOODRICH,
+38205,Michelin - PMax PH,2,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,,5156.25,1,YOKOHAMA 185/55/R16 BLUEARTH ES32 83V,YOKOHAMA,-
+38222,Michelin - PMax PH,2,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,,25807.5,4,BRIDGESTONE 235/70/R15 ECOPIA H/L 001 103S,BRIDGESTONE,-
+38234,Michelin - PMax PH,2,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,,11185.63,2,BRIDGESTONE 215/60/R16 ECOPIA EP300 95V,BRIDGESTONE,-
+38263,Michelin - PMax PH,2,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,CHAT,27988.75,4,DUNLOP 215/60/R17 ENASAVE EC300+ 96H,DUNLOP,CHAT
+38267,BFG Advantage Touring – PMax PH,2,Matched,Matched,Fulfilled,Fulfilled,Partial Payment,Partial Payment,Website,,16313.39,4,BRIDGESTONE 185/65/R15 ECOPIA EP300 88H,BRIDGESTONE,-
+38284,All Brand - PMax PH,2,Missing from blend,,Fulfilled,,Fully Paid,,Website,Website,13258.93,4,BFGOODRICH 185/55/R15 ADVANTAGE TOURING 86V,BFGOODRICH,
+38286,All Brand - PMax PH,2,Missing from blend,,Processing,,Fully Paid,,Website,,34946.43,4,MICHELIN 205/45/R17 PILOT SPORT 5 88Y,MICHELIN,
+38337,Michelin - PMax PH,2,Matched,Matched,Processing,Processing,Fully Paid,Fully Paid,Website,CALL,23064.11,2,YOKOHAMA 255/50/R20 GEOLANDAR X-CV G057 109W,YOKOHAMA,CALL
+38352,Michelin - PMax PH,2,Matched,Matched,Fulfilled,Fulfilled,Partial Payment,Partial Payment,Website,,8932.5,4,FRONWAY 175/65/R15 ECOGREEN ONE 84H,FRONWAY,-
+38354,Michelin - PMax PH,2,Missing from blend,,Pending,,Partial Payment,,Chatbot,Chatbot,23210,4,YOKOHAMA 215/45/R17 ADVAN FLEVA V701 91W,YOKOHAMA,
+38390,Michelin - PMax PH,2,Matched,Matched,Processing,Processing,Fully Paid,Fully Paid,Website,,10871.79,4,LAUFENN 185/60/R15 G FIT AS 84H,LAUFENN,-
+38392,Michelin - PMax PH,2,Matched,Matched,Processing,Processing,Fully Paid,Fully Paid,Website,Website,3073.39,2,ARIVO 165/65/R13 PREMIO ARZ1,ARIVO,Website
+38395,Michelin - PMax PH,2,Matched,Matched,Processing,Processing,Fully Paid,Fully Paid,Website,Website,8652.68,5,FRONWAY 175/65/R14 ECOGREEN ONE 82V,FRONWAY,Website
+38399,(cross-network),2,Missing from blend,,For Return,,Fully Paid,,Website,CALL,75348.21,4,MICHELIN 275/55/R20 PILOT SPORT EV 117V,MICHELIN,
+37928,Michelin - PMax PH,1,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,Website,11571.96,4,ARIVO 205/45/R17 ULTRA ARZ5,ARIVO,Website
+38397,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,,11656.61,4,ARIVO 195/55/R16 PREMIO COMFORT 6,ARIVO,-
+37822,Michelin - PMax PH,1,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,,21927.5,4,BRIDGESTONE 215/55/R17 TURANZA ER33 94V,BRIDGESTONE,-
+37832,Michelin - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,11621.25,4,HANKOOK 185/55/R15 KINERGY ECO2 82H,HANKOOK,
+37837,All Brand - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,15538.75,4,BFGOODRICH 205/65/R16 ADVANTAGE TOURING 95H,BFGOODRICH,
+37842,(cross-network),1,Missing from blend,,Fulfilled,,Fully Paid,,Website,Website,10291.52,2,HANKOOK 215/50/R17 VENTUS PRIME 4 95W,HANKOOK,
+37844,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,,12018.39,4,ARIVO 205/45/R17 ULTRA ARZ5,ARIVO,-
+37848,BFG Advantage Touring – PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,19659.82,4,HANKOOK 205/55/R17 VENTUS PRIME 4 95V,HANKOOK,
+37849,BFG Advantage Touring – PMax PH,1,Matched,Matched,For Refund,For Refund,For Refund,For Refund,Website,Website,5633.93,1,BRIDGESTONE 185/55/R15 POTENZA RE030 82V,BRIDGESTONE,Website
+37851,SRC | All Brands | PH,1,Missing from blend,,Fulfilled,,Fully Paid,,Website,,9146.96,4,ARIVO 185/60/R15 PREMIO COMFORT 6 88H,ARIVO,
+37858,Michelin - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,Website,22861.07,4,BFGOODRICH 235/55/R18 ADVANTAGE TOURING 104H,BFGOODRICH,
+37871,Michelin - PMax PH,1,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,Website,12053.57,4,WESTLAKE 205/55/R16 SA37,WESTLAKE,Website
+37894,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,,11571.96,4,ARIVO 205/45/R17 ULTRA ARZ5,ARIVO,-
+37819,Michelin - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,19518.04,4,BFGOODRICH 215/55/R17 ADVANTAGE TOURING 94V,BFGOODRICH,
+37947,Michelin - PMax PH,1,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,,43357.14,4,MICHELIN 235/60/R18 PRIMACY SUV+ 103V,MICHELIN,-
+37955,Michelin - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,Website,35937.5,8,BFGOODRICH 205/50/R17 ADVANTAGE TOURING 93V,BFGOODRICH,
+37957,Michelin - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,Website,17901.79,4,BFGOODRICH 205/50/R17 ADVANTAGE TOURING 93V,BFGOODRICH,
+37977,All Brand - PMax PH,1,Missing from blend,,Cancelled,,Pending,,Website,,2294.64,1,WESTLAKE 175/65/R15 RP26,WESTLAKE,
+37978,SRC | All Brands | PH,1,Missing from blend,,Pending,,Pending,,Website,,12928.57,4,APOLLO 185/60/R15 ALNAC 4G 84H,APOLLO,
+37982,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,Website,28303.57,4,MICHELIN 195/60/R16 PRIMACY 5 93V,MICHELIN,Website
+37990,Michelin - PMax PH,1,Missing from blend,,Fulfilled,,Fully Paid,,Chatbot,Chatbot,38280.36,4,DUNLOP 265/65/R17 GRANDTREK AT25 112S,DUNLOP,
+37996,BFG Advantage Touring – PMax PH,1,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,Website,19196.43,4,BFGOODRICH 225/60/R17 ADVANTAGE TOURING 99H,BFGOODRICH,Website
+38405,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,,23918.93,4,BFGOODRICH 225/65/R17 ADVANTAGE TOURING 102H,BFGOODRICH,-
+38414,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,,9504.11,4,ARIVO 185/60/R15 PREMIO COMFORT 6 88H,ARIVO,-
+38415,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,Website,14474.82,4,BFGOODRICH 185/65/R15 ADVANTAGE TOURING 88H,BFGOODRICH,Website
+38495,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,Website,33991.07,4,MICHELIN 225/55/R17 PRIMACY 5 101W,MICHELIN,Website
+38001,SRC | All Brands | PH,1,Missing from blend,,Fulfilled,,Fully Paid,,Website,Website,18701.25,4,BFGOODRICH 215/50/R17 ADVANTAGE TOURING 95V,BFGOODRICH,
+38025,All Brand - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,11966.43,4,HANKOOK 185/65/R15 KINERGY ECO2 88T,HANKOOK,
+38027,All Brand - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,11966.43,4,HANKOOK 185/65/R15 KINERGY ECO2 88T,HANKOOK,
+38030,All Brand - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,11966.43,4,HANKOOK 185/65/R15 KINERGY ECO2 88T,HANKOOK,
+38031,All Brand - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,11966.43,4,HANKOOK 185/65/R15 KINERGY ECO2 88T,HANKOOK,
+38036,All Brand - PMax PH,1,Missing from blend,,Fulfilled,,Fully Paid,,Website,,9748.57,4,WESTLAKE 185/65/R15 RP36,WESTLAKE,
+38044,Michelin - PMax PH,1,Missing from blend,,Fulfilled,,Fully Paid,,Fb,CHAT,20982.14,4,MICHELIN 205/65/R16 PRIMACY 5 95W,MICHELIN,
+38056,BFG Advantage Touring – PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,,26624.29,4,HANKOOK 265/65/R17 DYNAPRO HT2 RH14 112T,HANKOOK,-
+38064,Michelin - PMax PH,1,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,,14102.68,4,APOLLO 185/65/R15 ALNAC 4G 88H,APOLLO,-
+38065,BFG Advantage Touring – PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,,27070.71,4,HANKOOK 265/65/R17 DYNAPRO HT2 RH14 112T,HANKOOK,-
+38069,SRC | All Brands | PH,1,Missing from blend,,Pending,,Pending,,Website,,45281.25,4,MICHELIN 265/60/R18 PRIMACY SUV+ 110H,MICHELIN,
+38115,(cross-network),1,Missing from blend,,Pending,,Pending,,Website,,5863.93,4,WESTLAKE 155/65/R13 RP26,WESTLAKE,
+38132,Michelin - PMax PH,1,Matched,Matched,Processing,Processing,Fully Paid,Fully Paid,Website,,10099.33,5,ARIVO 185/65/R14 PREMIO COMFORT 6,ARIVO,-
+38133,BFG Advantage Touring – PMax PH,1,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,Website,9048.39,4,CST 175/65/R14 MARQUIS MR-C5 82H,CST,Website
+38143,Michelin - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,32418.57,4,BFGOODRICH 265/60/R18 ADVANTAGE TOURING 110H,BFGOODRICH,
+38177,Michelin - PMax PH,1,Matched,Matched,Fulfilled,Fulfilled,Fully Paid,Fully Paid,Website,,28610.36,4,BFGOODRICH 235/55/R19 ADVANTAGE TOURING 101H,BFGOODRICH,-
+38184,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,,6458.21,4,WESTLAKE 165/65/R13 RP36,WESTLAKE,-
+38206,BFG - PMax (Traffic),1,Missing from blend,,Pending,,Pending,,Website,,15782.95,2,LAUFENN 235/50/R19 S FIT AS 103 XLV,LAUFENN,
+38225,Michelin - PMax PH,1,Matched,Matched,Processing,Processing,Partial Payment,Partial Payment,Website,Website,40481.43,4,BRIDGESTONE 255/60/R18 DUELER H/T 684 RB 108S,BRIDGESTONE,Website
+38256,BFG - PMax (Traffic),1,Missing from blend,,Pending,,Pending,,Website,,5986.88,2,ARIVO 195/50/R16 ULTRA ARZ5 84V,ARIVO,
+38261,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,Website,27542.32,4,DUNLOP 215/60/R17 ENASAVE EC300+ 96H,DUNLOP,Website
+38279,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,Website,19138.21,4,BFGOODRICH 225/45/R18 ADVANTAGE TOURING 95V,BFGOODRICH,Website
+38317,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,,15412.68,4,DURATURN 225/40/R19 MOZZO SPORT 93W,DURATURN,-
+38362,Michelin - PMax PH,1,Matched,Matched,Pending,Pending,Pending,Pending,Website,Website,6008.93,2,FRONWAY 205/65/R16 ECOGREEN ONE 95H,FRONWAY,Website
+38365,(cross-network),1,Missing from blend,,Pending,,Pending,,Website,,24147.32,5,GOODYEAR 175/70/R14 ASSURANCE DURAPLUS 2 84H,GOODYEAR,
+37820,Michelin - PMax PH,1,Missing from blend,,New,,Unpaid,,Website,,19518.04,4,BFGOODRICH 215/55/R17 ADVANTAGE TOURING 94V,BFGOODRICH,

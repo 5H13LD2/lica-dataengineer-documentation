@@ -1,0 +1,78 @@
+﻿Session campaign,Page path + query string,Encoded requestid,Decoded request_id,Ecommerce purchases
+All Brand - PMax PH,/complete-order?requestid=Mzc4MTI=,Mzc4MTI=,37812,2
+All Brand - PMax PH,/complete-order?requestid=Mzg0MDA=,Mzg0MDA=,38400,2
+Michelin - PMax PH,/complete-order?requestid=Mzg0MDk%3D,Mzg0MDk%3D,38409,2
+SRC | All Brands | PH,/complete-order?requestid=Mzg0MTc%3D,Mzg0MTc%3D,38417,2
+Michelin - PMax PH,/complete-order?requestid=Mzg0NDA%3D,Mzg0NDA%3D,38440,2
+BFG - PMax (Traffic),/complete-order?requestid=Mzg0NDg%3D,Mzg0NDg%3D,38448,2
+Michelin - PMax PH,/complete-order?requestid=Mzg0ODM=,Mzg0ODM=,38483,2
+Michelin - PMax PH,/complete-order?requestid=Mzg0OTE=,Mzg0OTE=,38491,2
+BFG - PMax (Traffic),/complete-order?requestid=Mzg1MzM%3D,Mzg1MzM%3D,38533,2
+BFG - PMax (Traffic),/complete-order?requestid=Mzg1MzQ%3D,Mzg1MzQ%3D,38534,2
+All Brand - PMax PH,/complete-order?requestid=Mzg1NDQ%3D,Mzg1NDQ%3D,38544,2
+Michelin - PMax PH,/complete-order?requestid=MzgyMDU=,MzgyMDU=,38205,2
+Michelin - PMax PH,/complete-order?requestid=MzgyMjI%3D,MzgyMjI%3D,38222,2
+Michelin - PMax PH,/complete-order?requestid=MzgyMzQ%3D,MzgyMzQ%3D,38234,2
+Michelin - PMax PH,/complete-order?requestid=MzgyNjM=,MzgyNjM=,38263,2
+BFG Advantage Touring – PMax PH,/complete-order?requestid=MzgyNjc%3D,MzgyNjc%3D,38267,2
+All Brand - PMax PH,/complete-order?requestid=MzgyODQ=,MzgyODQ=,38284,2
+All Brand - PMax PH,/complete-order?requestid=MzgyODY%3D,MzgyODY%3D,38286,2
+Michelin - PMax PH,/complete-order?requestid=MzgzMzc%3D,MzgzMzc%3D,38337,2
+Michelin - PMax PH,/complete-order?requestid=MzgzNTI=,MzgzNTI=,38352,2
+Michelin - PMax PH,/complete-order?requestid=MzgzNTQ=,MzgzNTQ=,38354,2
+Michelin - PMax PH,/complete-order?requestid=MzgzOTA%3D,MzgzOTA%3D,38390,2
+Michelin - PMax PH,/complete-order?requestid=MzgzOTI=,MzgzOTI=,38392,2
+Michelin - PMax PH,/complete-order?requestid=MzgzOTU%3D,MzgzOTU%3D,38395,2
+(cross-network),/complete-order?requestid=MzgzOTk%3D,MzgzOTk%3D,38399,2
+Michelin - PMax PH,/complete-order?requestid=Mzc5Mjg=,Mzc5Mjg=,37928,1
+Michelin - PMax PH,/complete-order?requestid=MzgzOTc=,MzgzOTc=,38397,1
+Michelin - PMax PH,/complete-order?requestid=Mzc4MjI=,Mzc4MjI=,37822,1
+Michelin - PMax PH,/complete-order?requestid=Mzc4MzI=,Mzc4MzI=,37832,1
+All Brand - PMax PH,/complete-order?requestid=Mzc4Mzc=,Mzc4Mzc=,37837,1
+(cross-network),/complete-order?requestid=Mzc4NDI=,Mzc4NDI=,37842,1
+Michelin - PMax PH,/complete-order?requestid=Mzc4NDQ=,Mzc4NDQ=,37844,1
+BFG Advantage Touring – PMax PH,/complete-order?requestid=Mzc4NDg=,Mzc4NDg=,37848,1
+BFG Advantage Touring – PMax PH,/complete-order?requestid=Mzc4NDk%3D,Mzc4NDk%3D,37849,1
+SRC | All Brands | PH,/complete-order?requestid=Mzc4NTE%3D,Mzc4NTE%3D,37851,1
+Michelin - PMax PH,/complete-order?requestid=Mzc4NTg=,Mzc4NTg=,37858,1
+Michelin - PMax PH,/complete-order?requestid=Mzc4NzE%3D,Mzc4NzE%3D,37871,1
+Michelin - PMax PH,/complete-order?requestid=Mzc4OTQ=,Mzc4OTQ=,37894,1
+Michelin - PMax PH,/complete-order?requestid=Mzc4MTk=,Mzc4MTk=,37819,1
+Michelin - PMax PH,/complete-order?requestid=Mzc5NDc=,Mzc5NDc=,37947,1
+Michelin - PMax PH,/complete-order?requestid=Mzc5NTU=,Mzc5NTU=,37955,1
+Michelin - PMax PH,/complete-order?requestid=Mzc5NTc=,Mzc5NTc=,37957,1
+All Brand - PMax PH,/complete-order?requestid=Mzc5Nzc=,Mzc5Nzc=,37977,1
+SRC | All Brands | PH,/complete-order?requestid=Mzc5Nzg=,Mzc5Nzg=,37978,1
+Michelin - PMax PH,/complete-order?requestid=Mzc5ODI=,Mzc5ODI=,37982,1
+Michelin - PMax PH,/complete-order?requestid=Mzc5OTA=,Mzc5OTA=,37990,1
+BFG Advantage Touring – PMax PH,/complete-order?requestid=Mzc5OTY=,Mzc5OTY=,37996,1
+Michelin - PMax PH,/complete-order?requestid=Mzg0MDU=,Mzg0MDU=,38405,1
+Michelin - PMax PH,/complete-order?requestid=Mzg0MTQ=,Mzg0MTQ=,38414,1
+Michelin - PMax PH,/complete-order?requestid=Mzg0MTU=,Mzg0MTU=,38415,1
+Michelin - PMax PH,/complete-order?requestid=Mzg0OTU=,Mzg0OTU=,38495,1
+SRC | All Brands | PH,/complete-order?requestid=MzgwMDE=,MzgwMDE=,38001,1
+All Brand - PMax PH,/complete-order?requestid=MzgwMjU=,MzgwMjU=,38025,1
+All Brand - PMax PH,/complete-order?requestid=MzgwMjc=,MzgwMjc=,38027,1
+All Brand - PMax PH,/complete-order?requestid=MzgwMzA=,MzgwMzA=,38030,1
+All Brand - PMax PH,/complete-order?requestid=MzgwMzE=,MzgwMzE=,38031,1
+All Brand - PMax PH,/complete-order?requestid=MzgwMzY%3D,MzgwMzY%3D,38036,1
+Michelin - PMax PH,/complete-order?requestid=MzgwNDQ=,MzgwNDQ=,38044,1
+BFG Advantage Touring – PMax PH,/complete-order?requestid=MzgwNTY=,MzgwNTY=,38056,1
+Michelin - PMax PH,/complete-order?requestid=MzgwNjQ%3D,MzgwNjQ%3D,38064,1
+BFG Advantage Touring – PMax PH,/complete-order?requestid=MzgwNjU=,MzgwNjU=,38065,1
+SRC | All Brands | PH,/complete-order?requestid=MzgwNjk=,MzgwNjk=,38069,1
+(cross-network),/complete-order?requestid=MzgxMTU=,MzgxMTU=,38115,1
+Michelin - PMax PH,/complete-order?requestid=MzgxMzI=,MzgxMzI=,38132,1
+BFG Advantage Touring – PMax PH,/complete-order?requestid=MzgxMzM=,MzgxMzM=,38133,1
+Michelin - PMax PH,/complete-order?requestid=MzgxNDM=,MzgxNDM=,38143,1
+Michelin - PMax PH,/complete-order?requestid=MzgxNzc%3D,MzgxNzc%3D,38177,1
+Michelin - PMax PH,/complete-order?requestid=MzgxODQ=,MzgxODQ=,38184,1
+BFG - PMax (Traffic),/complete-order?requestid=MzgyMDY=,MzgyMDY=,38206,1
+Michelin - PMax PH,/complete-order?requestid=MzgyMjU=,MzgyMjU=,38225,1
+BFG - PMax (Traffic),/complete-order?requestid=MzgyNTY=,MzgyNTY=,38256,1
+Michelin - PMax PH,/complete-order?requestid=MzgyNjE=,MzgyNjE=,38261,1
+Michelin - PMax PH,/complete-order?requestid=MzgyNzk=,MzgyNzk=,38279,1
+Michelin - PMax PH,/complete-order?requestid=MzgzMTc=,MzgzMTc=,38317,1
+Michelin - PMax PH,/complete-order?requestid=MzgzNjI=,MzgzNjI=,38362,1
+(cross-network),/complete-order?requestid=MzgzNjU=,MzgzNjU=,38365,1
+Michelin - PMax PH,/complete-order?requestid=Mzc4MjA=,Mzc4MjA=,37820,1

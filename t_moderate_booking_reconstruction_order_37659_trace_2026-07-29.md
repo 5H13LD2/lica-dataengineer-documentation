@@ -2,7 +2,7 @@
 
 Original trace date: 2026-07-29
 
-Refreshed: 2026-08-04
+Refreshed: 2026-08-14
 
 ## Goal
 
@@ -10,51 +10,36 @@ Refresh the earlier trace for `order_id = 37659` and confirm the current warehou
 
 ## Summary
 
-The earlier 2026-07-29 trace is now stale.
+The earlier 2026-08-04 trace is now stale.
 
-As of `2026-08-04`:
+As of `2026-08-14`:
 
-- `order_id = 37659` is present in `gulong_core.orders_booked`
-- it still has a valid exact inquiry-session match in `gulong_reporting.v_looker_first_reply_detail`
-- direct replay of the current reconstruction logic still ranks it as:
-- `booking_match_rule = EXACT INQUIRY SESSION`
-- `booking_match_rn = 1`
-- `gulong_reporting.t_moderate_booking_reconstruction` now contains `37659`
+- `order_id = 37659` is no longer present in `gulong_core.orders_booked`
+- because the official booking row is gone, the direct reconstruction replay for `37659` returns no match candidates
+- `gulong_reporting.t_moderate_booking_reconstruction` no longer contains `37659`
+- `gulong_reporting.v_looker_moderate_booking_reconstruction` also no longer contains `37659`
 
 Current `2026-07-28` booking-day state:
 
-- `gulong_core.orders_booked` = `2`
-- `gulong_reporting.t_moderate_booking_reconstruction` = `2`
+- `gulong_core.orders_booked` = `1`
+- `gulong_reporting.t_moderate_booking_reconstruction` = `1`
 - `gulong_reporting.p_looker_agent_daily_conversion` = `1`
 
-So the old reconstruction gap has been resolved. The remaining mismatch is now between:
-
-- `orders_booked` / `t_moderate_booking_reconstruction` = `2`
-- `p_looker_agent_daily_conversion` = `1`
+So the old reconstruction mismatch is no longer a reconstruction issue. The current warehouse state is internally aligned for `2026-07-28`, with only `order_id = 37636` remaining in the official Chatbot/JCo booking source.
 
 ## Evidence
 
-### 1. Official bookings source still has 2 rows on 2026-07-28
+### 1. Official bookings source now has 1 row on 2026-07-28
 
-Rows found in `gulong_core.orders_booked`:
+Current row found in `gulong_core.orders_booked`:
 
 - `37636`
-- `37659`
 
-### 2. `37659` still has a valid inquiry session
+Direct lookup for `37659` now returns no row.
 
-Official booking row:
+### 2. `v_looker_first_reply_detail` still has the historical replied session
 
-- `order_id = 37659`
-- `booking_day = 2026-07-28`
-- `booking_at = 2026-07-28 17:06:00`
-- `manychat_id = 2845998122184220`
-- `inquiry_silver_session_id = 31698e21bbffe3bc05784586c258d032`
-- `customer_name = joan gonzales`
-
-### 3. `v_looker_first_reply_detail` still has the matching replied session
-
-Matched session:
+Historical matched session:
 
 - `report_date = 2026-07-27`
 - `silver_session_id = 31698e21bbffe3bc05784586c258d032`
@@ -64,50 +49,32 @@ Matched session:
 - `first_customer_message_at = 2026-07-27 12:36:37`
 - `first_cs_reply_at = 2026-07-27 13:29:08`
 
-### 4. Direct replay of the current reconstruction logic still matches the order
+### 3. Direct replay of the current reconstruction logic no longer returns `37659`
 
-Direct replay result:
+The replay query now returns no candidate row for `37659` because the official booking CTE itself is empty for that order.
 
-- `order_id = 37659`
-- `booking_match_rule = EXACT INQUIRY SESSION`
-- `booking_match_rn = 1`
-
-This means the order still qualifies under the current reconstruction matching rule.
-
-### 5. Physical reconstruction table now includes it
+### 4. Physical reconstruction table no longer includes it
 
 Current result for `booking_day = 2026-07-28`:
 
-- `t_moderate_booking_reconstruction` = `2` orders
+- `t_moderate_booking_reconstruction` = `1` order
 - `37636` appears
-- `37659` appears
+- `37659` does not appear
 
-Current row for `37659` in `t_moderate_booking_reconstruction`:
-
-- `order_id = 37659`
-- `booking_day = 2026-07-28`
-- `moderate_report_date = 2026-07-27`
-- `silver_session_id = 31698e21bbffe3bc05784586c258d032`
-- `booking_match_rule = EXACT INQUIRY SESSION`
-- `booking_owner_bucket = CS Assisted`
-- `reply_status = Has CS Reply`
-- `reply_agent_name = sarah gulongph`
+The same is true for `v_looker_moderate_booking_reconstruction`.
 
 ## Interpretation
 
-The earlier missing row was consistent with refresh lag or a stale physical snapshot, not with a failure of the reconstruction matching logic itself.
+The warehouse state changed again after the August 4 refresh.
 
-That old gap is no longer present in the current warehouse state.
+The refreshed trace now shows:
 
-The refreshed trace shows that `37659`:
+- the historical replied session still exists in `v_looker_first_reply_detail`
+- but `37659` itself no longer exists in the official `orders_booked` source
+- so it cannot be reconstructed into `t_moderate_booking_reconstruction`
+- and the `2026-07-28` counts are now aligned across `orders_booked`, `t_moderate_booking_reconstruction`, and `p_looker_agent_daily_conversion`
 
-- is in official booked orders
-- has an exact inquiry-session link
-- has a valid replied moderate session
-- qualifies when the current reconstruction join logic is replayed
-- is now physically present in `t_moderate_booking_reconstruction`
-
-So the open reporting discrepancy has shifted downstream to `p_looker_agent_daily_conversion`, not the reconstruction table.
+The active issue is no longer a stale reconstruction snapshot. The source booking universe itself has changed.
 
 ## Important date-basis note
 
@@ -123,20 +90,19 @@ Reference:
 
 - [moderate_conversion_manual.md](/home/jerico/Desktop/gulong-data/moderate_conversion_manual.md:206)
 
-## Current warehouse state on 2026-08-04
+## Current warehouse state on 2026-08-14
 
 For `2026-07-28`:
 
-- `orders_booked` official Chatbot/JCo bookings = `2`
-- `t_moderate_booking_reconstruction` = `2`
+- `orders_booked` official Chatbot/JCo bookings = `1`
+- `t_moderate_booking_reconstruction` = `1`
 - `p_looker_agent_daily_conversion` = `1`
 
 Current reconstruction rows:
 
 - `37636` -> `LATEST PRIOR INQUIRY`, `Chatbot Only`
-- `37659` -> `EXACT INQUIRY SESSION`, `CS Assisted`
 
-So `37659` is no longer missing from reconstruction.
+So `37659` is no longer in the official booking source or the reconstruction outputs.
 
 ## Files
 
