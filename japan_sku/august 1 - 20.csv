@@ -1,0 +1,41 @@
+order_date (Date),pickup_date,id,customer_name,SKU,AGENT,Status,Sales Agent,quantity,payment_status,New Field,Net Sales of VAT,Fulfilled Amount (GROSS)
+"Aug 19, 2026","Aug 25, 2026, 3:00:00 PM",38515,Earl Balbontin,MICHELIN 225/55/R17 PRIMACY 5 101W,DEV,Processing,DEV,4,Partial Payment,Primacy 5,"₱33,991.07",0
+"Aug 19, 2026","Aug 24, 2026, 9:00:00 AM",38538,Christopher Datugan,MICHELIN 215/55/R17 PRIMACY 5 94V,DEV,Processing,DEV,4,Fully Paid,Primacy 5,"₱32,334.82",0
+"Aug 20, 2026","Aug 23, 2026, 8:30:00 AM",38581,Victor Leo Katigbac,MICHELIN 205/60/R16 PRIMACY 5 96W XL,DEV,Processing,DEV,4,Fully Paid,Primacy 5,"₱25,571.43",0
+"Aug 18, 2026","Aug 22, 2026, 2:00:00 PM",38486,Andrew U. Arellano,MICHELIN 205/55/R17 PRIMACY 5 95W,ROLYN ANG,Processing,ROLYN ANG,4,Fully Paid,Primacy 5,"₱31,084.82",0
+"Aug 20, 2026","Aug 22, 2026, 1:00:00 PM",38551,Nikko Patio,MICHELIN 265/35/ZR18 PILOT SPORT 5 97Y,AIRA,Processing,AIRA,4,Fully Paid,Pilot Sport 5,"₱42,000",0
+"Aug 20, 2026","Aug 22, 2026, 9:00:00 AM",38569,Patrick Matias,MICHELIN 255/45/ZR19 PILOT SPORT 5 104Y XL TL,ROLYN ANG,Processing,ROLYN ANG,4,Fully Paid,Pilot Sport 5,"₱46,875",0
+"Aug 18, 2026","Aug 21, 2026, 9:55:00 AM",38459,John Renzie Lanozo,MICHELIN 215/45/R18 PRIMACY 5 93W,DEV,Fulfilled,DEV,1,Fully Paid,Primacy 5,"₱9,883.93","11,070"
+"Aug 15, 2026","Aug 21, 2026, 9:00:00 AM",38378,Ian Kevin Antonio,MICHELIN 205/60/R16 PRIMACY 5 96W XL,TAIRA,Processing,SARAH MAE MANANSALA,4,Fully Paid,Primacy 5,"₱26,196.43",0
+"Aug 19, 2026","Aug 20, 2026, 1:00:00 PM",38514,Ian Miranda,MICHELIN 205/45/R17 PILOT SPORT 5 88Y,SARAH MAE MANANSALA,Fulfilled,SARAH MAE MANANSALA,4,Partial Payment,Pilot Sport 5,"₱35,571.43","39,840"
+"Aug 13, 2026","Aug 20, 2026, 1:00:00 PM",38293,Michelle Paez,MICHELIN 205/55/R16 PRIMACY 5 91W,DEV,Fulfilled,DEV,4,Fully Paid,Primacy 5,"₱23,732.14","26,580"
+"Aug 17, 2026","Aug 19, 2026, 3:00:00 PM",38424,Marinelle Martos,MICHELIN 205/65/R16 PRIMACY 5 95W,DEV,Fulfilled,DEV,4,Fully Paid,Primacy 5,"₱22,294.64","24,970"
+"Aug 5, 2026","Aug 19, 2026, 1:00:00 PM",37963,Serge E. Grynkewich,MICHELIN 275/45/R21 LATITUDE SPORT 3 107Y,TAIRA,Processing,SARAH MAE MANANSALA,4,Partial Payment,Latitude Sport 3,"₱114,000",0
+"Aug 18, 2026","Aug 19, 2026, 1:00:00 PM",38487,Ruther Sumipo,MICHELIN 235/50/R18 PRIMACY 5 97W,REMYLYN,Processing,REMYLYN,4,Fully Paid,Primacy 5,"₱37,727.68",0
+"Aug 17, 2026","Aug 19, 2026, 10:00:00 AM",38436,eugene alison,MICHELIN 215/55/R17 PRIMACY 5 94V,ROLYN ANG,Processing,ROLYN ANG,4,Partial Payment,Primacy 5,"₱32,959.82",0
+"Aug 13, 2026","Aug 19, 2026, 9:00:00 AM",38302,Ferdinand Syfu,MICHELIN 235/50/R18 PRIMACY 5 97W,AIRA,Processing,AIRA,4,Partial Payment,Primacy 5,"₱36,428.57",0
+"Aug 13, 2026","Aug 18, 2026, 1:30:00 PM",38306,Almon Samiano,MICHELIN 265/35/ZR18 PILOT SPORT 5 97Y,DEV,Fulfilled,DEV,4,Fully Paid,Pilot Sport 5,"₱41,464.29","46,440"
+"Aug 15, 2026","Aug 18, 2026, 9:00:00 AM",38370,Daniel Michael Chua,MICHELIN 205/55/R16 PRIMACY 5 91W,SARAH MAE MANANSALA,Fulfilled,SARAH MAE MANANSALA,4,Fully Paid,Primacy 5,"₱23,732.14","26,580"
+"Aug 16, 2026","Aug 17, 2026, 10:00:00 AM",38404,Noreen Escobar,MICHELIN 225/55/R18 PRIMACY 5 102V,REMYLYN,Fulfilled,REMYLYN,4,Partial Payment,Primacy 5,"₱35,799.11","40,095"
+"Aug 15, 2026","Aug 17, 2026, 9:00:00 AM",38368,Rodney rubica,MICHELIN 235/55/R19 PILOT SPORT 4 SUV 105Y,REMYLYN,Fulfilled,REMYLYN,4,Partial Payment,Pilot Sport 4 S,"₱59,209.82","66,315"
+"Aug 13, 2026","Aug 16, 2026, 8:30:00 AM",38286,Jeremy Almuete,MICHELIN 205/45/R17 PILOT SPORT 5 88Y,DEV,Processing,DEV,4,Fully Paid,Pilot Sport 5,"₱34,946.43",0
+"Aug 13, 2026","Aug 15, 2026, 1:00:00 PM",38297,Jay Cabuloy,MICHELIN 215/55/R17 PRIMACY 5 94V,DEV,Fulfilled,DEV,4,Fully Paid,Primacy 5,"₱32,424.11","36,315"
+"Aug 12, 2026","Aug 15, 2026, 10:00:00 AM",38229,Kristine Lazarito,MICHELIN 235/50/R19 PRIMACY 5 103W,DEV,Fulfilled,DEV,4,Fully Paid,Primacy 5,"₱43,750","49,000"
+"Aug 13, 2026","Aug 15, 2026, 9:00:00 AM",38299,Melbert Reyes,MICHELIN 205/55/R17 PRIMACY 5 95W,DEV,Fulfilled,DEV,5,Fully Paid,Primacy 5,"₱40,821.43","45,720"
+"Aug 12, 2026","Aug 15, 2026, 9:00:00 AM",38236,Romar v. Egualan,MICHELIN 255/40/ZR19 PILOT SPORT 5 100Y,TAIRA,Fulfilled,SARAH MAE MANANSALA,4,Fully Paid,Pilot Sport 5,"₱42,000","47,040"
+"Aug 13, 2026","Aug 14, 2026, 1:00:00 PM",38273,Lexus Rei Cabanting,MICHELIN 245/35/ZR18 PILOT SPORT 5 92Y,AIRA,Processing,AIRA,4,Fully Paid,Pilot Sport 5,"₱55,446.43",0
+"Aug 12, 2026","Aug 13, 2026, 3:00:00 PM",38249,Glade Goding,MICHELIN 245/35/ZR19 PILOT SPORT 5 93Y XL TL,REMYLYN,Processing,REMYLYN,4,Fully Paid,Pilot Sport 5,"₱53,571.43",0
+"Aug 12, 2026","Aug 13, 2026, 3:00:00 PM",38243,Gregory M Temple,MICHELIN 245/45/ZR19 PILOT SPORT 5 102Y XL TL,DEV,Fulfilled,DEV,4,Fully Paid,Pilot Sport 5,"₱54,830.36","61,410"
+"Aug 11, 2026","Aug 13, 2026, 8:00:00 AM",38164,Mikhail Alekseenko,MICHELIN 225/60/R17 PRIMACY 5 103V,DEV,Fulfilled,DEV,4,Fully Paid,Primacy 5,"₱40,089.29","44,900"
+"Aug 6, 2026","Aug 12, 2026, 9:00:00 AM",37983,Karl Vincent David,MICHELIN 195/60/R16 PRIMACY 5 93V,DEV,Fulfilled,DEV,4,Fully Paid,Primacy 5,"₱28,303.57","31,700"
+"Aug 7, 2026","Aug 12, 2026, 9:00:00 AM",38046,Martin Calvin flogio,MICHELIN 245/40/ZR19 PILOT SPORT 5 98Y,DEV,Fulfilled,DEV,4,Partial Payment,Pilot Sport 5,"₱44,678.57","50,040"
+"Aug 7, 2026","Aug 12, 2026, 8:30:00 AM",38048,Hugo Hung,MICHELIN 235/50/R18 PRIMACY 5 97W,REMYLYN,Fulfilled,REMYLYN,4,Fully Paid,Primacy 5,"₱39,870.54","44,655"
+"Aug 10, 2026","Aug 11, 2026, 1:00:00 PM",38121,Alfredo Wendell Besana,MICHELIN 205/60/R16 PRIMACY 5 96W XL,ROLYN ANG,Fulfilled,ROLYN ANG,4,Fully Paid,Primacy 5,"₱27,535.71","30,840"
+"Aug 7, 2026","Aug 11, 2026, 1:00:00 PM",38047,Jay Casti,MICHELIN 245/40/ZR18 PILOT SPORT 5 97Y XL TL,ROLYN ANG,Fulfilled,ROLYN ANG,4,Fully Paid,Pilot Sport 5,"₱40,044.64","44,850"
+"Aug 7, 2026","Aug 11, 2026, 10:00:00 AM",38044,Williard M. Lacar,MICHELIN 205/65/R16 PRIMACY 5 95W,ROLYN ANG,Fulfilled,ROLYN ANG,4,Fully Paid,Primacy 5,"₱20,982.14","23,500"
+"Aug 7, 2026","Aug 10, 2026, 1:00:00 PM",38050,Junichiro Nagasawa,MICHELIN 225/50/R18 PRIMACY 5 99W,DEV,Fulfilled,DEV,4,Fully Paid,Primacy 5,"₱38,995.54","43,675"
+"Aug 1, 2026","Aug 8, 2026, 1:00:00 PM",37817,JENELL MAE CHAVEZ,MICHELIN 205/55/R17 PRIMACY 5 95W,DEV,Fulfilled,DEV,4,Fully Paid,Primacy 5,"₱29,209.82","32,715"
+"Aug 5, 2026","Aug 8, 2026, 10:00:00 AM",37943,"Francis Roque ",MICHELIN 275/45/R21 LATITUDE SPORT 3 107Y,DEV,Fulfilled,DEV,8,Fully Paid,Latitude Sport 3,"₱140,178.57","157,000"
+"Aug 3, 2026","Aug 6, 2026, 3:00:00 PM",37867,REYNALDO LAINEZ,MICHELIN 205/65/R16 PRIMACY 5 95W,ROLYN ANG,Processing,ROLYN ANG,4,Fully Paid,Primacy 5,"₱23,812.5",0
+"Aug 1, 2026","Aug 4, 2026, 9:00:00 AM",37813,MICHAEL LIRIO,MICHELIN 235/45/R18 PRIMACY 5 98Y,SARAH MAE MANANSALA,Fulfilled,SARAH MAE MANANSALA,4,Fully Paid,Primacy 5,"₱36,607.14","41,000"
+"Aug 1, 2026","Aug 3, 2026, 9:00:00 AM",37809,Marlon Panghulan,MICHELIN 235/55/R18 PRIMACY 5 104W,DEV,Fulfilled,DEV,4,Fully Paid,Primacy 5,"₱35,816.96","40,115"
