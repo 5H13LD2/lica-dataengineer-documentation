@@ -1,0 +1,16 @@
+{
+  "qr_image_url": "https://storage.googleapis.com/gulong_chatbot_files/images/gulong_qr.png",
+  "BDO Bank Transfer": {
+    "account_name": "Golden Point Auto Care, Inc.",
+    "account_number": "000438033760"
+  },
+  "BPI Bank Transfer": {
+    "account_name": "Golden Point Auto Care Inc.",
+    "account_number": "9671002072"
+  },
+  "LDB Bank Transfer": {
+    "account_name": "Golden Point Auto Care Inc.",
+    "account_number": "028-33-00151-4"
+  }
+}
+

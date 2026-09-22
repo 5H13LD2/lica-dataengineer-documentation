@@ -1,0 +1,363 @@
+{
+  "pack_id": "runtime_v7_first_turn_intro_live_pack_v1",
+  "title": "Runtime V7 First-Turn Intro Live Probe Pack",
+  "description": "Focused live scenarios for the Runtime V7 first-turn welcome/intake intro. The same pack can be used by the harness live runner for prompt/tool artifacts and by the endpoint probe for customer-visible bubble assertions.",
+  "runner": "scripts/runtime_v7_live_test_pack.py",
+  "endpoint_runner": "scripts/runtime_v7_first_turn_intro_endpoint_probe.py",
+  "recommended_harness_command": "$env:PYTHONIOENCODING='utf-8'; $env:PYTHONUTF8='1'; python scripts/runtime_v7_live_test_pack.py --pack test_packs/runtime_v7_first_turn_intro_live_pack.json --mode live --scenario ft01_vague_greeting_full_intro --memory-generator heuristic --background-signal-generator hybrid-live --image-evidence-generator none --max-model-calls-per-run 20",
+  "recommended_endpoint_command": "$env:PYTHONIOENCODING='utf-8'; $env:PYTHONUTF8='1'; python scripts/runtime_v7_first_turn_intro_endpoint_probe.py --base-url https://<runtime-service-url> --pack test_packs/runtime_v7_first_turn_intro_live_pack.json --scenario ft01_vague_greeting_full_intro",
+  "endpoint": "/gulong/v7/chat/tester",
+  "global_review_checklist": [
+    "No post-response stripping or mutation is used to remove model greetings.",
+    "Runtime-owned intro bubbles appear only when there is no prior outbound assistant, human-agent, or ManyChat automation evidence.",
+    "For every nonempty first turn, the model writes the complete personalized opening before any guided or deterministic surface.",
+    "Customer-visible bubbles do not duplicate Welcome to Gulong.ph.",
+    "The prompt asks first-turn openings to identify Gulong.ph, while the structural gate checks only that nonempty text precedes any surface.",
+    "Exact automated starter buttons provide advisory intent and route to model-owned composition rather than deterministic prose.",
+    "Seeded prior outbound history suppresses the runtime-owned first-turn intro."
+  ],
+  "scenarios": [
+    {
+      "id": "ft01_vague_greeting_full_intro",
+      "title": "New customer vague greeting receives one model-owned opening",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "welcome_only", "new_customer", "greeting"],
+      "turns": [
+        "hi po"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "welcome_only",
+          "max_welcome_occurrences": 1,
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "turn.first_turn_intro_mode is welcome_only",
+          "turn.first_turn_opening_model_composed is true unless the bounded fixed fallback was required",
+          "context_input contains First-Turn Intro Context with mode=welcome_only",
+          "the reply welcomes or acknowledges naturally and asks one useful next question"
+        ]
+      },
+      "review_focus": ["natural greeting", "useful next question", "no intake dump", "no duplicate welcome"]
+    },
+    {
+      "id": "ft02_exact_tire_help_button_full_intro",
+      "title": "Exact tire-help starter receives a model-owned helpful response",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "welcome_only", "automated_button", "tire_help"],
+      "turns": [
+        "Can you help me find the right tire for my car?"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "welcome_only",
+          "max_welcome_occurrences": 1,
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "lead_qualifier.action is defer_to_full_runtime",
+          "lead_qualifier.button_type is automated_tire_help_button",
+          "turn.first_turn_intro_mode is welcome_only",
+          "response_seeds contain advisory intent but no response_units"
+        ]
+      },
+      "review_focus": ["direct reassurance", "one useful intake question", "no deterministic spiel"]
+    },
+    {
+      "id": "ft03_exact_location_button_full_intro",
+      "title": "Location question receives a direct model-owned response",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "welcome_only", "location"],
+      "turns": [
+        "Where are you located?"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "welcome_only",
+          "max_welcome_occurrences": 1,
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "turn.first_turn_intro_mode is welcome_only",
+          "the answer addresses the location question before asking for city or province",
+          "an unavailable location provider still permits the reviewed head-office installation-site answer, but not exact partner coverage, nearby availability, or serviceability"
+        ]
+      },
+      "review_focus": ["direct location answer", "grounded wording", "one natural next step", "no intake overload"]
+    },
+    {
+      "id": "ft04_actionable_size_welcome_only",
+      "title": "Actionable tire-size price inquiry receives a model-composed opening",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "welcome_only", "actionable", "product"],
+      "turns": [
+        "hm 185 60 r15"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "welcome_only",
+          "max_welcome_occurrences": 1,
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "turn.first_turn_intro_mode is welcome_only",
+          "context_input contains First-Turn Intro Context with mode=welcome_only",
+          "turn.first_turn_opening_model_composed is true unless the bounded fixed fallback was required",
+          "the opening and continuation proceed with product/service flow and do not ask for the full four-field intake list"
+        ]
+      },
+      "review_focus": ["actionable size", "personalized branded opening", "product continuation"]
+    },
+    {
+      "id": "ft05_actionable_vehicle_welcome_only",
+      "title": "Actionable vehicle hint receives a model-composed opening",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "welcome_only", "actionable", "fitment"],
+      "turns": [
+        "hm tires for vios"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "welcome_only",
+          "max_welcome_occurrences": 1,
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "turn.first_turn_intro_mode is welcome_only",
+          "turn.first_turn_opening_model_composed is true unless the bounded fixed fallback was required",
+          "vehicle/fitment context remains model-led and tool-grounded",
+          "the continuation should not restart the full intake script"
+        ]
+      },
+      "review_focus": ["vehicle hint", "personalized branded opening", "fitment continuation"]
+    },
+    {
+      "id": "ft06_actionable_service_question_welcome_only",
+      "title": "Specific same-day installation question receives a model-composed opening",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "welcome_only", "actionable", "service"],
+      "turns": [
+        "do you offer same day installation? Carmona"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "welcome_only",
+          "max_welcome_occurrences": 1,
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ],
+          "must_contain_any": [
+            ["same-day", "Carmona", "installation"]
+          ]
+        },
+        "harness_review": [
+          "turn.first_turn_intro_mode is welcome_only",
+          "turn.first_turn_opening_model_composed is true unless the bounded fixed fallback was required",
+          "service intent and location are preserved after the personalized opening",
+          "no same-day availability is claimed without service tool grounding"
+        ]
+      },
+      "review_focus": ["specific service question", "personalized branded opening", "service continuation"]
+    },
+    {
+      "id": "ft07_prior_manychat_automation_suppresses_intro",
+      "title": "Prior ManyChat automation welcome suppresses runtime-owned intro",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "suppression", "manychat_automation", "seeded_history"],
+      "conversation_history": [
+        {
+          "role": "assistant",
+          "type": "msgout_default",
+          "message_kind": "manychat_automation",
+          "sender": "ManyChat automation",
+          "content": "Hi po! Welcome to Gulong.ph. Para ma-check namin yung best tires for you, pakisend lang po tire size/car info, brand or budget, location, and contact number.",
+          "message_id": "probe_auto_intro_1",
+          "datetime": "2026-06-04 10:00:00"
+        }
+      ],
+      "turns": [
+        "hm 185 60 r15"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "none",
+          "max_welcome_occurrences": 0,
+          "must_not_start_with": ["Welcome to Gulong.ph", "Hi po! Welcome to Gulong.ph"],
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "turn.welcome_spiel_inserted is false",
+          "hydrated_recent_turns_before_turn includes message_kind=manychat_automation",
+          "the model sees the automation as conversation history, not a trusted product/order fact"
+        ]
+      },
+      "review_focus": ["ManyChat automation history", "intro suppression", "no duplicate welcome"]
+    },
+    {
+      "id": "ft08_prior_human_agent_suppresses_intro",
+      "title": "Prior human-agent welcome suppresses runtime-owned intro",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "suppression", "human_agent", "seeded_history"],
+      "conversation_history": [
+        {
+          "role": "human_agent",
+          "sender": "Human Agent",
+          "content": "Hi po, welcome to Gulong.ph. Paki-send tire size or car model po para ma-check natin.",
+          "message_id": "probe_agent_intro_1",
+          "datetime": "2026-06-04 10:00:00"
+        }
+      ],
+      "turns": [
+        "hm 185 60 r15"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "none",
+          "max_welcome_occurrences": 0,
+          "must_not_start_with": ["Welcome to Gulong.ph", "Hi po! Welcome to Gulong.ph"],
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "turn.welcome_spiel_inserted is false",
+          "hydrated_recent_turns_before_turn includes the human-agent message",
+          "the continuation uses the latest customer tire size"
+        ]
+      },
+      "review_focus": ["human-agent history", "intro suppression", "latest customer message priority"]
+    },
+    {
+      "id": "ft09_prior_chatbot_message_suppresses_intro",
+      "title": "Prior chatbot welcome suppresses runtime-owned intro",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "suppression", "assistant_history", "seeded_history"],
+      "conversation_history": [
+        {
+          "role": "assistant",
+          "content": "Hi po! Welcome to Gulong.ph. Ano pong tire size or car model nila?",
+          "message_id": "probe_bot_intro_1",
+          "datetime": "2026-06-04 10:00:00"
+        }
+      ],
+      "turns": [
+        "hm 185 60 r15"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "none",
+          "max_welcome_occurrences": 0,
+          "must_not_start_with": ["Welcome to Gulong.ph", "Hi po! Welcome to Gulong.ph"],
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "turn.welcome_spiel_inserted is false",
+          "hydrated_recent_turns_before_turn includes the prior assistant message",
+          "the model does not repeat the welcome"
+        ]
+      },
+      "review_focus": ["prior chatbot message", "intro suppression", "no duplicate welcome"]
+    },
+    {
+      "id": "ft10_exact_availability_button",
+      "title": "Exact availability starter asks whether anyone can chat",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "availability", "automated_button", "human_support"],
+      "turns": [
+        "Is anyone available to chat?"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "welcome_only",
+          "max_welcome_occurrences": 1,
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "the response answers availability directly without treating the question as an explicit handoff request",
+          "no Stop Chatbot action or claim that a human is already assigned is produced",
+          "the customer is not forced through unrelated tire-size guidance before receiving the answer"
+        ]
+      },
+      "review_focus": ["exact starter text", "direct assistance answer", "no false handoff", "no intake overload"]
+    },
+    {
+      "id": "ft11_generic_assistance_paraphrase",
+      "title": "Free-text customer asks whether someone can assist",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "availability", "free_text", "human_support"],
+      "turns": [
+        "Hi, is there anyone available to assist?"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "welcome_only",
+          "max_welcome_occurrences": 1,
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "the response distinguishes a general availability question from an explicit human takeover request",
+          "the first answer is friendly and direct, then asks one lightweight question about the customer's need",
+          "no Stop Chatbot action or unsupported staffing-status claim is produced"
+        ]
+      },
+      "review_focus": ["free-text assistance", "natural greeting", "one next question", "no false handoff"]
+    },
+    {
+      "id": "ft12_colloquial_location_question",
+      "title": "Colloquial first-turn business location question",
+      "category": "first_turn_intro",
+      "tags": ["first_turn_intro", "location", "free_text", "service"],
+      "turns": [
+        "Saan po kayo located? may physical shop ba?"
+      ],
+      "expected": {
+        "endpoint": {
+          "intro_mode": "welcome_only",
+          "max_welcome_occurrences": 1,
+          "must_not_contain": [
+            "Para ma-check namin yung best tires",
+            "Guide lang po: tire size usually"
+          ]
+        },
+        "harness_review": [
+          "the response directly explains the reviewed online-first setup and that the Makati head office is also an installation site instead of sounding uncertain or evasive",
+          "the approved over-100 partner brand claim may be used, but exact coverage or nearby availability still requires grounded runtime evidence",
+          "if the partner-network claim is used, it is connected to the online installation process, customer convenience, or the location next step rather than appended as a detached credential",
+          "the head-office address is correctly presented as an installation site, while pickup, stock, slots, and unreserved walk-in service are not invented",
+          "the response does not add nationwide or regional coverage without current service evidence, and any nearby-installation CTA asks for the customer's city/area rather than pivoting to unrelated intake",
+          "the opening does not prepend the unrelated full tire-intake script"
+        ]
+      },
+      "review_focus": ["business presence", "trustworthy direct answer", "grounded service transition", "no intake overload"]
+    }
+  ]
+}

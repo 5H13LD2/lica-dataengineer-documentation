@@ -1,0 +1,145 @@
+{
+  "changes": [
+    {
+      "behavioral_scope": "analytics_only",
+      "change_id": "release-a-final-composer-repair-observability",
+      "deployment_status": "completed",
+      "files": [
+        "runtime_v7/runtime_harness.py",
+        "runtime_v7/api_runtime.py"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "normalized-repair-cause-gap",
+      "status": "confirmed",
+      "summary": "Normalized final-composer spans lacked explicit attempt-kind and repair-cause labels."
+    },
+    {
+      "claim_id": "release-a-no-runtime-behavior-change",
+      "status": "confirmed",
+      "summary": "Release A changes call-record and analytics metadata only; focused regressions and a like-for-like deployed baseline comparison show no response-path movement attributable to the patch."
+    }
+  ],
+  "cost_ledger": [],
+  "investigation_id": "20260827-runtime-v7-repair-observability",
+  "objective": "Implement Release A observability for final-composer attempt kinds and repair causes without changing prompts, schemas, retry policy, models, rendering, or customer responses.",
+  "owner_agent": "codex",
+  "primary_repo": "D:\\Carlo\\LICA Auto\\assistant\\_codex_worktrees\\gulong-runtime-repair-observability-live-20260827",
+  "release_and_backfill": {
+    "backfill_status": "not_requested",
+    "deployment_status": "completed_staging_cloud_run_live_and_vm",
+    "rollback_gate": "VM rollback container gulong-chatbot-runtime-shadow-rollback-feb88a4-20260827T1912PHT is retained; restore it or the prior Cloud Run revision if normalized ingestion, runtime health, or delivery status regresses."
+  },
+  "scope": [
+    "final-composer LLM call records",
+    "normalized llm_span_log metadata",
+    "deterministic observability regressions"
+  ],
+  "sources": [
+    {
+      "cutoff": "2026-08-27T18:35:21+08:00",
+      "freshness": "current at investigation start",
+      "location": "origin/product@71b15cadf5d012ad58c0f42349dd96127ff09ae6",
+      "source_id": "origin-product-baseline",
+      "source_kind": "git_revision"
+    },
+    {
+      "cutoff": "2026-08-27T18:32:00+08:00",
+      "freshness": "post-change",
+      "location": "local isolated worktree",
+      "source_id": "focused-regression-run",
+      "source_kind": "pytest"
+    },
+    {
+      "cutoff": "2026-08-27T18:59:00+08:00",
+      "freshness": "post-staging deployment",
+      "location": "gulong-chatbot-runtime-staging-00429-rh9 and gulong_chatbot_dev normalized tables",
+      "source_id": "staging-release-verification",
+      "source_kind": "cloud_run_and_bigquery"
+    },
+    {
+      "cutoff": "2026-08-27T19:08:00+08:00",
+      "freshness": "post-live Cloud Run deployment",
+      "location": "gulong-chatbot-runtime-live-00105-7tr and gulong_chatbot_live normalized tables",
+      "source_id": "cloud-run-live-verification",
+      "source_kind": "cloud_run_and_bigquery"
+    },
+    {
+      "cutoff": "2026-08-27T19:17:36+08:00",
+      "freshness": "bounded post-VM cutover window",
+      "location": "gulong-platform-shadow-vm, gulong-chatbot-runtime-shadow, and gulong_chatbot_live normalized tables",
+      "source_id": "vm-live-verification",
+      "source_kind": "compute_engine_docker_and_bigquery"
+    }
+  ],
+  "started_at": "2026-08-27T18:35:21+08:00",
+  "status": "complete",
+  "timezone": "Asia/Manila",
+  "title": "Runtime V7 Final Composer Repair Observability",
+  "updated_at": "2026-08-27T19:22:02+08:00",
+  "verification": [
+    {
+      "coverage": [
+        "successful initial composition",
+        "initial response-format retry",
+        "contract repair and repair-format retry",
+        "normalized LLM-span metadata projection",
+        "all existing final-composer attempt categories"
+      ],
+      "result": "5 passed",
+      "status": "passed",
+      "verification_id": "focused-deterministic-tests"
+    },
+    {
+      "coverage": [
+        "all files matching test_runtime_v7 under test"
+      ],
+      "result": "1502 passed in 60.50s",
+      "status": "passed",
+      "verification_id": "full-runtime-v7-regression"
+    },
+    {
+      "coverage": [
+        "diff from origin/product",
+        "documentation contract",
+        "behavioral change checklist"
+      ],
+      "result": "No findings beyond README confirmation informational item",
+      "status": "passed_with_info",
+      "verification_id": "behavioral-change-audit"
+    },
+    {
+      "coverage": [
+        "exact staging SHA and revision",
+        "health and return-only configuration",
+        "normalized final-composer attempt_kind projection",
+        "revision errors and HTTP 5xx"
+      ],
+      "result": "Staging revision gulong-chatbot-runtime-staging-00429-rh9 passed",
+      "status": "passed",
+      "verification_id": "staging-deployment"
+    },
+    {
+      "coverage": [
+        "staging versus pre-patch live baseline",
+        "hotline, delivery policy, and payment contract cases"
+      ],
+      "result": "Both revisions passed 1 of 3 with matching failure categories; no Release A quality regression observed",
+      "status": "passed_with_baseline_debt",
+      "verification_id": "deployed-quality-parity"
+    },
+    {
+      "coverage": [
+        "Cloud Run live revision and traffic",
+        "VM immutable digest and restart metadata",
+        "return-only probes and normalized telemetry",
+        "rollback retention and post-cutover request outcomes"
+      ],
+      "result": "Cloud Run live and VM passed; 8 completed VM rows included 5 successful deliveries, 1 synthetic skip, and 2 intentional suppressions",
+      "status": "passed",
+      "verification_id": "live-and-vm-deployment"
+    }
+  ]
+}

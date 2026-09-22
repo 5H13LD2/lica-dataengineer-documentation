@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "provider": "bigquery",
+  "gateway": "bigquery",
+  "project_id": "gulong-chatbot-459723",
+  "dataset_id": "gulong_chatbot",
+  "location": "asia-southeast1",
+  "max_rows": 200,
+  "max_age_s": 5.0,
+  "retry_max": 2,
+  "retry_backoff_s": 0.5,
+  "service_account": null
+}

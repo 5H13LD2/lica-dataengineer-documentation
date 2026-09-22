@@ -1,0 +1,132 @@
+{
+  "probes": [
+    {
+      "id": "product_search_known_size",
+      "component": "product_search",
+      "enabled": false,
+      "method": "POST",
+      "read_only": true,
+      "base_url": "$ENV:GULONG_API_BASE_URL",
+      "path": "/shop",
+      "query": {
+        "section_width": "175",
+        "aspect_ratio": "65",
+        "rim_size": "R14"
+      },
+      "expected": {
+        "status_codes": [200],
+        "root_type": "object",
+        "required_paths": ["data"],
+        "types": {"data": "array"},
+        "non_empty": ["data"]
+      },
+      "max_latency_ms": 10000
+    },
+    {
+      "id": "installation_partner_catalog",
+      "component": "installation_partners",
+      "enabled": false,
+      "method": "GET",
+      "base_url": "$ENV:GULONG_API_BASE_URL",
+      "path": "/branch_list_loc",
+      "expected": {
+        "status_codes": [200],
+        "root_type": "array",
+        "non_empty": ["0"]
+      },
+      "max_latency_ms": 10000
+    },
+    {
+      "id": "payment_catalog",
+      "component": "payment_catalog",
+      "enabled": false,
+      "method": "GET",
+      "base_url": "$ENV:GULONG_API_BASE_URL",
+      "path": "/payment/list",
+      "expected": {
+        "status_codes": [200],
+        "root_type": "object",
+        "required_paths": ["data"],
+        "types": {"data": "array"},
+        "non_empty": ["data"]
+      },
+      "max_latency_ms": 10000
+    },
+    {
+      "id": "transaction_type_catalog",
+      "component": "transaction_types",
+      "enabled": false,
+      "method": "GET",
+      "base_url": "$ENV:GULONG_API_BASE_URL",
+      "path": "/transaction_list",
+      "expected": {
+        "status_codes": [200],
+        "root_type": "array",
+        "non_empty": ["0"]
+      },
+      "max_latency_ms": 10000
+    },
+    {
+      "id": "installation_slots_for_test_branch",
+      "component": "installation_slots",
+      "enabled": false,
+      "method": "GET",
+      "base_url": "$ENV:GULONG_API_BASE_URL",
+      "path": "/available_slots",
+      "query": {
+        "branch": "$ENV:RUNTIME_HEALTH_TEST_BRANCH_ID",
+        "date": "$ENV:RUNTIME_HEALTH_TEST_SLOT_DATE",
+        "tType": "Install"
+      },
+      "expected": {
+        "status_codes": [200],
+        "root_type": "object",
+        "required_paths": ["sched"],
+        "types": {"sched": "array"}
+      },
+      "max_latency_ms": 10000
+    },
+    {
+      "id": "manychat_load_messages_test_contact",
+      "component": "manychat_messages",
+      "enabled": false,
+      "method": "GET",
+      "url": "$ENV:RUNTIME_HEALTH_MANYCHAT_LOAD_MESSAGES_URL",
+      "query": {
+        "limit": 5,
+        "user_id": "$ENV:RUNTIME_HEALTH_MANYCHAT_TEST_USER_ID",
+        "type": "facebook"
+      },
+      "headers": {
+        "Cookie": "$ENV:RUNTIME_HEALTH_MANYCHAT_COOKIE"
+      },
+      "expected": {
+        "status_codes": [200],
+        "root_type": "object",
+        "required_paths": ["messages"],
+        "types": {"messages": "array"}
+      },
+      "max_latency_ms": 10000
+    },
+    {
+      "id": "manychat_profile_test_contact",
+      "component": "manychat_profile",
+      "enabled": false,
+      "method": "GET",
+      "url": "$ENV:RUNTIME_HEALTH_MANYCHAT_PROFILE_URL",
+      "headers": {
+        "Authorization": "$ENV:RUNTIME_HEALTH_MANYCHAT_AUTHORIZATION"
+      },
+      "expected": {
+        "status_codes": [200],
+        "root_type": "object",
+        "required_paths": ["data.tags", "data.custom_fields"],
+        "types": {
+          "data.tags": "array",
+          "data.custom_fields": "array"
+        }
+      },
+      "max_latency_ms": 10000
+    }
+  ]
+}

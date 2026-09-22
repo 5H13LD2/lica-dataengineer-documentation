@@ -1,0 +1,558 @@
+{
+  "pack_id": "runtime_v7_signal_retention_probe_v1",
+  "title": "Runtime V7 fixed free-text Background Signal retention",
+  "description": "Cost-bounded component probe for model extraction, normalization, typed correction/retraction, transient questions, and durable ledger carry-forward. This is not an adaptive customer simulation and does not run the whole Runtime V7 harness.",
+  "runner": "scripts/runtime_v7_signal_retention_probe.py",
+  "coverage_dimensions": [
+    "tire_size",
+    "brand",
+    "car",
+    "location",
+    "contact_or_customer_info",
+    "service_type",
+    "schedule",
+    "payment",
+    "promo_interest",
+    "correction_or_retraction",
+    "conditional_or_question_only",
+    "interruptions_5_plus"
+  ],
+  "execution_policy": {
+    "default_model_retry_attempts": 0,
+    "default_max_model_calls_run": 60,
+    "artifact_first": true,
+    "utf8_safe": true,
+    "component_boundary": "RuntimeV7BackgroundSignalModelClient + build_commercial_state_context + InMemoryBackgroundSignalLedgerStore",
+    "adaptive_customer_simulation": false,
+    "whole_runtime_calls": false,
+    "focused_command": "$env:PYTHONIOENCODING='utf-8'; $env:PYTHONUTF8='1'; $env:LANGSMITH_TRACING='false'; $env:LANGCHAIN_TRACING_V2='false'; python scripts/runtime_v7_signal_retention_probe.py --pack test_packs/runtime_v7_signal_retention_probe.json --scenario sr01_honda_yokohama --max-model-calls-run 12"
+  },
+  "scenarios": [
+    {
+      "id": "sr01_honda_yokohama",
+      "title": "Civic Yokohama request with payment question and size correction",
+      "tags": ["product", "service", "payment", "correction", "question_only", "interruptions"],
+      "coverage": ["correction_or_retraction", "conditional_or_question_only", "interruptions_5_plus"],
+      "min_interruptions": 7,
+      "variation_dimensions": {
+        "tire_size": "195/65R15 -> 205/60R16",
+        "brand": "Yokohama",
+        "car": "Honda Civic 2020",
+        "location": "Pasig -> Quezon City",
+        "contact_or_customer_info": "Carlo; 09171234567",
+        "service_type": "installation",
+        "schedule": "Saturday afternoon",
+        "payment": "Pay Now question -> Pay Later / BDO 6 months",
+        "promo_interest": "asks about discount conditionally"
+      },
+      "turns": [
+        {
+          "id": "t01_initial_product",
+          "message": "Hi po, 195/65R15 for my Honda Civic 2020, 4 tires. Yokohama sana, budget around PHP 28000. I'm Carlo, 09171234567.",
+          "required_durable_signals": [
+            {"key": "tire_size", "value": "195/65R15"},
+            {"key": "car_make_model", "value": "Honda Civic"},
+            {"key": "quantity", "value": "4"},
+            {"key": "preferred_brands", "value": "YOKOHAMA"},
+            {"key": "budget", "value": "about PHP 28,000 total"},
+            {"key": "contact_number", "value": "09171234567"},
+            {"key": "first_name", "value": "Carlo"}
+          ]
+        },
+        {
+          "id": "t02_install_schedule",
+          "message": "May installation po ba sa Pasig this Saturday afternoon?",
+          "required_durable_signals": [
+            {"key": "location", "value": "Pasig"},
+            {"key": "service_type", "value": "installation"},
+            {"key": "chosen_schedule_slot", "value": "Saturday afternoon"}
+          ]
+        },
+        {
+          "id": "t03_payment_question",
+          "message": "If Pay Now, may discount ba? Also is BPI installment available?",
+          "forbidden_durable_signals": [
+            {"key": "payment_option", "value": "Pay Now"},
+            {"key": "bank", "value": "BPI"}
+          ]
+        },
+        {
+          "id": "t04_payment_correction",
+          "message": "Pay Later na lang po, and I prefer BDO 6 months if available.",
+          "required_durable_signals": [
+            {"key": "payment_option", "value": "Pay Later"},
+            {"key": "bank", "value": "BDO"},
+            {"key": "installment_months", "value": "6"}
+          ],
+          "forbidden_durable_signals": [
+            {"key": "payment_option", "value": "Pay Now"}
+          ]
+        },
+        {
+          "id": "t05_size_correction",
+          "message": "Actually size is 205/60R16, not 195/65R15. The Civic has different tires.",
+          "required_durable_signals": [
+            {"key": "tire_size", "value": "205/60R16"}
+          ],
+          "forbidden_durable_signals": [
+            {"key": "tire_size", "value": "195/65R15"}
+          ]
+        },
+        {
+          "id": "t06_warranty_interrupt",
+          "message": "Original and brand new naman lahat? May warranty ba?"
+        },
+        {
+          "id": "t07_alignment_interrupt",
+          "message": "May wheel alignment addon din ba sa installation?"
+        },
+        {
+          "id": "t08_location_correction",
+          "message": "Correction po, Quezon City na lang yung installation area, not Pasig.",
+          "required_durable_signals": [
+            {"key": "location", "value": "Quezon City"}
+          ],
+          "forbidden_durable_signals": [
+            {"key": "location", "value": "Pasig"}
+          ]
+        }
+      ],
+      "final_required_durable_signals": [
+        {"key": "tire_size", "value": "205/60R16"},
+        {"key": "preferred_brands", "value": "YOKOHAMA"},
+        {"key": "location", "value": "Quezon City"},
+        {"key": "payment_option", "value": "Pay Later"}
+      ],
+      "final_forbidden_durable_signals": [
+        {"key": "tire_size", "value": "195/65R15"},
+        {"key": "payment_option", "value": "Pay Now"},
+        {"key": "location", "value": "Pasig"}
+      ]
+    },
+    {
+      "id": "sr02_toyota_bridgestone",
+      "title": "Fortuner Bridgestone request with promo retraction and email continuation",
+      "tags": ["product", "promo", "service", "retraction", "question_only", "interruptions"],
+      "coverage": ["correction_or_retraction", "conditional_or_question_only", "interruptions_5_plus"],
+      "min_interruptions": 6,
+      "variation_dimensions": {
+        "tire_size": "225/55R18",
+        "brand": "Bridgestone -> Michelin",
+        "car": "Toyota Fortuner 2019",
+        "location": "Makati",
+        "contact_or_customer_info": "Bea Santos; 09981234567; bea@example.com",
+        "service_type": "installation",
+        "schedule": "Sunday morning",
+        "payment": "cash at branch (context only)",
+        "promo_interest": "Buy 3 Get 1 then retracted"
+      },
+      "turns": [
+        {
+          "id": "t01_initial_product",
+          "message": "Need 225/55R18 for my Toyota Fortuner 2019, 4 Bridgestone tires, install in Makati. Bea Santos, 09981234567.",
+          "required_durable_signals": [
+            {"key": "tire_size", "value": "225/55R18"},
+            {"key": "car_make_model", "value": "Toyota Fortuner"},
+            {"key": "quantity", "value": "4"},
+            {"key": "required_brands", "value": "BRIDGESTONE"},
+            {"key": "location", "value": "Makati"},
+            {"key": "service_type", "value": "installation"},
+            {"key": "contact_number", "value": "09981234567"},
+            {"key": "first_name", "value": "Bea"},
+            {"key": "last_name", "value": "Santos"}
+          ]
+        },
+        {
+          "id": "t02_schedule",
+          "message": "Sunday morning sana if may slot.",
+          "required_durable_signals": [
+            {"key": "chosen_schedule_slot", "value": "Sunday morning"}
+          ]
+        },
+        {
+          "id": "t03_promo_interest",
+          "message": "Promo interested ako, Buy 3 Get 1 if available.",
+          "required_durable_signals": [
+            {"key": "promo_types", "value": "buy3get1"},
+            {"key": "quantity", "value": "4"}
+          ]
+        },
+        {
+          "id": "t04_promo_retraction",
+          "message": "Hindi na promo; regular four tires na lang.",
+          "forbidden_durable_signals": [
+            {"key": "promo_types", "value": "buy3get1"}
+          ]
+        },
+        {
+          "id": "t05_brand_correction",
+          "message": "Actually Michelin na lang instead of Bridgestone.",
+          "required_durable_signals": [
+            {"key": "required_brands", "value": "MICHELIN"}
+          ],
+          "forbidden_durable_signals": [
+            {"key": "required_brands", "value": "BRIDGESTONE"}
+          ]
+        },
+        {
+          "id": "t06_branch_question",
+          "message": "May branch ba sa Carmona?",
+          "forbidden_durable_signals": [
+            {"key": "location", "value": "Carmona"}
+          ]
+        },
+        {
+          "id": "t07_email_interrupt",
+          "message": "Please email the details to bea@example.com.",
+          "required_durable_signals": [
+            {"key": "email_address", "value": "bea@example.com"}
+          ]
+        }
+      ],
+      "final_required_durable_signals": [
+        {"key": "tire_size", "value": "225/55R18"},
+        {"key": "required_brands", "value": "MICHELIN"},
+        {"key": "location", "value": "Makati"},
+        {"key": "email_address", "value": "bea@example.com"}
+      ],
+      "final_forbidden_durable_signals": [
+        {"key": "promo_types", "value": "buy3get1"},
+        {"key": "required_brands", "value": "BRIDGESTONE"},
+        {"key": "location", "value": "Carmona"}
+      ]
+    },
+    {
+      "id": "sr03_xpander_delivery",
+      "title": "Xpander delivery request with payment question and pickup retraction",
+      "tags": ["delivery", "payment", "correction", "conditional", "interruptions"],
+      "coverage": ["correction_or_retraction", "conditional_or_question_only", "interruptions_5_plus"],
+      "min_interruptions": 7,
+      "variation_dimensions": {
+        "tire_size": "175R14C -> 185R14C",
+        "brand": "Arivo",
+        "car": "Mitsubishi Xpander",
+        "location": "Alabang -> Cubao",
+        "contact_or_customer_info": "Jun Reyes; 09181234567; jun@example.com",
+        "service_type": "delivery -> pickup",
+        "schedule": "tomorrow 9am -> Saturday",
+        "payment": "GCash question -> Pay Now via GCash",
+        "promo_interest": "asks whether a budget promo exists"
+      },
+      "turns": [
+        {
+          "id": "t01_initial_delivery",
+          "message": "Mitsubishi Xpander needs 175R14C, 2 tires, Arivo sana. Delivery to Alabang please; call 09181234567.",
+          "required_durable_signals": [
+            {"key": "tire_size", "value": "175R14C"},
+            {"key": "car_make_model", "value": "Mitsubishi Xpander"},
+            {"key": "quantity", "value": "2"},
+            {"key": "preferred_brands", "value": "ARIVO"},
+            {"key": "location", "value": "Alabang"},
+            {"key": "service_type", "value": "delivery"},
+            {"key": "contact_number", "value": "09181234567"}
+          ]
+        },
+        {
+          "id": "t02_delivery_schedule",
+          "message": "Can you deliver near Alabang tomorrow at 9am?",
+          "required_durable_signals": [
+            {"key": "chosen_schedule_slot", "value": "tomorrow at 9am"}
+          ]
+        },
+        {
+          "id": "t03_payment_question",
+          "message": "Question lang, do you accept GCash?",
+          "forbidden_durable_signals": [
+            {"key": "payment_method", "value": "gcash"}
+          ]
+        },
+        {
+          "id": "t04_payment_selection",
+          "message": "For this order, Pay Now via GCash please.",
+          "required_durable_signals": [
+            {"key": "payment_option", "value": "Pay Now"},
+            {"key": "payment_method", "value": "gcash"}
+          ]
+        },
+        {
+          "id": "t05_size_quantity_correction",
+          "message": "Wait, make that 4 tires, not 2, and use 185R14C.",
+          "required_durable_signals": [
+            {"key": "quantity", "value": "4"},
+            {"key": "tire_size", "value": "185R14C"}
+          ],
+          "forbidden_durable_signals": [
+            {"key": "quantity", "value": "2"},
+            {"key": "tire_size", "value": "175R14C"}
+          ]
+        },
+        {
+          "id": "t06_promo_question",
+          "message": "Any budget promo? Is China origin okay?",
+          "forbidden_durable_signals": [
+            {"key": "origins", "value": "China"}
+          ]
+        },
+        {
+          "id": "t07_customer_details",
+          "message": "Name is Jun Reyes, email jun@example.com.",
+          "required_durable_signals": [
+            {"key": "first_name", "value": "Jun"},
+            {"key": "last_name", "value": "Reyes"},
+            {"key": "email_address", "value": "jun@example.com"}
+          ]
+        },
+        {
+          "id": "t08_fulfillment_retraction",
+          "message": "Actually no delivery for now; pickup at Cubao on Saturday instead.",
+          "required_durable_signals": [
+            {"key": "service_type", "value": "pickup"},
+            {"key": "location", "value": "Cubao"},
+            {"key": "chosen_schedule_slot", "value": "Saturday"}
+          ],
+          "forbidden_durable_signals": [
+            {"key": "service_type", "value": "delivery"},
+            {"key": "location", "value": "Alabang"}
+          ]
+        }
+      ],
+      "final_required_durable_signals": [
+        {"key": "tire_size", "value": "185R14C"},
+        {"key": "quantity", "value": "4"},
+        {"key": "service_type", "value": "pickup"},
+        {"key": "payment_option", "value": "Pay Now"}
+      ],
+      "final_forbidden_durable_signals": [
+        {"key": "tire_size", "value": "175R14C"},
+        {"key": "quantity", "value": "2"},
+        {"key": "service_type", "value": "delivery"},
+        {"key": "location", "value": "Alabang"}
+      ]
+    },
+    {
+      "id": "sr04_navara_home_service",
+      "title": "Navara home-service preference, payment question, and service retraction",
+      "tags": ["service", "fitment", "payment", "retraction", "interruptions"],
+      "coverage": ["correction_or_retraction", "conditional_or_question_only", "interruptions_5_plus"],
+      "min_interruptions": 6,
+      "variation_dimensions": {
+        "tire_size": "265/65R17",
+        "brand": "BFGoodrich",
+        "car": "Nissan Navara",
+        "location": "Cavite -> Imus",
+        "contact_or_customer_info": "Lia; 09281234567",
+        "service_type": "home service (retracted)",
+        "schedule": "next Monday afternoon",
+        "payment": "BPI 3 months question",
+        "promo_interest": "promo interest without named promo"
+      },
+      "turns": [
+        {
+          "id": "t01_initial_service",
+          "message": "Need 265/65R17 BFGoodrich for my Nissan Navara. Home service near Cavite, please. Lia, 09281234567.",
+          "required_durable_signals": [
+            {"key": "tire_size", "value": "265/65R17"},
+            {"key": "car_make_model", "value": "Nissan Navara"},
+            {"key": "required_brands", "value": "BFGOODRICH"},
+            {"key": "location"},
+            {"key": "service_type", "value": "home_service"},
+            {"key": "contact_number", "value": "09281234567"},
+            {"key": "first_name", "value": "Lia"}
+          ]
+        },
+        {
+          "id": "t02_category_preference",
+          "message": "Premium sana, pero quiet and durable for daily driving.",
+          "required_durable_signals": [
+            {"key": "tire_category_preference", "value": "Premium"}
+          ]
+        },
+        {
+          "id": "t03_warranty_interrupt",
+          "message": "What warranty coverage comes with it?"
+        },
+        {
+          "id": "t04_payment_question",
+          "message": "How about BPI 3 months, available ba?",
+          "forbidden_durable_signals": [
+            {"key": "bank", "value": "BPI"},
+            {"key": "installment_months", "value": "3"}
+          ]
+        },
+        {
+          "id": "t05_schedule",
+          "message": "Book installation next Monday afternoon if possible.",
+          "required_durable_signals": [
+            {"key": "chosen_schedule_slot", "value": "next Monday afternoon"},
+            {"key": "service_type", "value": "installation"}
+          ]
+        },
+        {
+          "id": "t06_location_correction",
+          "message": "Correction, Imus na lang, not Cavite.",
+          "required_durable_signals": [
+            {"key": "location", "value": "Imus, Cavite"}
+          ],
+          "forbidden_durable_signals": [
+            {"key": "location", "value": "Cavite"}
+          ]
+        },
+        {
+          "id": "t07_service_retraction",
+          "message": "No, cancel home service for now; I will decide later.",
+          "forbidden_durable_signals": [
+            {"key": "service_type", "value": "home_service"}
+          ]
+        },
+        {
+          "id": "t08_promo_question",
+          "message": "Still interested if there is any promo for this size."
+        }
+      ],
+      "final_required_durable_signals": [
+        {"key": "tire_size", "value": "265/65R17"},
+        {"key": "required_brands", "value": "BFGOODRICH"},
+        {"key": "location", "value": "Imus, Cavite"},
+        {"key": "tire_category_preference", "value": "Premium"}
+      ],
+      "final_forbidden_durable_signals": [
+        {"key": "location", "value": "Cavite"},
+        {"key": "service_type", "value": "home_service"},
+        {"key": "bank", "value": "BPI"}
+      ]
+    },
+    {
+      "id": "sr05_partial_size_correction",
+      "title": "Partial tire-size correction with delivery continuity",
+      "tags": ["product", "delivery", "correction", "deferment"],
+      "coverage": ["correction_or_retraction", "conditional_or_question_only"],
+      "min_interruptions": 2,
+      "variation_dimensions": {
+        "tire_size": "255/65R17 -> 225/65R17 partial correction",
+        "car": "Mitsubishi Montero Sport",
+        "location": "Bacolod City",
+        "service_type": "delivery",
+        "conditional_or_question_only": "delivery payment process question"
+      },
+      "turns": [
+        {
+          "id": "t01_initial_request",
+          "message": "Need 4 tires, 255/65R17 for my Montero Sport. Delivery to Bacolod City sana.",
+          "required_durable_signals": [
+            {"key": "tire_size", "value": "255/65R17"},
+            {"key": "quantity", "value": "4"},
+            {"key": "location", "value": "Bacolod City, Negros Occidental"},
+            {"key": "service_type", "value": "delivery"}
+          ]
+        },
+        {
+          "id": "t02_partial_size_correction",
+          "message": "225 pala, I mean.",
+          "required_durable_signals": [
+            {"key": "tire_size", "value": "225/65R17"}
+          ],
+          "forbidden_durable_signals": [
+            {"key": "tire_size", "value": "255/65R17"}
+          ]
+        },
+        {
+          "id": "t03_defer_address_and_ask_payment",
+          "message": "I'll send the exact address later. For now, paano yung payment for delivery?",
+          "required_durable_signals": [
+            {"key": "tire_size", "value": "225/65R17"},
+            {"key": "quantity", "value": "4"},
+            {"key": "location", "value": "Bacolod City, Negros Occidental"},
+            {"key": "service_type", "value": "delivery"}
+          ],
+          "forbidden_durable_signals": [
+            {"key": "payment_option"},
+            {"key": "payment_method"}
+          ]
+        }
+      ],
+      "final_required_durable_signals": [
+        {"key": "tire_size", "value": "225/65R17"},
+        {"key": "quantity", "value": "4"},
+        {"key": "location", "value": "Bacolod City, Negros Occidental"},
+        {"key": "service_type", "value": "delivery"}
+      ],
+      "final_forbidden_durable_signals": [
+        {"key": "tire_size", "value": "255/65R17"},
+        {"key": "payment_option"},
+        {"key": "payment_method"}
+      ]
+    },
+    {
+      "id": "sr06_payment_document_boundary",
+      "title": "Payment providers remain distinct from receipt and invoice documents",
+      "tags": ["payment", "receipt", "invoice", "question_only", "deferment"],
+      "coverage": ["conditional_or_question_only", "interruptions_5_plus"],
+      "min_interruptions": 2,
+      "variation_dimensions": {
+        "payment": "BPI card question -> Maya Credit question",
+        "contact_or_customer_info": "company invoice question",
+        "correction_or_retraction": "none; all values remain questions",
+        "conditional_or_question_only": "payment and document availability"
+      },
+      "turns": [
+        {
+          "id": "t01_compound_payment_receipt",
+          "message": "Pwede BPI card? May official receipt ba?",
+          "forbidden_durable_signals": [
+            {"key": "payment_method", "value": "official receipt"},
+            {"key": "payment_method", "value": "BPI"},
+            {"key": "bank", "value": "BPI"}
+          ]
+        },
+        {
+          "id": "t02_unknown_real_provider",
+          "message": "Maya Credit ba pwede?",
+          "forbidden_durable_signals": [
+            {"key": "payment_method", "value": "Maya Credit"}
+          ]
+        },
+        {
+          "id": "t03_defer_with_document_question",
+          "message": "I'll decide later, pero puwede bang company invoice?",
+          "forbidden_durable_signals": [
+            {"key": "payment_method", "value": "company invoice"},
+            {"key": "invoice_to_company"}
+          ]
+        }
+      ],
+      "final_forbidden_durable_signals": [
+        {"key": "payment_method", "value": "official receipt"},
+        {"key": "payment_method", "value": "company invoice"},
+        {"key": "invoice_to_company"}
+      ]
+    },
+    {
+      "id": "sr07_generic_payment_and_receipt",
+      "title": "Generic payment-process question plus receipt availability",
+      "tags": ["payment", "receipt", "compound_question", "question_only"],
+      "coverage": ["conditional_or_question_only"],
+      "min_interruptions": 0,
+      "variation_dimensions": {
+        "payment": "generic process question with no selected method",
+        "contact_or_customer_info": "official receipt availability",
+        "conditional_or_question_only": "compound read-only FAQ"
+      },
+      "turns": [
+        {
+          "id": "t01_generic_payment_receipt",
+          "message": "Good afternoon, paano payment and nagbibigay ba kayo ng official receipt?",
+          "forbidden_durable_signals": [
+            {"key": "payment_method"},
+            {"key": "payment_option"},
+            {"key": "invoice_to_company"}
+          ]
+        }
+      ],
+      "final_forbidden_durable_signals": [
+        {"key": "payment_method"},
+        {"key": "payment_option"},
+        {"key": "invoice_to_company"}
+      ]
+    }
+  ]
+}

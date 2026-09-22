@@ -1,0 +1,117 @@
+timeout: "2400s"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _SERVICE_NAME: gulong-chatbot-runtime-staging
+  _SERVICE_ENVIRONMENT: staging
+  _STATUS: staging
+  _REGION: asia-southeast1
+  _ARTIFACT_REPOSITORY: gulong-chatbot-runtime
+  _IMAGE_NAME: gulong-chatbot-runtime
+  _RUNTIME_DELIVERY_MODE: return_only
+  _RUNTIME_V7_APPLY_MANYCHAT_TAGS: "0"
+  _RUNTIME_V7_INTERACTION_BATCHING_ENABLED: "1"
+  _RUNTIME_V7_INTERACTION_SETTLE_MS: "400"
+  _RUNTIME_V7_INTERACTION_MAX_WAIT_MS: "600"
+  _RUNTIME_V7_INTERACTION_MAX_EVENTS: "5"
+  _RUNTIME_V7_TURN_PLAN_ENABLED: "1"
+  _RUNTIME_V7_BRAND_KNOWLEDGE_ENABLED: "1"
+  _RUNTIME_V7_FIRESTORE_RPC_DIAGNOSTICS: "1"
+  _RUNTIME_V7_FIRESTORE_STRATEGY_STATE_FORMAT: canonical_json_v1
+  _GUNICORN_WORKERS: "4"
+  _RUNTIME_V7_PROMO_CATALOG_USER_ALLOWLIST: ""
+  _PROMO_STAGING_ROUTER_FLOW_NAMESPACE: content20260719224556_101828
+  _PROMO_LIVE_ROUTER_FLOW_NAMESPACE: content20260719225032_161939
+  _FOLLOWUP_SEND_ENABLED: "false"
+  _FOLLOWUP_SEND_USER_ALLOWLIST: ""
+  _FOLLOWUP_SEND_CANARY_PERCENT: "0"
+  _MAX_INSTANCES: "20"
+
+steps:
+  - id: Run V7 tests
+    name: python:3.12-slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        python -m pip install --upgrade pip
+        python -m pip install --no-cache-dir -r requirements.txt
+        python -m pytest test -q
+
+  - id: Build image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+      - -t
+      - asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPOSITORY}/${_IMAGE_NAME}:${_SERVICE_ENVIRONMENT}-latest
+      - .
+
+  - id: Push image sha
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+
+  - id: Push image environment latest
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPOSITORY}/${_IMAGE_NAME}:${_SERVICE_ENVIRONMENT}-latest
+
+  - id: Deploy Cloud Run
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE_NAME}
+      - --project=$PROJECT_ID
+      - --region=${_REGION}
+      - --platform=managed
+      - --image=asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA
+      - --allow-unauthenticated
+      - --service-account=lica-aids@gulong-chatbot-459723.iam.gserviceaccount.com
+      - --execution-environment=gen1
+      - --cpu=1
+      - --memory=2Gi
+      - --concurrency=80
+      - --timeout=300
+      - --max-instances=${_MAX_INSTANCES}
+      - --cpu-boost
+      - --ingress=all
+      - --startup-probe=tcpSocket.port=8080,periodSeconds=240,timeoutSeconds=240,failureThreshold=1
+      - --labels=runtime-generation=v7,service-environment=${_SERVICE_ENVIRONMENT}
+      - --set-env-vars=STATUS=${_STATUS},SERVICE_ENVIRONMENT=${_SERVICE_ENVIRONMENT},RUNTIME_HOST=${_SERVICE_NAME},BU=gulong,RUNTIME_GENERATION=v7,RELEASE_VERSION=$SHORT_SHA,GIT_SHA=$SHORT_SHA,RUN_INTEGRATION=1,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,RUNTIME_DELIVERY_MODE=${_RUNTIME_DELIVERY_MODE},GUNICORN_WORKERS=${_GUNICORN_WORKERS},RUNTIME_V7_FETCH_MANYCHAT_PROFILE=0,RUNTIME_V7_FETCH_MANYCHAT_MESSAGES=1,RUNTIME_V7_APPLY_MANYCHAT_TAGS=${_RUNTIME_V7_APPLY_MANYCHAT_TAGS},RUNTIME_V7_SESSION_LOCK_ENABLED=1,RUNTIME_V7_FIRESTORE_RPC_DIAGNOSTICS=${_RUNTIME_V7_FIRESTORE_RPC_DIAGNOSTICS},RUNTIME_V7_FIRESTORE_STRATEGY_STATE_FORMAT=${_RUNTIME_V7_FIRESTORE_STRATEGY_STATE_FORMAT},RUNTIME_V7_INTERACTION_BATCHING_ENABLED=${_RUNTIME_V7_INTERACTION_BATCHING_ENABLED},RUNTIME_V7_INTERACTION_SETTLE_MS=${_RUNTIME_V7_INTERACTION_SETTLE_MS},RUNTIME_V7_INTERACTION_MAX_WAIT_MS=${_RUNTIME_V7_INTERACTION_MAX_WAIT_MS},RUNTIME_V7_INTERACTION_MAX_EVENTS=${_RUNTIME_V7_INTERACTION_MAX_EVENTS},RUNTIME_V7_TURN_PLAN_ENABLED=${_RUNTIME_V7_TURN_PLAN_ENABLED},RUNTIME_V7_BRAND_KNOWLEDGE_ENABLED=${_RUNTIME_V7_BRAND_KNOWLEDGE_ENABLED},BRAND_KNOWLEDGE_PROFILES_COLLECTION=brand_knowledge_profiles,BRAND_KNOWLEDGE_CHUNKS_COLLECTION=brand_knowledge_chunks,BRAND_KNOWLEDGE_CONFIG_COLLECTION=brand_knowledge_config,IDEMPOTENCY_ON=1,FOLLOWUP_SEND_ENABLED=${_FOLLOWUP_SEND_ENABLED},FOLLOWUP_SEND_USER_ALLOWLIST=${_FOLLOWUP_SEND_USER_ALLOWLIST},FOLLOWUP_SEND_CANARY_PERCENT=${_FOLLOWUP_SEND_CANARY_PERCENT},FOLLOWUP_EXPECT_SEND_ENABLED=false,RUNTIME_V7_FOLLOWUP_TRANSPORT_RETRIES=1,RUNTIME_V7_FOLLOWUP_TRANSPORT_RETRY_BACKOFF_S=0.75,RUNTIME_V7_PROMO_CATALOG_ENABLED=1,RUNTIME_V7_PROMO_CATALOG_USER_ALLOWLIST=${_RUNTIME_V7_PROMO_CATALOG_USER_ALLOWLIST},PROMO_STAGING_ROUTER_FLOW_NAMESPACE=${_PROMO_STAGING_ROUTER_FLOW_NAMESPACE},PROMO_LIVE_ROUTER_FLOW_NAMESPACE=${_PROMO_LIVE_ROUTER_FLOW_NAMESPACE},PROMO_CATALOG_EMBEDDING_SERVICE_ACCOUNT=promo-catalog-bot@gulong-chatbot-459723.iam.gserviceaccount.com,PROMO_CATALOG_CARDS_COLLECTION=promo_catalog_cards,PROMO_CATALOG_MECHANICS_COLLECTION=promo_catalog_mechanics,PROMO_BRAND_PROFILES_COLLECTION=promo_brand_profiles,PROMO_CATALOG_CONFIG_COLLECTION=promo_catalog_config,RUNTIME_V7_ENABLE_CONTEXT_CACHE=0,RUNTIME_V7_MAIN_ENABLE_CONTEXT_CACHE=0,RUNTIME_V7_MEMORY_ENABLE_CONTEXT_CACHE=0,RUNTIME_V7_BACKGROUND_SIGNAL_ENABLE_CONTEXT_CACHE=0,RUNTIME_V7_FOLLOWUP_ENABLE_CONTEXT_CACHE=0,RUNTIME_V7_CONTEXT_CACHE_TTL=300s
+      - --set-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest,MANYCHAT_API_KEY=MANYCHAT_API_KEY:latest,GMAPS_API_KEY=GMAPS_API_KEY:latest,CREDENTIALS=CREDENTIALS:latest,MANYCHAT_PAGE_ID=MANYCHAT_PAGE_ID:latest,MANYCHAT_APP_HEADERS=MANYCHAT_APP_HEADERS:latest,MANYCHAT_COOKIES=MANYCHAT_COOKIES:latest,FOLLOWUP_WEBHOOK_TOKEN=FOLLOWUP_WEBHOOK_TOKEN:latest
+
+  - id: Route Cloud Run traffic
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - services
+      - update-traffic
+      - ${_SERVICE_NAME}
+      - --project=$PROJECT_ID
+      - --region=${_REGION}
+      - --platform=managed
+      - --to-latest
+
+  - id: Smoke health
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        SERVICE_URL="$$(gcloud run services describe ${_SERVICE_NAME} --project=$PROJECT_ID --region=${_REGION} --format='value(status.url)')"
+        HEALTH_JSON="$$(curl -fsS "$${SERVICE_URL}/health")"
+        printf '%s\n' "$${HEALTH_JSON}"
+        printf '%s' "$${HEALTH_JSON}" | python3 -c 'import json,sys; payload=json.load(sys.stdin); expected="${SHORT_SHA}"; actual=str(payload.get("release_version") or payload.get("git_sha") or ""); assert actual == expected, f"health release mismatch: expected {expected}, got {actual}"'
+        curl -fsS "$${SERVICE_URL}/gulong/health"
+
+images:
+  - asia-southeast1-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPOSITORY}/${_IMAGE_NAME}:$SHORT_SHA

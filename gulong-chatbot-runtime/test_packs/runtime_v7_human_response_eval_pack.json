@@ -1,0 +1,540 @@
+{
+  "pack_id": "runtime_v7_human_response_eval_v1",
+  "title": "Runtime V7 Complete-Turn Human Response Evaluation",
+  "description": "Cost-bounded, varied scenarios for reviewing complete customer-visible turns and transitions. Mechanical checks cover authority and structure only; Codex/orchestrator review owns naturalness, tone, and overall quality.",
+  "runner": "scripts/runtime_v7_live_test_pack.py",
+  "review_bundler": "scripts/runtime_v7_human_review_bundle.py",
+  "input_basis": {
+    "source_window": "2026-06-14 through 2026-08-04 Asia/Manila",
+    "source": "Paraphrased patterns from the bounded Gulong ManyChat episode study; no raw identifiers or verbatim customer transcripts.",
+    "privacy": "No names, contact details, exact addresses, order references, or private URLs.",
+    "causal_limit": "Scenario outcomes evaluate response quality and safety, not conversion lift."
+  },
+  "execution_policy": {
+    "default": "List or run one selected scenario. Do not run the whole pack during implementation.",
+    "focused_command": "$env:PYTHONIOENCODING='utf-8'; $env:PYTHONUTF8='1'; $env:LANGSMITH_TRACING='false'; $env:LANGCHAIN_TRACING_V2='false'; python scripts/runtime_v7_live_test_pack.py --pack test_packs/runtime_v7_human_response_eval_pack.json --mode live --scenario <scenario_id> --memory-generator heuristic --background-signal-generator none --image-evidence-generator none --lead-qualifier-generator none --max-model-calls-per-turn 8 --max-model-calls-per-scenario 16 --max-model-calls-per-run 20",
+    "full_pack_gate": "Run once only after focused tests and the selected-scenario review pass, or before an approved release candidate when the change scope requires it."
+  },
+  "human_review_dimensions": [
+    "understands_customer",
+    "natural_language",
+    "directness",
+    "grounding",
+    "progression",
+    "presentation",
+    "consistency"
+  ],
+  "scenarios": [
+    {
+      "id": "hr01_direct_price_specific_size",
+      "case_family_id": "direct_answer_then_progress",
+      "title": "Specific Yokohama size and four-piece price",
+      "category": "product_price",
+      "posture": "new",
+      "tags": ["direct_answer", "product", "price", "quantity"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Yokohama", "tire_size": "205/55R16", "quantity": 4, "vehicle": "Honda Civic"},
+      "turns": [
+        "good am po may yokohama 205 55 r16? hm apat"
+      ],
+      "hard_fact_checks": [
+        "Any product identity, price, total, or promo comes from current product-tool evidence.",
+        "A product or price surface is rendered at most once.",
+        "No stock, fitment, reservation, or installation availability is implied without its authority."
+      ],
+      "review_focus": ["answers the price request early", "greeting fits a first turn", "one useful next step at most"]
+    },
+    {
+      "id": "hr02_brand_vehicle_missing_size",
+      "case_family_id": "missing_fitment_detail",
+      "title": "Goodyear request for a Mirage without tire size",
+      "category": "fitment",
+      "posture": "new",
+      "tags": ["brand_only", "vehicle", "missing_size"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Goodyear", "vehicle": "Mirage G4", "location": "Marikina"},
+      "turns": [
+        "boss goodyear sana pang mirage g4, ano available?"
+      ],
+      "hard_fact_checks": [
+        "Vehicle-derived sizes remain candidates until the sidewall size is confirmed.",
+        "No SKU price or fitment certainty appears without current evidence."
+      ],
+      "review_focus": ["does not dump a broad catalog", "asks the easiest fitment clarifier", "brand preference is retained"]
+    },
+    {
+      "id": "hr03_size_only_budget_preference",
+      "case_family_id": "guided_product_discovery",
+      "title": "Budget but quiet options for 195/65R15",
+      "category": "product_discovery",
+      "posture": "new",
+      "tags": ["size_only", "budget", "comfort", "guided_selection"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Laufenn", "tire_size": "195/65R15", "location": "Antipolo"},
+      "turns": [
+        "195 65 15 po. budget lang pero sana hindi maingay"
+      ],
+      "hard_fact_checks": [
+        "Presented categories or products use renderer-owned labels and current product evidence.",
+        "Only one active guided decision layer is presented."
+      ],
+      "review_focus": ["uses both budget and quietness context", "explains the presented choice briefly", "does not prematurely ask for every booking field"]
+    },
+    {
+      "id": "hr04_fitment_candidate_then_correction",
+      "case_family_id": "correction_transition",
+      "title": "Fortuner fitment question followed by sidewall confirmation",
+      "category": "fitment",
+      "posture": "continuing",
+      "tags": ["vehicle", "fitment_candidate", "correction", "multi_turn"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Bridgestone", "tire_size": "265/60R18", "vehicle": "Fortuner 2019", "location": "Bacoor"},
+      "turns": [
+        "fortuner 2019 stock mags, anong tire size po?",
+        "chineck ko 265/60r18 pala yung nakasulat"
+      ],
+      "hard_fact_checks": [
+        "The first turn labels inferred sizes as candidates, not confirmed fitment.",
+        "The later customer-supplied sidewall size supersedes candidate context without rewriting history."
+      ],
+      "review_focus": ["natural acknowledgement of the confirmed size", "does not ask for the size again", "progresses one layer"]
+    },
+    {
+      "id": "hr05_double_warranty_catalog_question",
+      "case_family_id": "promo_catalog_answer",
+      "title": "Direct Double Warranty mechanics question",
+      "category": "promo_warranty",
+      "posture": "new",
+      "tags": ["promo_catalog", "double_warranty", "image", "faq"],
+      "input_provenance": "user_requested_scenario",
+      "variation_dimensions": {"promo": "The Gulong Double Warranty", "vehicle": "Nissan Navara", "location": "Cainta"},
+      "turns": [
+        "ano po covered nung Gulong Double Warranty? pwede makita yung promo?"
+      ],
+      "hard_fact_checks": [
+        "Warranty mechanics and media come from the active reviewed promo catalog.",
+        "A generic warranty answer does not replace or expand the scoped promo evidence.",
+        "Any image URL and action are renderer-owned trusted catalog fields."
+      ],
+      "review_focus": ["answers the question before or around the image naturally", "does not copy the whole poster into prose", "no separate image scaffold wording"]
+    },
+    {
+      "id": "hr06_pricelist_supporting_warranty",
+      "case_family_id": "product_surface_with_supporting_promo",
+      "title": "Deestone and Toyo pricelist with optional supporting warranty visual",
+      "category": "product_price",
+      "posture": "new",
+      "tags": ["pricelist", "product_comparison", "promo_catalog", "double_warranty"],
+      "input_provenance": "user_requested_scenario",
+      "variation_dimensions": {"brand": "Deestone and Toyo", "tire_size": "215/65R16", "vehicle": "Toyota Innova", "location": "Dasmarinas"},
+      "turns": [
+        "may Deestone or Toyo 215/65R16? send options and price po"
+      ],
+      "hard_fact_checks": [
+        "Pricelist facts come from current product results and are not duplicated in prose.",
+        "If Double Warranty is shown, it is the active catalog surface and is not presented as SKU fitment or stock proof.",
+        "Product selection remains the single active decision layer."
+      ],
+      "review_focus": ["cohesive complete turn", "supporting promo feels contextual rather than inserted", "next step follows the shown choices"]
+    },
+    {
+      "id": "hr07_location_refinement",
+      "case_family_id": "guided_location_transition",
+      "title": "Dasma installation question refined to Salitran",
+      "category": "location_service",
+      "posture": "continuing",
+      "tags": ["location", "city", "barangay", "service", "multi_turn"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Dunlop", "tire_size": "185/65R15", "vehicle": "Toyota Avanza", "location": "Salitran, Dasmarinas"},
+      "turns": [
+        "may kabitan kayo near dasma? 185/65r15 yung size",
+        "salitran area ako"
+      ],
+      "hard_fact_checks": [
+        "The accepted location is not described as a confirmed partner or available slot without service evidence.",
+        "A satisfied city/location detail is not requested again.",
+        "Only one location/service choice layer is active."
+      ],
+      "review_focus": ["natural city-to-area transition", "uses the supplied size", "moves toward service one step at a time"]
+    },
+    {
+      "id": "hr08_schedule_preference_not_booking",
+      "case_family_id": "guided_schedule_transition",
+      "title": "Saturday afternoon installation preference",
+      "category": "schedule",
+      "posture": "continuing",
+      "tags": ["schedule", "service", "preference", "not_booked"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Continental", "tire_size": "225/45R18", "vehicle": "Mazda 3", "location": "San Pedro, Laguna"},
+      "turns": [
+        "Continental 225/45r18 po, pwede install Saturday afternoon sa San Pedro?"
+      ],
+      "hard_fact_checks": [
+        "Date/time and service availability require current partner/slot evidence.",
+        "A selected or preferred slot is not described as reserved or booked before the authoritative action."
+      ],
+      "review_focus": ["answers what can be checked", "keeps uncertainty local", "asks only the next schedule or product decision"]
+    },
+    {
+      "id": "hr09_payment_method_question",
+      "case_family_id": "payment_answer_then_progress",
+      "title": "BDO card and Pay Later question",
+      "category": "payment",
+      "posture": "transactional",
+      "tags": ["payment", "bank", "pay_later", "faq"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Arivo", "tire_size": "175/70R13", "vehicle": "Toyota Wigo", "location": "Pasig"},
+      "turns": [
+        "accept BDO credit card? pay later sana"
+      ],
+      "hard_fact_checks": [
+        "Payment option, method, bank, and installment facts come only from current payment or FAQ authority.",
+        "No payment, approval, or saved method is claimed."
+      ],
+      "review_focus": ["directly answers the bank/payment question", "does not force a product intake first", "one appropriate order next step"]
+    },
+    {
+      "id": "hr10_order_summary_correction",
+      "case_family_id": "order_state_correction",
+      "title": "Delivery address correction before submission",
+      "category": "order",
+      "posture": "transactional",
+      "tags": ["order_summary", "correction", "delivery", "not_submitted"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "BFGoodrich", "tire_size": "235/70R16", "vehicle": "Ford Ranger", "location": "Calamba"},
+      "conversation_history": [
+        {"role": "user", "text_content": "For delivery po yung order, Calamba area.", "message_id": "hr10_u1", "datetime": "2026-08-02T10:00:00"},
+        {"role": "assistant", "text_content": "Noted po. I can prepare the order details once the delivery address is complete.", "message_id": "hr10_a1", "datetime": "2026-08-02T10:01:00"}
+      ],
+      "turns": [
+        "update lang, ibang address pala sa loob ng Calamba. hindi pa submit ha"
+      ],
+      "hard_fact_checks": [
+        "The latest correction wins and no stale address is restated unnecessarily.",
+        "The order remains unsubmitted and unbooked unless the submit tool succeeds.",
+        "An order summary is rendered only when a current summary ref exists."
+      ],
+      "review_focus": ["acknowledges the correction naturally", "does not over-celebrate or claim success", "asks only for the missing address detail if needed"]
+    },
+    {
+      "id": "hr11_complaint_and_handoff",
+      "case_family_id": "deescalation_handoff",
+      "title": "Customer questions legitimacy and asks for an agent",
+      "category": "complaint_handoff",
+      "posture": "complaint",
+      "tags": ["complaint", "trust", "handoff", "no_sales_pressure"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Michelin", "tire_size": "265/65R17", "vehicle": "Mitsubishi Montero", "location": "Valenzuela"},
+      "turns": [
+        "parang scam kasi iba iba sagot. tao na lang makausap ko"
+      ],
+      "hard_fact_checks": [
+        "The bot does not claim that a human is already connected or assigned unless downstream evidence proves it.",
+        "No product, price, or booking sales pressure is added to the complaint turn."
+      ],
+      "review_focus": ["acknowledges the concern", "clear ownership without false transfer", "zero unnecessary CTA"]
+    },
+    {
+      "id": "hr12_reactivated_ambiguous_followup",
+      "case_family_id": "reactivation_continuity",
+      "title": "Customer returns to an older commercial-tire discussion",
+      "category": "reactivation",
+      "posture": "reactivated",
+      "tags": ["reactivation", "ambiguous", "commercial_tire", "history"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Apollo", "tire_size": "195R15C", "vehicle": "L300 delivery van", "location": "Meycauayan"},
+      "conversation_history": [
+        {"role": "user", "text_content": "195R15C pang delivery van, Apollo sana.", "message_id": "hr12_u1", "datetime": "2026-07-25T14:00:00"},
+        {"role": "assistant", "text_content": "I can check current options once you are ready to continue.", "message_id": "hr12_a1", "datetime": "2026-07-25T14:01:00"}
+      ],
+      "turns": [
+        "available pa kaya yun? tuloy ko na sana"
+      ],
+      "hard_fact_checks": [
+        "Old commercial context is continuity only; current availability and price require a fresh tool result.",
+        "The response does not restart with a generic welcome or ask again for known size/brand."
+      ],
+      "review_focus": ["understands what 'yun' refers to", "natural reactivation tone", "moves to the next valid check"]
+    },
+    {
+      "id": "hr13_free_text_product_choice",
+      "case_family_id": "guided_choice_transition",
+      "title": "Customer chooses the middle option in natural language",
+      "category": "guided_selection",
+      "posture": "continuing",
+      "tags": ["product_choice", "free_text", "transition", "multi_turn"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"brand": "Nankang", "tire_size": "215/55R17", "vehicle": "Honda HR-V", "location": "BGC, Taguig"},
+      "turns": [
+        "215/55R17 options po, mid range lang",
+        "yung pangalawa okay na sakin, saan pwede ipakabit near BGC?"
+      ],
+      "hard_fact_checks": [
+        "A free-text choice is accepted only when it resolves unambiguously to a currently visible option.",
+        "Product selection does not itself prove installation availability or booking.",
+        "The selected product is not re-asked and location becomes the next active decision only when valid."
+      ],
+      "review_focus": ["acknowledges the actual choice rather than a generic 'noted'", "transition to location feels connected", "no repeated product list"]
+    },
+    {
+      "id": "hr14_business_location_and_walkin",
+      "case_family_id": "operating_identity_answer",
+      "title": "First-turn physical-shop and business-location question",
+      "category": "business_identity",
+      "posture": "new",
+      "tags": ["first_turn", "location", "physical_shop", "walk_in", "branding"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"question_style": "colloquial Taglish", "location": "Manila"},
+      "turns": [
+        "hello po saan kayo located, may shop ba na puwedeng puntahan?"
+      ],
+      "hard_fact_checks": [
+        "Any online-first, head-office, warehouse, or over-100 partner detail the model chooses to use stays within reviewed operating identity; none is a required talking point.",
+        "No exact partner, area coverage, availability, slot, stock, booking, pickup, or unreserved walk-in service is implied without current authority.",
+        "The business-location question is not counted as the customer's own area and does not suppress a useful area CTA."
+      ],
+      "review_focus": ["answers both questions directly", "sounds trustworthy rather than evasive", "welcome and answer form one natural opening", "partner-network branding is integrated rather than appended", "one useful area CTA at most"]
+    },
+    {
+      "id": "hr15_general_assistance_first_turn",
+      "case_family_id": "generic_assistance_opening",
+      "title": "Customer asks whether anyone can assist",
+      "category": "general_assistance",
+      "posture": "new",
+      "tags": ["first_turn", "availability", "generic", "no_false_handoff"],
+      "input_provenance": "paraphrased_bq_pattern",
+      "variation_dimensions": {"question_style": "straight English", "intent_completeness": "generic"},
+      "turns": [
+        "Hi, is anyone available to help me?"
+      ],
+      "hard_fact_checks": [
+        "A general assistance question is not treated as an explicit human-handoff request.",
+        "The response does not claim a human is online, assigned, or already connected."
+      ],
+      "review_focus": ["friendly direct availability answer", "natural Gulong.ph welcome", "asks one lightweight question about the customer's need", "no tire-intake dump"]
+    },
+    {
+      "id": "hr16_assistance_to_confirmed_sidewall",
+      "case_family_id": "assistance_to_fitment_progression",
+      "title": "Generic assistance progresses through vehicle context to confirmed sidewall size",
+      "category": "multi_turn_fitment",
+      "posture": "new_to_active",
+      "tags": ["multi_turn", "assistance", "vehicle", "budget", "sidewall_confirmation"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"vehicle": "2019 Toyota Vios", "tire_size": "185/60R15", "budget": "PHP 12000 for four", "use": "daily drive"},
+      "turns": [
+        "Hello, may makaka-assist ba?",
+        "Need ko tires para sa 2019 Toyota Vios, daily drive lang. Around 12k sana for four.",
+        "Nacheck ko na, 185/60R15 pala yung nasa sidewall."
+      ],
+      "hard_fact_checks": [
+        "The opening does not claim a human agent is assigned or online.",
+        "Vehicle and budget context do not become confirmed fitment or product facts.",
+        "The explicit sidewall size supersedes fitment uncertainty and is not re-asked."
+      ],
+      "review_focus": ["natural shift from generic help to tire discovery", "uses daily-driving and budget context helpfully", "no repetitive intake", "one active decision at a time"]
+    },
+    {
+      "id": "hr17_product_choice_to_schedule",
+      "case_family_id": "product_service_schedule_progression",
+      "title": "Comfort preference progresses from grounded options to area and schedule",
+      "category": "multi_turn_sales_progression",
+      "posture": "active",
+      "tags": ["multi_turn", "product", "preference", "free_text_choice", "location", "schedule"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"tire_size": "205/60R16", "preference": "comfort and value", "location": "Marikina Heights", "schedule": "Saturday afternoon"},
+      "turns": [
+        "205/60R16 po, comfortable sana pero hindi sobrang mahal.",
+        "Yung pinaka-affordable sa mga pinakita, okay na. Marikina Heights ako.",
+        "Saturday afternoon sana kung may available."
+      ],
+      "hard_fact_checks": [
+        "Comfort and value are customer preferences, not unsupported attributes of a returned tire.",
+        "A free-text product choice must resolve to a visible provider-backed option before service progression.",
+        "The schedule preference is not described as booked and availability requires the service provider."
+      ],
+      "review_focus": ["contextual product lead-in", "acknowledges the selected option by name when resolved", "smooth product-to-location-to-schedule transitions", "no duplicate cards or intake"]
+    },
+    {
+      "id": "hr18_vehicle_size_and_brand_correction",
+      "case_family_id": "fitment_and_preference_correction",
+      "title": "Vehicle estimate is corrected by sidewall size and relaxed brand preference",
+      "category": "multi_turn_correction",
+      "posture": "active",
+      "tags": ["multi_turn", "vehicle", "fitment", "correction", "brand", "terrain", "service"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"vehicle": "2021 Ford Everest", "tire_size": "265/60R18", "brand": "BFGoodrich", "terrain": "all-terrain", "location": "Commonwealth"},
+      "turns": [
+        "Pang 2021 Ford Everest, BFGoodrich sana.",
+        "265/60R18 ang actual sidewall, all-terrain sana.",
+        "Pwede rin ibang brand basta same size at all-terrain.",
+        "Yung best value na option. Saan pwede ipakabit near Commonwealth?"
+      ],
+      "hard_fact_checks": [
+        "The customer-confirmed sidewall size supersedes candidate vehicle fitment.",
+        "The relaxed brand preference permits alternatives without inventing product terrain capability.",
+        "A best-value selection must resolve to a visible grounded option before service lookup."
+      ],
+      "review_focus": ["recognizes corrections without lecturing", "uses technical context only when grounded", "does not repeat the old strict brand requirement", "organic move into installation"]
+    },
+    {
+      "id": "hr19_installation_to_delivery_change",
+      "case_family_id": "fulfillment_change_of_mind",
+      "title": "Customer changes from nearby installation to delivery",
+      "category": "multi_turn_fulfillment",
+      "posture": "active",
+      "tags": ["multi_turn", "location", "installation", "delivery", "product", "timing"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"landmark": "Festival Mall Alabang", "delivery_area": "Las Pinas", "tire_size": "225/45R17", "brand": "Bridgestone", "quantity": 2},
+      "turns": [
+        "May installer ba malapit sa Festival Mall Alabang?",
+        "Actually delivery na lang sa Las Piñas.",
+        "225/45R17 Bridgestone sana, 2 pcs.",
+        "Tomorrow morning if possible."
+      ],
+      "hard_fact_checks": [
+        "The explicit delivery correction replaces the installation path.",
+        "No installation partner or slot controls are shown after delivery becomes active unless the customer reopens installation.",
+        "Delivery timing, stock, and availability are not promised without current authority."
+      ],
+      "review_focus": ["accepts the change naturally", "does not keep pushing installation", "preserves product and quantity context", "asks only the next delivery-relevant detail"]
+    },
+    {
+      "id": "hr20_promo_warranty_to_product",
+      "case_family_id": "promo_explanation_to_product_progression",
+      "title": "Current promo and warranty questions progress into commercial-tire options",
+      "category": "multi_turn_promo_product",
+      "posture": "active",
+      "tags": ["multi_turn", "promo_catalog", "double_warranty", "product", "commercial_tire", "service"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"promo": "Gulong Double Warranty", "tire_size": "195R14C", "vehicle": "Mitsubishi L300", "location": "Cavite City"},
+      "turns": [
+        "Ano mga active tire promo niyo ngayon?",
+        "Yung Gulong Double Warranty, ano covered nun?",
+        "195R14C pang L300, budget option sana na may warranty.",
+        "Okay yung first option. Cavite City area ako."
+      ],
+      "hard_fact_checks": [
+        "Promo and warranty facts come only from the current promo catalog or approved policy evidence.",
+        "The approved promo image may be rendered without duplicating its full copy in prose.",
+        "Warranty interest is a preference until a returned product or promo explicitly supports it."
+      ],
+      "review_focus": ["brief useful promo explanation", "image and caption feel like one response", "natural transition into product discovery", "selected product remains clear when moving to location"]
+    },
+    {
+      "id": "hr21_payment_question_before_product",
+      "case_family_id": "payment_context_then_product",
+      "title": "Installment question precedes product and payment-option selection",
+      "category": "multi_turn_payment",
+      "posture": "active",
+      "tags": ["multi_turn", "payment", "bank", "installment", "product", "payment_option"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"bank": "BDO", "term": "6 months", "tire_size": "195/65R15", "vehicle": "Toyota Corolla Altis", "quantity": 4},
+      "turns": [
+        "Pwede BDO card installment 6 months?",
+        "195/65R15 for Corolla Altis, four pieces.",
+        "Midrange option lang sana.",
+        "Pay Later na lang if available."
+      ],
+      "hard_fact_checks": [
+        "Payment support and brand eligibility come only from active checkout or payment-policy authority.",
+        "The initial payment inquiry does not become a selected method or approved installment.",
+        "A later payment-option choice cannot submit, book, or collect payment."
+      ],
+      "review_focus": ["answers the payment question directly without derailing discovery", "retains useful bank and term context", "does not repeat payment policy unnecessarily", "progresses one stage at a time"]
+    },
+    {
+      "id": "hr22_reactivation_with_size_correction",
+      "case_family_id": "reactivation_and_current_correction",
+      "title": "Returning customer changes the historical tire size before continuing",
+      "category": "multi_turn_reactivation",
+      "posture": "reactivated",
+      "tags": ["multi_turn", "reactivation", "history", "correction", "quantity", "location"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"old_tire_size": "235/75R15", "new_tire_size": "235/70R16", "brand": "Cooper", "quantity": 2, "location": "San Pedro Laguna"},
+      "conversation_history": [
+        {"role": "user", "text_content": "Cooper 235/75R15 sana, balikan ko kayo.", "message_id": "hr22_u1", "datetime": "2026-07-28T11:00:00"},
+        {"role": "assistant", "text_content": "Sige po, message lang kayo when ready para ma-check natin ulit ang current options.", "message_id": "hr22_a1", "datetime": "2026-07-28T11:01:00"}
+      ],
+      "turns": [
+        "Available pa kaya yung Cooper option natin?",
+        "Correction, 235/70R16 pala yung current size.",
+        "Two pieces lang, installation around San Pedro Laguna."
+      ],
+      "hard_fact_checks": [
+        "Historical price, stock, and availability are not reused as current truth.",
+        "The latest explicit tire-size correction supersedes the old size everywhere.",
+        "The response does not restart with a first-turn welcome or ask for already known brand context."
+      ],
+      "review_focus": ["recognizes the returning context", "acknowledges the correction briefly", "does not resurface the old size", "moves naturally toward current product and service checks"]
+    },
+    {
+      "id": "hr23_exclusion_comparison_and_choice",
+      "case_family_id": "product_exclusion_and_comparison",
+      "title": "Customer excludes an origin, compares tiers, and settles on one option",
+      "category": "multi_turn_product_comparison",
+      "posture": "active",
+      "tags": ["multi_turn", "product", "exclusion", "comparison", "choice", "location"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"tire_size": "215/60R17", "exclusion": "China origin", "comparison": "economy versus midrange", "location": "Kapitolyo Pasig"},
+      "turns": [
+        "215/60R17, affordable options po.",
+        "Pass muna sa China-made.",
+        "Compare natin economy at midrange, ano practical difference?",
+        "Midrange na lang. Kapitolyo Pasig ako."
+      ],
+      "hard_fact_checks": [
+        "The origin exclusion filters later product results without becoming a disparaging claim.",
+        "Comparisons use only attributes supported by current product evidence.",
+        "The settled tier or product choice supersedes the earlier open comparison."
+      ],
+      "review_focus": ["handles preference without judgment", "comparison is useful and concise", "no invented quality claims", "location transition follows the settled choice"]
+    },
+    {
+      "id": "hr24_faq_interruption_then_resume",
+      "case_family_id": "informational_interruption_continuity",
+      "title": "Limited-stock FAQ interrupts and then resumes product selection",
+      "category": "multi_turn_interruption",
+      "posture": "active",
+      "tags": ["multi_turn", "product", "faq", "limited_stock", "resume", "service"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"tire_size": "185/65R14", "vehicle": "Kia Picanto", "location": "Sucat Muntinlupa"},
+      "turns": [
+        "185/65R14 options for Kia Picanto please.",
+        "What does limited stocks mean?",
+        "Okay balik tayo, yung second option sa list.",
+        "Install sana around Sucat Muntinlupa."
+      ],
+      "hard_fact_checks": [
+        "The direct FAQ is answered without turning it into a stock guarantee or replacing product state.",
+        "The resumed product reference must resolve to the still-valid visible presentation.",
+        "Installation availability requires a current service result."
+      ],
+      "review_focus": ["answers the interruption directly", "resumes without repeating the full list", "acknowledges the selected option", "maintains coherent context across the topic shift"]
+    },
+    {
+      "id": "hr25_late_stage_confusion_to_handoff",
+      "case_family_id": "late_stage_deescalation",
+      "title": "A confused late-stage customer asks for a human after inconsistent pricing",
+      "category": "multi_turn_complaint_handoff",
+      "posture": "complaint",
+      "tags": ["multi_turn", "complaint", "price_confusion", "handoff", "no_sales_pressure"],
+      "input_provenance": "human_authored_variant",
+      "variation_dimensions": {"tire_size": "245/70R16", "brand": "Falken", "location": "Antipolo"},
+      "conversation_history": [
+        {"role": "user", "text_content": "245/70R16 Falken, installation sa Antipolo.", "message_id": "hr25_u1", "datetime": "2026-08-03T15:00:00"},
+        {"role": "assistant", "text_content": "I can recheck the current product and installation details before we proceed.", "message_id": "hr25_a1", "datetime": "2026-08-03T15:01:00"}
+      ],
+      "turns": [
+        "Bakit iba na naman yung price? Nalilito na ako.",
+        "Tao na lang please."
+      ],
+      "hard_fact_checks": [
+        "The bot does not defend, invent, or restate a price without current product evidence.",
+        "The explicit handoff request does not claim that a human is already assigned or connected.",
+        "No further sales CTA is added after the handoff request."
+      ],
+      "review_focus": ["brief sincere acknowledgement", "does not argue or over-explain", "preserves useful context for handoff", "zero sales pressure"]
+    }
+  ]
+}

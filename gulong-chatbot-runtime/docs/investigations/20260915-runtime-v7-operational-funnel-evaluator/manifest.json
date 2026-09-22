@@ -1,0 +1,104 @@
+{
+  "changes": [
+    {
+      "ref": "feat/runtime-v7-operational-funnel-evaluator-20260915",
+      "summary": "Added operational funnel contract, runners, scoring, redacted export, tests, and documentation."
+    }
+  ],
+  "claims": [
+    {
+      "status": "confirmed",
+      "summary": "The evaluator can fail closed on rendered location/contact progression, canonical customer-owned capture, and planned Moderate qualification before persistence."
+    },
+    {
+      "status": "supported",
+      "summary": "Corrected targeted evidence on staging release 639a0c3 supports three of four intended paths; contact fallback remains unresolved."
+    }
+  ],
+  "cost_ledger": [
+    {
+      "billing_cutoff": null,
+      "cached_tokens": 87180,
+      "credential_alias": "runtime_managed",
+      "estimated_cost": null,
+      "input_tokens": 654524,
+      "model": "mixed_runtime_components",
+      "operation_id": "staging-639a0c3-operational-funnel",
+      "output_tokens": 24640,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed_runtime",
+      "provider_calls": 40,
+      "task_type": "four_scenario_operational_funnel_diagnostic",
+      "total_tokens": 679164
+    },
+    {
+      "billing_cutoff": null,
+      "cached_tokens": 62649,
+      "credential_alias": "runtime_managed",
+      "estimated_cost": null,
+      "input_tokens": 439052,
+      "model": "mixed_runtime_components",
+      "operation_id": "staging-639a0c3-guided-location-correction",
+      "output_tokens": 14245,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed_runtime",
+      "provider_calls": 24,
+      "task_type": "single_guided_operational_funnel_diagnostic",
+      "total_tokens": 453297
+    }
+  ],
+  "investigation_id": "20260915-runtime-v7-operational-funnel-evaluator",
+  "objective": "Add and validate a data-derived pre-delivery size-brand-to-Moderate operational funnel gate.",
+  "owner_agent": "Codex",
+  "primary_repo": "D:\\Carlo\\LICA Auto\\assistant\\_codex_worktrees\\gulong-runtime-operational-funnel-evaluator-20260915",
+  "release_and_backfill": {
+    "backfill_status": "not_requested",
+    "deployment_status": "evaluator_release_approved_runtime_fix_deferred",
+    "rollback_gate": "The evaluator may release independently; do not promote a runtime behavior candidate on operational-funnel evidence until contact fallback passes the complete candidate run."
+  },
+  "scope": [
+    "return-only rendered response before delivery",
+    "canonical customer-owned location/contact signal capture",
+    "planned deterministic Moderate qualification before persistence",
+    "operational latency, errors, model calls, and tokens"
+  ],
+  "sources": [
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "date_window_or_cutoff": "2026-07 privacy-safe reviewed samples",
+      "freshness": "versioned fixture",
+      "id": "privacy-safe-july-corpus",
+      "location": "test/fixtures/runtime_v7_followup_july_corpus.json",
+      "query_job_id": null,
+      "source_kind": "checked_in_fixture"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "date_window_or_cutoff": "2026-09-15 06:49-06:58 Asia/Manila",
+      "freshness": "live at acquisition",
+      "id": "staging-639a0c3",
+      "location": "gulong-chatbot-459723/asia-southeast1/gulong-chatbot-runtime-staging",
+      "query_job_id": null,
+      "source_kind": "cloud_run_service_and_tester_responses"
+    }
+  ],
+  "started_at": "2026-09-15T07:02:38+08:00",
+  "status": "evaluator_release_approved_runtime_remediation_gated",
+  "timezone": "Asia/Manila",
+  "title": "Runtime V7 operational funnel evaluator",
+  "updated_at": "2026-09-15T07:06:33+08:00",
+  "verification": [
+    {
+      "status": "passed",
+      "summary": "All 1863 repository tests and changed-file Ruff checks passed."
+    },
+    {
+      "status": "blocked",
+      "summary": "Contact fallback was not offered after explicit installation-city uncertainty on staging 639a0c3."
+    }
+  ]
+}

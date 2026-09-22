@@ -1,0 +1,36 @@
+{
+  "temperature": 0.2,
+  "max_tokens": 2000,
+  "max_retries": 1,
+  "timeout_s": 25.0,
+  "backoff_base_s": 0.4,
+  "backoff_jitter_s": 0.2,
+  "hard_fail_closed": false,
+  "log_request_bodies": false,
+  "model_policy": {
+    "main": [
+      ["gemini", "gemini/gemini-2.5-flash"],
+      ["gemini", "gemini/gemini-2.5-pro"]
+    ],
+    "main_tool_loop": [
+      ["gemini", "gemini/gemini-2.5-flash"],
+      ["gemini", "gemini/gemini-2.5-pro"]
+    ],
+    "main_finalize": [
+      ["gemini", "gemini/gemini-2.5-flash"],
+      ["gemini", "gemini/gemini-2.5-pro"]
+    ],
+    "slot_extract": [
+      ["gemini", "gemini/gemini-2.5-pro"],
+      ["gemini", "gemini/gemini-2.5-flash"]
+    ],
+    "tool_llm": [
+      ["gemini", "gemini/gemini-2.5-pro"],
+      ["gemini", "gemini/gemini-2.5-flash"]
+    ],
+    "env_keys": {
+      "openai": "OPENAI_API_KEY",
+      "gemini": "GEMINI_API_KEY"
+    }
+  }
+}

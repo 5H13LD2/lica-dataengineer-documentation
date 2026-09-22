@@ -1,0 +1,376 @@
+{
+  "pack_id": "runtime_v7_live_model_test_pack_v3_reasoning_compact",
+  "title": "Runtime V7 Compact Live Model Probe Pack",
+  "description": "Cost-conscious live-model scenarios for Runtime V7 product search, service availability, memory, signals, context management, FAQ retrieval, image evidence, and human-agent continuation. Each scenario is isolated and intentionally combines multiple runtime concerns across turns.",
+  "runner": "scripts/runtime_v7_live_test_pack.py",
+  "run_intent": "Use live model clients, live background-signal extraction, live Active Working Memory generation, live FAQ embedding retrieval, and live tool APIs where configured. Do not use scripted model stubs for review runs.",
+  "recommended_command": "$env:PYTHONIOENCODING='utf-8'; $env:PYTHONUTF8='1'; python scripts/runtime_v7_live_test_pack.py --pack test_packs/runtime_v7_live_model_test_pack.json --mode live --enable-context-cache",
+  "optional_image_env": {
+    "RUNTIME_V7_TEST_TIRE_IMAGE_URL": "Live-accessible tire photo URL for OCR/vision intake scenarios.",
+    "RUNTIME_V7_TEST_CONVERSATION_SCREENSHOT_URL": "Live-accessible screenshot URL of a customer/human-agent conversation snippet.",
+    "RUNTIME_V7_TEST_PRODUCT_CARD_IMAGE_URL": "Live-accessible product-card or website-card screenshot URL."
+  },
+  "global_review_checklist": [
+    "Each scenario starts from a fresh harness, fresh in-memory Active Working Memory, fresh product/service observation stores, and a scenario-specific session_id.",
+    "Broad or underspecified size-only inquiries may prefer discover_brand_buckets; direct HM plus a complete tire size may present grounded product cards through product_search.",
+    "Prices, promos, DOT, origin, warranty, TPP, slots, and branch data appear only from trusted tool outputs or FAQ retrieval.",
+    "Service responses do not claim same-day availability unless find_installation_slots or validate_installation_slot supports it.",
+    "Installation partner cards are deterministic and concise; model text supplies the conversational lead-in or CTA.",
+    "No-walk-in wording applies only to provider-backed partner-site access when installation partner cards or grounded service policy require it. It must not deny installation at the Makati head office, which is itself an installation site.",
+    "Background Signals capture normalized tire size, vehicle, location, service type, schedule candidates, quantity, selected refs, and trusted-order-total inputs when present.",
+    "Active Working Memory reflects customer language and context without being overruled by stale signals or advisory cues.",
+    "Human-agent messages are trusted for context but still require validation before order/payment/schedule actions.",
+    "Image evidence is incorporated as supplementary context and background-signal input without becoming action-safe by itself.",
+    "FAQ hints remain answer-free; answer_product_faq or answer_service_faq retrieves actual FAQ answers only when useful.",
+    "Response text is conversational Taglish when the user uses Taglish, short enough for ManyChat-style bubbles, and avoids robotic pending-check replies.",
+    "Artifacts include tool sequence, compiled contexts, capability profile history, latency, usage, cache usage, tool latency, memory after turn, and signal extraction details."
+  ],
+  "scenarios": [
+    {
+      "id": "mt01_product_discovery_details_close",
+      "title": "Size-only HM into budget options, selected details, then close",
+      "category": "product",
+      "tags": ["product", "multi_turn", "brand_menu", "product_search", "selected_card", "close"],
+      "source": "condensed_from_product_policy_and_user_discussion",
+      "turns": [
+        "hm 175 65 14",
+        "budget lang boss pero safe pa din",
+        "yung una may warranty, dot, origin, installment?",
+        "salamat boss may nakuha na muna kami"
+      ],
+      "expected": {
+        "preferred_tools_by_phase": [
+          "Turn 1: product_search is allowed for direct HM plus stored/complete 175/65R14 product-card presentation",
+          "Turn 2: product_search using stored 175/65R14 and budget preference",
+          "Turn 3: resolve_product_reference and get_product_details if visible product refs exist",
+          "Turn 4: no product/service tool unless the model needs a grounded policy answer"
+        ],
+        "signals_to_check": ["tire_size=175/65R14", "budget_preference", "selected_product_ref"],
+        "response_checks": [
+          "HM with a complete tire size is treated as a product inquiry with grounded product presentation.",
+          "Product cards/details are deterministic; model only writes lead-in/CTA or comparison.",
+          "Selected detail response shows only customer-facing safe fields.",
+          "The final close does not keep pushing products or scheduling."
+        ]
+      },
+      "review_focus": ["multi-turn product memory", "brand-menu trigger", "selected-card rendering", "no unnecessary tool on close"]
+    },
+    {
+      "id": "mt02_fitment_location_schedule",
+      "title": "Vehicle fitment plus General Trias shorthand and install schedule",
+      "category": "mixed",
+      "tags": ["product", "service", "fitment", "location_alias", "schedule", "multi_turn"],
+      "source": "condensed_from_user_requested_gen_tri_case",
+      "turns": [
+        "boss may rim 15 kayo pang innova? gen tri",
+        "need ko sana kabit today kung meron malapit",
+        "sige yung sakto lang quality, ano size dapat?"
+      ],
+      "expected": {
+        "preferred_tools": ["extract_compatible_fitment", "find_installation_partners", "find_installation_slots"],
+        "signals_to_check": ["vehicle_model=Innova", "rim_size=15", "location=General Trias", "preferred_schedule=today"],
+        "response_checks": [
+          "Gen tri is normalized to General Trias in signals, tool args, or model response after tool output.",
+          "Fitment candidates are not treated as confirmed tire size until customer accepts.",
+          "No exact schedule or same-day claim appears without slot grounding.",
+          "No made-up branch or installation partner names appear."
+        ]
+      },
+      "review_focus": ["model-led fitment", "location normalization", "service-tool recovery", "same-day slot grounding"]
+    },
+    {
+      "id": "mt03_service_cta_landmark_then_product",
+      "title": "Generic location question, Megamall urgent service, then tire size",
+      "category": "mixed",
+      "tags": ["service", "product", "landmark", "urgent", "multi_turn"],
+      "source": "user_requested_case",
+      "turns": [
+        "Where are you located?",
+        "sa may megamall lang. need ko palitan flat tire ko asap",
+        "yung sakto lang na quality pa din. 175 65 14 yung nakkaabit ngayon"
+      ],
+      "expected": {
+        "preferred_tools": ["answer_service_faq", "find_installation_partners", "find_installation_slots", "product_search"],
+        "signals_to_check": ["location=SM Megamall or Mandaluyong", "urgency", "tire_size=175/65R14", "budget_preference"],
+        "response_checks": [
+          "Turn 1 directly explains the reviewed Gulong.ph operating identity and asks a useful area/service follow-up without inventing a retail branch.",
+          "Turn 2 resolves Megamall as a landmark-level location and checks service availability if appropriate.",
+          "Turn 3 uses the customer-provided size and quality preference instead of repeating earlier questions.",
+          "If partner cards are shown, any access reminder is scoped to those partner sites and does not deny head-office installation."
+        ]
+      },
+      "review_focus": ["CTA effectiveness", "cross-turn detail accumulation", "landmark geocoding", "service-to-product transition"]
+    },
+    {
+      "id": "mt04_lead_form_threshold_delivery",
+      "title": "Lead-form style first message with subtle quantity and install threshold risk",
+      "category": "mixed",
+      "tags": ["lead_form", "product", "service", "threshold", "quantity", "multi_turn"],
+      "source": "designed_from_lead_qualification_and_delivery_threshold_policy",
+      "turns": [
+        "Lead form: tire size 175/65R14, preferred brand Arivo, area Batangas, contact 09XX-XXX-XXXX",
+        "2 pcs lang muna boss, pakabit sana today if pwede",
+        "kung may 3+1 promo pwede ko rin iconsider"
+      ],
+      "expected": {
+        "preferred_tools": ["product_search", "find_installation_partners", "find_installation_slots"],
+        "signals_to_check": ["tire_size=175/65R14", "preferred_brands=ARIVO", "location=Batangas", "quantity=2", "promo_interest=3+1"],
+        "response_checks": [
+          "First message extracts lead-form fields without leaking or repeating the contact number unnecessarily.",
+          "Quantity 2 overrides the default quantity 4 assumption until customer changes it.",
+          "If selected SKU price and branch threshold imply installation is not allowed, delivery is surfaced as the grounded alternative.",
+          "3+1 promo math is only used if grounded by product output, not from raw text alone."
+        ]
+      },
+      "review_focus": ["lead-form extraction", "trusted order total derivation", "quantity inference", "delivery push trigger without obvious prompt wording"]
+    },
+    {
+      "id": "mt05_human_agent_commercial_continuation",
+      "title": "Human-agent commercial context then customer correction",
+      "category": "human_agent_continuation",
+      "tags": ["human_agent", "product", "service", "commercial", "correction", "multi_turn"],
+      "source": "redacted_actual_pattern_from_prior_bq_artifacts",
+      "conversation_history": [
+        {
+          "role": "user",
+          "text_content": "Good pm, delivery van po.",
+          "message_id": "redacted_user_001",
+          "datetime": "2026-05-20T14:00:00"
+        },
+        {
+          "role": "agent",
+          "sender": "Human Agent",
+          "text_content": "Customer needs 195/14c. Apollo and Yokohama options were discussed. No walk-ins; installation needs coordination.",
+          "message_id": "redacted_agent_001",
+          "datetime": "2026-05-20T14:04:00"
+        }
+      ],
+      "turns": [
+        "Apollo po magkano kung 4 pcs?",
+        "ay hindi van boss, Vios pala. 185/60R15. May budget option?",
+        "pwede ba ipakabit sa gen tri bukas?"
+      ],
+      "expected": {
+        "preferred_tools": ["product_search", "find_installation_partners", "find_installation_slots"],
+        "signals_to_check": ["tire_size=195R14C on initial human-agent continuation", "corrected_tire_size=185/60R15", "vehicle_model=Vios", "location=General Trias", "preferred_schedule_candidates"],
+        "response_checks": [
+          "Human-agent message is trusted for initial context and memory.",
+          "Commercial size 195/14c normalizes to 195R14C without inventing an aspect ratio on the first product turn.",
+          "The customer's later correction to Vios and 185/60R15 wins over the older human-agent van context.",
+          "Product price and service availability are validated through tools after the correction.",
+          "No-walk-in reminder appears if installation partner cards are shown."
+        ]
+      },
+      "review_focus": ["human-agent continuation", "commercial size normalization", "latest customer correction", "memory hydration", "service validation after corrected product context"]
+    },
+    {
+      "id": "mt06_image_evidence_multi_source",
+      "title": "Tire photo, conversation screenshot, and product-card screenshot intake",
+      "category": "image",
+      "tags": ["image", "product", "human_agent", "ocr", "requires_env", "multi_turn"],
+      "source": "live_media_placeholder",
+      "turns": [
+        {
+          "message": "hm po",
+          "image_urls": ["$RUNTIME_V7_TEST_TIRE_IMAGE_URL"]
+        },
+        {
+          "message": "ito po yung usapan namin sa agent, applicable pa ba?",
+          "image_urls": ["$RUNTIME_V7_TEST_CONVERSATION_SCREENSHOT_URL"]
+        },
+        {
+          "message": "available pa po ba ito ngayon?",
+          "image_urls": ["$RUNTIME_V7_TEST_PRODUCT_CARD_IMAGE_URL"]
+        }
+      ],
+      "expected": {
+        "preferred_tools": ["discover_brand_buckets", "product_search", "answer_product_faq", "find_installation_slots"],
+        "signals_to_check": ["image_evidence", "tire_size", "agent_message", "product_title"],
+        "response_checks": [
+          "Image evidence is included in external evidence refs and Background Signals.",
+          "OCR/vision evidence remains requires_validation and is not action-safe by itself.",
+          "Human-agent screenshot content is trusted as supplementary context but validated before promo/order/schedule claims.",
+          "Website product-card screenshot availability is validated through product tools if enough details are extracted."
+        ]
+      },
+      "review_focus": ["async pre-turn image intake", "image evidence latency", "memory hydration", "validation boundary"]
+    },
+    {
+      "id": "mt07_2am_bukas_schedule_candidates",
+      "title": "2 AM bukas wording should seed schedule candidates",
+      "category": "service",
+      "tags": ["service", "schedule", "relative_date", "request_time", "multi_turn"],
+      "source": "designed_from_relative_date_discussion",
+      "request_time": "2026-05-22 02:05:00",
+      "turns": [
+        "bukas ng umaga pwede kabit sa makati?",
+        "185/60R15 Apollo sana, 4 pcs"
+      ],
+      "expected": {
+        "preferred_tools": ["find_installation_partners", "find_installation_slots"],
+        "signals_to_check": ["location=Makati", "preferred_schedule_candidates", "tire_size=185/60R15", "preferred_brands=APOLLO", "quantity=4"],
+        "response_checks": [
+          "Request Time in the context is exactly 2026-05-22 02:05:00 Asia/Manila.",
+          "The model can treat later 2026-05-22 morning as a high-probability interpretation and 2026-05-23 as an alternative if ambiguous.",
+          "Tool calls still pass exact API dates or date ranges.",
+          "No slot is presented as booked or confirmed."
+        ]
+      },
+      "review_focus": ["request_time usage", "schedule candidate sync", "relative-date ambiguity", "slot grouping"]
+    },
+    {
+      "id": "mt08_outside_area_typo_delivery",
+      "title": "Outside-area typo should normalize and pivot to delivery",
+      "category": "service",
+      "tags": ["service", "outside_area", "typo", "delivery", "multi_turn"],
+      "source": "user_requested_case_condensed",
+      "turns": [
+        "bukdinon may branch or installation?",
+        "delivery na lang if wala, 185/60R15 Apollo sana"
+      ],
+      "expected": {
+        "preferred_tools": ["answer_service_faq", "find_installation_partners", "product_search"],
+        "signals_to_check": ["location=Bukidnon", "service_type=delivery", "tire_size=185/60R15", "preferred_brands=APOLLO"],
+        "response_checks": [
+          "Normalizes typo to Bukidnon if confidence is enough.",
+          "Does not imply a nearby-branch lookup failed mysteriously when the area is outside install coverage.",
+          "Delivery is treated as the primary service alternative.",
+          "No partner-site access reminder appears unless partner cards are actually shown."
+        ]
+      },
+      "review_focus": ["location typo normalization", "delivery fallback", "outside-service-area wording", "product context after service fallback"]
+    },
+    {
+      "id": "mt09_qc_landmark_precision",
+      "title": "SM North should not collapse to broad Quezon City",
+      "category": "service",
+      "tags": ["service", "landmark", "location_resolution"],
+      "source": "user_requested_landmark_case",
+      "turns": [
+        "near SM North need install today",
+        "175/65R14 lang yung tire"
+      ],
+      "expected": {
+        "preferred_tools": ["find_installation_partners", "find_installation_slots"],
+        "signals_to_check": ["location=SM North or SM North EDSA", "preferred_schedule=today", "tire_size=175/65R14"],
+        "response_checks": [
+          "Partner lookup uses landmark-level resolution, not just a generic QC centroid.",
+          "No distance is shown in customer presentation.",
+          "If partner cards are shown, any access reminder is scoped to those partner sites."
+        ]
+      },
+      "review_focus": ["least-overlapping location precision case", "QC landmark risk", "same-day slot grounding"]
+    },
+    {
+      "id": "mt10_slex_ambiguous_landmark",
+      "title": "SLEX should trigger clarification or cautious resolution",
+      "category": "service",
+      "tags": ["service", "ambiguous_location", "landmark", "multi_turn"],
+      "source": "user_requested_landmark_case",
+      "turns": [
+        "SLEX ako boss need tire install",
+        "near Alabang exit ako"
+      ],
+      "expected": {
+        "preferred_tools": ["find_installation_partners"],
+        "signals_to_check": ["ambiguous_location=SLEX", "location=Alabang or Muntinlupa after clarification"],
+        "response_checks": [
+          "SLEX is recognized as too broad if no exit/city is known.",
+          "The second turn should refine the location and proceed instead of asking the same generic question again.",
+          "No fabricated precise location is used from the first turn alone."
+        ]
+      },
+      "review_focus": ["least-overlapping ambiguous-location case", "CTA effectiveness", "refinement across turns"]
+    },
+    {
+      "id": "mt11_faq_product_vs_order_boundary",
+      "title": "Product FAQ then order/payment boundary",
+      "category": "faq",
+      "tags": ["faq", "product", "order_boundary", "multi_turn"],
+      "source": "designed_domain_boundary_case",
+      "turns": [
+        "brand new ba tires niyo? may warranty?",
+        "paano umorder and paano payment?"
+      ],
+      "expected": {
+        "preferred_tools": ["answer_product_faq"],
+        "avoid_tools": ["product_search", "answer_product_faq for order/payment answer"],
+        "signals_to_check": ["faq_hint"],
+        "response_checks": [
+          "Product FAQ uses retrieved FAQ answer context with source_type=faq.",
+          "Order/payment question is not forced into answer_product_faq.",
+          "No payment instruction, payment collection, or order finalization is invented."
+        ]
+      },
+      "review_focus": ["domain-scoped FAQ", "FAQ hinting", "order domain boundary", "safe answer without overblocking"]
+    },
+    {
+      "id": "mt12_latest_customer_correction",
+      "title": "Latest customer correction should beat prior in-session memory",
+      "category": "product",
+      "tags": ["product", "service", "correction", "memory", "multi_turn"],
+      "source": "designed_reasoning_stress_case",
+      "turns": [
+        "185/60R15 Michelin magkano?",
+        "ay mali boss 175/65R14 pala, Apollo or budget lang",
+        "pwede install sa Makati tomorrow?"
+      ],
+      "expected": {
+        "preferred_tools": ["product_search", "find_installation_partners", "find_installation_slots"],
+        "signals_to_check": ["initial_tire_size=185/60R15", "corrected_tire_size=175/65R14", "preferred_brands=APOLLO", "budget_preference", "location=Makati", "preferred_schedule_candidates"],
+        "response_checks": [
+          "The first turn may search Michelin 185/60R15 if the model has enough signal.",
+          "The second turn must switch to 175/65R14 and not keep using stale Michelin/185/60R15 context.",
+          "Active Working Memory should preserve the correction clearly, not flatten both sizes into equal current facts.",
+          "Service lookup should use the corrected product context and Makati schedule context."
+        ]
+      },
+      "review_focus": ["latest-message priority", "memory correction handling", "stale signal avoidance", "product-to-service continuity"]
+    },
+    {
+      "id": "mt13_overconstrained_recovery",
+      "title": "Overconstrained product request should recover when customer relaxes constraints",
+      "category": "product",
+      "tags": ["product", "overconstrained", "recovery", "service", "multi_turn"],
+      "source": "designed_reasoning_stress_case",
+      "turns": [
+        "May Michelin 175/65R14 under 2k?",
+        "kahit ibang brand basta safe and mura",
+        "pwede ba ipakabit today sa SM North?"
+      ],
+      "expected": {
+        "preferred_tools": ["product_search", "find_installation_partners", "find_installation_slots"],
+        "signals_to_check": ["tire_size=175/65R14", "initial_required_brand=MICHELIN", "budget_ceiling=2000", "relaxed_brand_preference", "location=SM North", "preferred_schedule=today"],
+        "response_checks": [
+          "No unsupported claim that Michelin under 2k is available.",
+          "If the exact request has no result, the model explains naturally and offers grounded alternatives only after the customer relaxes constraints.",
+          "The relaxed search should not keep Michelin as a hard required brand.",
+          "Service lookup should happen only after there is enough location/schedule context."
+        ]
+      },
+      "review_focus": ["tool-output interpretation", "constraint relaxation", "grounded alternatives", "model flexibility after empty or narrow results"]
+    },
+    {
+      "id": "mt14_service_addons_grounding",
+      "title": "Service addons and inclusions should be grounded by tools",
+      "category": "service",
+      "tags": ["service", "addons", "inclusions", "slots", "multi_turn"],
+      "source": "designed_reasoning_stress_case",
+      "turns": [
+        "near Makati ako, 185/60R15 need kabit today",
+        "may balancing, pito, nitrogen, disposal included?"
+      ],
+      "expected": {
+        "preferred_tools": ["find_installation_partners", "find_installation_slots", "get_branch_addons", "answer_service_faq"],
+        "signals_to_check": ["location=Makati", "tire_size=185/60R15", "preferred_schedule=today", "branch_addons"],
+        "response_checks": [
+          "The first turn should establish nearby partners or slots before claiming same-day availability.",
+          "Addon/inclusion answers should come from branch addon catalog or service FAQ grounding.",
+          "The model should not say all requested services are included unless tool output supports it.",
+          "If addon availability differs by partner, the response should preserve that nuance instead of flattening it."
+        ]
+      },
+      "review_focus": ["branch addon grounding", "service FAQ vs addon tool choice", "same-day slot context", "partner-specific nuance"]
+    }
+  ]
+}

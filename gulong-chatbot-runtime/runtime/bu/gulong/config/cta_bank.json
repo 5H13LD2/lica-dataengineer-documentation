@@ -1,0 +1,113 @@
+{
+  "mode": "hint_only",
+  "ctas": [
+    {
+      "id": "ask_location_first",
+      "text": "Saan po kayo located (city/province)? Para ma suggest ko yung best option for you.",
+      "placement": "end",
+      "allow_model_edit": true,
+      "priority": 1,
+      "triggers": ["missing_location"]
+    },
+    {
+      "id": "ask_location_and_schedule",
+      "text": "Saan po kayo located and kailan niyo balak magpakabit? Para ma suggest ko yung best option for you.",
+      "placement": "end",
+      "allow_model_edit": true,
+      "priority": 1,
+      "triggers": ["missing_location_or_schedule", "missing_location_price_inquiry"]
+    },
+    {
+      "id": "ask_barangay_metro_manila",
+      "text": "Salamat po! If within Metro Manila po kayo, anong barangay po kayo?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["missing_barangay_metro_manila"]
+    },
+    {
+      "id": "ask_tire_size_first",
+      "text": "Ano pong tire size ninyo? (e.g., 175/65R14)",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["missing_tire_size_initial"]
+    },
+    {
+      "id": "bucket_ask_preferred_brand",
+      "text": "Alin po preferred brand or budget niyo, at ilang tires po kailangan niyo?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["bucket_ask_preferred_brand"]
+    },
+    {
+      "id": "bucket_ask_budget",
+      "text": "May target budget po ba kayo?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["bucket_ask_budget"]
+    },
+    {
+      "id": "bucket_ask_driving_style",
+      "text": "Daily city driving po ba ito, highway, or mixed use?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["bucket_ask_driving_style"]
+    },
+    {
+      "id": "bucket_ask_car_model",
+      "text": "Ano pong car make/model ninyo para macheck ko rin yung pinaka-fit na options?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["bucket_ask_car_model"]
+    },
+    {
+      "id": "ask_quantity_for_total",
+      "text": "Alin pong exact tire model/SKU ang prefer ninyo, at ilang tires po ang kukunin ninyo?",
+      "placement": "end",
+      "allow_model_edit": false,
+      "triggers": ["missing_quantity_for_total"]
+    },
+    {
+      "id": "ask_service_type",
+      "text": "Install, home service, or delivery po ang gusto ninyo?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["missing_service_type"]
+    },
+    {
+      "id": "ask_schedule_urgency",
+      "text": "Mas prefer niyo po ba weekday or weekend, at anong time window po (morning/afternoon)?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["missing_schedule_urgency"]
+    },
+    {
+      "id": "ask_schedule_slot_confirmation",
+      "text": "Alin po sa available schedule options ang prefer ninyo para ma-confirm natin?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "priority": 1,
+      "triggers": ["missing_schedule_slot_confirmation"]
+    },
+    {
+      "id": "ask_payment_option",
+      "text": "Ano pong preferred payment option niyo? Pay Now (may discount) or Pay Later (reservation fee muna)?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["missing_payment_option"]
+    },
+    {
+      "id": "ask_preferred_ip",
+      "text": "Alin po sa mga options ang prefer ninyo, at anong oras po ang gusto ninyo para ma-lock natin yung schedule?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["missing_installation_partner"]
+    },
+    {
+      "id": "confirm_tire_size_or_photo",
+      "text": "Can you confirm your current tire size (from the sidewall), or send a clear tire photo?",
+      "placement": "end",
+      "allow_model_edit": true,
+      "triggers": ["needs_tire_size_confirmation"]
+    }
+  ]
+}

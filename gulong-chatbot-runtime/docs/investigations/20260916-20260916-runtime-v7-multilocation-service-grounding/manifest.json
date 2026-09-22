@@ -1,0 +1,42 @@
+{
+  "changes": [
+    "Separate canonical location anchor from acceptable service locations",
+    "Scope service claims to exact provider query evidence",
+    "Guard slots against zero-card product observations",
+    "Restore explicit latest-turn product constraints",
+    "Add deterministic service and partial-match surfaces",
+    "Present same-brand exact-size terrain near-matches with disclosure",
+    "Separate source-backed text products from trusted-image visual choices"
+  ],
+  "claims": [],
+  "cost_ledger": [],
+  "investigation_id": "20260916-20260916-runtime-v7-multilocation-service-grounding",
+  "objective": "Prevent unsupported multi-area service claims, route empty product observations to partner coverage, preserve customer anchor and acceptable nearby areas, and validate through adaptive return-only replay.",
+  "owner_agent": "codex",
+  "primary_repo": "D:\\Carlo\\LICA Auto\\assistant\\_codex_worktrees\\gulong-runtime-multilocation-grounding-20260916",
+  "release_and_backfill": {
+    "backfill_status": "not_requested",
+    "deployment_status": "not_requested",
+    "rollback_gate": null
+  },
+  "scope": [
+    "Runtime V7 signals, service/product hydration, turn plan, composer validation, API debug projection, tests, and documentation"
+  ],
+  "sources": [
+    "Adaptive local return-only runtime replay",
+    "Focused integrated pytest suite",
+    "Complete Runtime V7 pytest suite"
+  ],
+  "started_at": "2026-09-16T01:08:40+08:00",
+  "status": "complete",
+  "timezone": "Asia/Manila",
+  "title": "Runtime V7 multi-location service grounding correction",
+  "updated_at": "2026-09-16T02:19:01+08:00",
+  "verification": [
+    "862 focused tests passed",
+    "1772 complete Runtime V7 tests passed",
+    "Adaptive Rosario and Nitto all-terrain journey produced scoped provider operations and grounded output",
+    "Final adaptive replay rendered all three source-backed Nitto 265/50R20 rows and only two trusted-image selection cards",
+    "Expanded focused suite passed 1024 tests and complete Runtime V7 suite passed 1781 tests"
+  ]
+}

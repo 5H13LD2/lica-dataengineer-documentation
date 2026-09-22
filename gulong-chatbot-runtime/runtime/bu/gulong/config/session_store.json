@@ -1,0 +1,9 @@
+{
+  "provider": "firestore",
+  "storage_kind": "firestore",
+  "project_id": "gulong-chatbot-459723",
+  "users_collection": "users",
+  "sessions_subcollection": "sessions",
+  "enable_firestore": true,
+  "credentials_json": null
+}

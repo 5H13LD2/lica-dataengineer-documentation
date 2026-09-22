@@ -1,0 +1,3 @@
+SELECT MIN(order_date) first_order, MAX(order_date) latest_order, MAX(_ingest_loaded_at) latest_load,
+ARRAY_AGG(IF(REGEXP_CONTAINS(REGEXP_REPLACE(LOWER(COALESCE(remarks,'')), r'[^a-z0-9]', ''), r'9930869617|9052228494|9606589180|9171247917|9156589569|9266416672|9476139463|9190871879|9494425470|9959101911|jowelpernadjowea30gmailcom|maribethsalvador82gmailcom|shenalynesquivel01gmailcom|ryanrobertangelesurccomph|iamdrew1223gmailcom|neilmanimtimgmailcom|nsf1966|wqr912|ngt1580|gbe1708|car9463|new9642|nkp2033'), STRUCT(id, customer_name, status, payment_status, remarks), NULL) IGNORE NULLS) identifier_matches
+FROM `gulong-chatbot-459723.gulong_backend.orders_raw`

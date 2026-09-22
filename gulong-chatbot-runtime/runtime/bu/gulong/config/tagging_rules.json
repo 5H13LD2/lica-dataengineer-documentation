@@ -1,0 +1,171 @@
+{
+  "policy": {
+    "title": "Tagging Policy (Truth Source)",
+    "summary": "This file is the single source of truth for runtime tagging. Runtime code must only emit tags defined here.",
+    "rule_fields": [
+      "enabled",
+      "tag",
+      "description",
+      "bus",
+      "channels",
+      "keywords",
+      "tool_names",
+      "handoff_tags",
+      "error_reasons"
+    ],
+    "error_reasons": [
+      "llm_failure",
+      "llm_empty",
+      "llm_unavailable",
+      "tool_failure",
+      "render_invalid"
+    ],
+    "notes": [
+      "Runtime evaluates rules on suppressed delivery and on successful replies.",
+      "Rules are channel-agnostic; ChannelGateway applies tags for the active channel.",
+      "Do not add ad-hoc tags in runtime code."
+    ]
+  },
+  "enabled": true,
+  "rules": {
+    "high_intent": {
+      "enabled": true,
+      "tag": "High Intent",
+      "bus": [
+        "gulong"
+      ],
+      "channels": [
+        "manychat"
+      ],
+      "tool_names": [
+        "check_install_dt",
+        "branch_slots",
+        "payment_options",
+        "prepare_payment_request",
+        "finalize_order_and_payment"
+      ]
+    },
+    "order_submission_handoff": {
+      "enabled": true,
+      "tag": "Handoff - Order",
+      "description": "Order submitted; route to human agent for post-order follow-up.",
+      "bus": [
+        "gulong"
+      ],
+      "channels": [
+        "manychat"
+      ],
+      "tool_names": [
+        "finalize_order_and_payment"
+      ]
+    },
+    "irate": {
+      "enabled": true,
+      "tag": "Irate",
+      "bus": [
+        "gulong"
+      ],
+      "channels": [
+        "manychat"
+      ],
+      "keywords": [
+        "galit",
+        "bad service",
+        "bwisit",
+        "complain",
+        "refund",
+        "ang tagal",
+        "ang bagal",
+        "report",
+        "reprimand"
+      ]
+    },
+    "agent_handoff": {
+      "enabled": true,
+      "tag": "Handoff - Assist",
+      "description": "User explicitly requests a human or tools set a handoff tag.",
+      "bus": [
+        "gulong"
+      ],
+      "channels": [
+        "manychat"
+      ],
+      "handoff_tags": [
+        "order_submit_failed",
+        "order_incomplete"
+      ],
+      "keywords": [
+        "agent",
+        "human",
+        "tao",
+        "representative",
+        "live agent"
+      ]
+    },
+    "runtime_llm_handoff": {
+      "enabled": true,
+      "tag": "Chatbot Error",
+      "description": "LLM failure or no usable content; suppress delivery and tag for handoff.",
+      "bus": [
+        "gulong"
+      ],
+      "channels": [
+        "manychat"
+      ],
+      "error_reasons": [
+        "llm_failure",
+        "llm_empty",
+        "llm_unavailable"
+      ]
+    },
+    "runtime_llm_issue": {
+      "enabled": true,
+      "tag": "Chatbot Error",
+      "description": "LLM failure or no usable content; tag for analytics and alerts.",
+      "bus": [
+        "gulong"
+      ],
+      "channels": [
+        "manychat"
+      ],
+      "error_reasons": [
+        "llm_failure",
+        "llm_empty",
+        "llm_unavailable"
+      ]
+    },
+    "runtime_tool_issue": {
+      "enabled": true,
+      "tag": "Chatbot Error",
+      "description": "Tool failures after retry; tag for analytics and alerts.",
+      "bus": [
+        "gulong"
+      ],
+      "channels": [
+        "manychat"
+      ],
+      "error_reasons": [
+        "tool_failure"
+      ]
+    },
+    "runtime_render_issue": {
+      "enabled": true,
+      "tag": "Chatbot Error",
+      "description": "Bubble rendering invalid; fallback to plain text or suppress if empty.",
+      "bus": [
+        "gulong"
+      ],
+      "channels": [
+        "manychat"
+      ],
+      "error_reasons": [
+        "render_invalid"
+      ]
+    },
+    "followup_eligible": {
+      "enabled": true,
+      "tag": "FollowUp - Eligible",
+      "description": "User is eligible for a scheduled follow-up via ManyChat fields."
+    }
+  }
+}

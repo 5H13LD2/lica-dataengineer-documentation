@@ -1,0 +1,10 @@
+{
+  "provider": "firestore",
+  "project_id": "gulong-chatbot-459723",
+  "collection": "runtime_idempotency",
+  "enable_firestore": true,
+  "credentials_json": null,
+  "ttl_seconds": 900,
+  "poll_timeout_s": 2.0,
+  "poll_interval_s": 0.2
+}

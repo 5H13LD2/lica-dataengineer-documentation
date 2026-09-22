@@ -1,0 +1,94 @@
+{
+  "pack_id": "runtime-v7-composer-tone-v1",
+  "endpoint": "/gulong/v7/chat/tester",
+  "scenarios": [
+    {
+      "id": "taglish_compound_payment",
+      "user_text": "Pwede ba Home Credit? Kung Pay Later sa Yokohama, available ba ang 3 months installment 0%? At available ba ang BPI 6 months installment 0%?",
+      "expected": {
+        "minimum_commercial_claims": 3,
+        "required_patterns": [
+          "home credit",
+          "yokohama",
+          "3\\s*[- ]?month",
+          "bpi\\s*6\\s*[- ]?month",
+          "pay later",
+          "tire size"
+        ],
+        "forbidden_patterns": [
+          "bpi (?:is|ay) not (?:currently )?supported",
+          "6\\s*%\\s*interest",
+          "straight credit|debit"
+        ]
+      }
+    },
+    {
+      "id": "english_compound_payment",
+      "user_text": "For Yokohama Pay Later, can I use Home Credit, 3-month 0%, or BPI 6-month 0%?",
+      "expected": {
+        "minimum_commercial_claims": 3,
+        "required_patterns": [
+          "home credit",
+          "yokohama",
+          "3\\s*[- ]?month",
+          "bpi\\s*6\\s*[- ]?month",
+          "pay later"
+        ],
+        "forbidden_patterns": [
+          "bpi (?:is|ay) not (?:currently )?supported",
+          "6\\s*%\\s*interest",
+          "straight credit|debit"
+        ]
+      }
+    },
+    {
+      "id": "casual_filipino_compound_payment",
+      "user_text": "Boss may Home Credit ba sa Yokohama? Pay Later sana, alin pwede: 3 months 0% o BPI 6 months 0%?",
+      "expected": {
+        "minimum_commercial_claims": 3,
+        "required_patterns": [
+          "home credit",
+          "yokohama",
+          "3\\s*[- ]?month",
+          "bpi\\s*6\\s*[- ]?month",
+          "pay later"
+        ],
+        "forbidden_patterns": [
+          "bpi (?:is|ay) not (?:currently )?supported",
+          "6\\s*%\\s*interest",
+          "straight credit|debit"
+        ]
+      }
+    },
+    {
+      "id": "unsupported_method_only",
+      "user_text": "May Home Credit ba kayo?",
+      "expected": {
+        "minimum_commercial_claims": 1,
+        "required_patterns": [
+          "home credit"
+        ],
+        "forbidden_patterns": [
+          "under the active checkout options"
+        ]
+      }
+    },
+    {
+      "id": "other_provider_compound_payment",
+      "user_text": "Pwede ba Atome? For Apollo Pay Later naman, available ba ang 3 months 0% at BPI 6 months 0%?",
+      "expected": {
+        "minimum_commercial_claims": 3,
+        "required_patterns": [
+          "atome",
+          "apollo",
+          "3\\s*[- ]?month",
+          "bpi\\s*6\\s*[- ]?month",
+          "pay later"
+        ],
+        "forbidden_patterns": [
+          "6\\s*%\\s*interest"
+        ]
+      }
+    }
+  ]
+}

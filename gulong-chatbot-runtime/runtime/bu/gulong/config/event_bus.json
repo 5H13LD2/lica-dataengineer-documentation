@@ -1,0 +1,6 @@
+{
+  "enabled": false,
+  "provider": "memory",
+  "project_id": "gulong-chatbot-459723",
+  "topic_id": "runtime-trace-events"
+}

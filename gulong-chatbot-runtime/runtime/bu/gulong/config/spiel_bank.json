@@ -1,0 +1,97 @@
+{
+  "mode": "hint_only",
+  "spiels": [
+    {
+      "id": "intro_new_customer",
+      "text": "Hello po! Welcome to GulongPH - the largest online tire supermarket in the Philippines. We buy straight from the manufacturer/importer, eliminating the middle-man, thus guaranteeing genuine and new tires. We make tire buying quick and easy.",
+      "placement": "system_note",
+      "allow_model_edit": true,
+      "once_per_session": true,
+      "triggers": [
+        "session_start"
+      ]
+    },
+    {
+      "id": "origin_note",
+      "text": "🌍 Origin note: country listed is the brand's country of origin; actual manufacturing location may vary.",
+      "placement": "after_tire_presentations",
+      "allow_model_edit": false,
+      "once_per_session": true
+    },
+    {
+      "id": "tire_protection_plan_note",
+      "text": "Kasama na rin po diyan yung Tire Protection Plan namin na worth ₱875, pero FREE na po for you! Kung mabutas o madamage yung gulong nyo dahil sa pako or iba pang road hazard, agad namin itong papalitan, no questions asked.",
+      "placement": "after_tire_presentations",
+      "allow_model_edit": true,
+      "once_per_session": true
+    },
+    {
+      "id": "walkin_objection",
+      "text": "Just to clarify - wala po kaming walk-in setup, since lahat ng stocks namin are coming directly from our warehouse. That's how we keep prices low and service efficient.",
+      "placement": "system_note",
+      "allow_model_edit": true,
+      "once_per_session": false,
+      "triggers": [
+        "walkin_objection"
+      ]
+    },
+    {
+      "id": "install_free_note",
+      "text": "✅ FREE installation po inclusive of mounting, balancing, weights and valves sa installation partners po natin.\n\n📌 NOTE: Kailangan po ng reservation bago pumunta sa installation site para ma-secure ang tires at schedule.",
+      "placement": "after_installation_partners",
+      "allow_model_edit": false,
+      "once_per_session": false
+    },
+    {
+      "id": "home_service_recommend_partner",
+      "text": "Yes, Ma'am/Sir! We also offer home service within Metro Manila po. But highly recommended po namin na magpunta kayo sa aming installation partners. Bakit po?\n\n- Proper and Secure Installation: Our partners have complete equipment and trained technicians to ensure your tires are installed safely.\n- Complete Installation Process: From mounting, balancing, weights, to valves - lahat po ay maayos na nagagawa sa installation site.\nSafety niyo po ang priority namin, kaya we want to make sure your tires are installed correctly. Let me know po what works best for you.",
+      "placement": "system_note",
+      "allow_model_edit": true,
+      "once_per_session": true,
+      "triggers": [
+        "home_service_recommend_partner"
+      ]
+    },
+    {
+      "id": "installment_plans",
+      "text": "We offer 0% interest installment plans.\n\n- 3 months 0% interest - BDO, BPI, Metrobank, EastWest, HSBC, and China Bank (minimum of 4 tires)\n- 6 months 0% interest - BPI only for specific brand\n  (MICHELIN, BFGOODRICH, COOPER and APOLLO)\n\nNote:\n- BPI and Metrobank are processed via online payment\n- BDO, EastWest, HSBC, and China Bank are processed via terminal",
+      "placement": "system_note",
+      "allow_model_edit": false,
+      "once_per_session": true,
+      "triggers": [
+        "installment_info"
+      ]
+    },
+    {
+      "id": "branch_slots_notice",
+      "text": "🗓️ Appointments require 3 days advance notice at this branch. Same-day installation available before 11:00 AM.\n\n⏱️ Your tires will be at the shop for your scheduled time. Our team will confirm your requested drop off time with the shop.\n\n🔁 In the unlikely event your requested time is no longer available, we will work with you on rescheduling.",
+      "placement": "system_note",
+      "allow_model_edit": true,
+      "once_per_session": false,
+      "cooldown_days": 1,
+      "triggers": [
+        "branch_slots_notice"
+      ]
+    },
+    {
+      "id": "order_form_template",
+      "text": "Name: {first_name} {last_name}\nContact No: {contact_no}\nEmail: {email}\nCar Make/Model: {car_make} {car_model}\nPlate No: {plate_no}\nTire Size: {tire_size}\nBrand: {tire_brands}\nQty: {quantity}\nTotal: PHP {total} (including promo discounts)\nPreferred Branch: {installation_partner}\nPreferred Date/Time: {schedule}\nMode of Payment (for balance): {payment_option} via {payment_method}\nInvoice to Company? (YES/NO): {invoice_to_company}",
+      "placement": "system_note",
+      "allow_model_edit": true,
+      "once_per_session": true,
+      "triggers": [
+        "order_summary_template"
+      ]
+    },
+    {
+      "id": "order_fee_terms",
+      "text": "Reservation fee tiers (deductible from total):\n- Below PHP 40,000: PHP 500\n- PHP 40,000 to below PHP 80,000: PHP 1,000\n- PHP 80,000 and above: 10% of total\n\nBalance payable upon installation. Payment via GCash or bank.\n\nNon-refundable fee applies. Rescheduling 2+ days before requires full balance payment.\n\nFull terms: https://gulong.ph/terms-and-conditions",
+      "placement": "system_note",
+      "allow_model_edit": true,
+      "once_per_session": true,
+      "triggers": [
+        "order_fee_terms"
+      ]
+    }
+  ]
+}

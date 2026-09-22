@@ -1,0 +1,945 @@
+{
+  "changes": [
+    {
+      "ref": "working-tree",
+      "summary": "Added deterministic health scoring, canonical/provider-relative contracts, tester-only release routes, human CS worksheet and offline rescoring, scenario tiers, and operator documentation."
+    },
+    {
+      "ref": "working-tree-hardening",
+      "summary": "Added identity-linked model-to-provider scope-chain scoring, bounded dedupe evidence, and a second reordered two-brand shorthand/typo payment case."
+    },
+    {
+      "ref": "working-tree-feature-contract",
+      "summary": "Added explicit environment feature expectations, authoritative unavailable-surface evidence, positive payment-option and payment-method tracked clicks, and schema-v4 baseline compatibility."
+    },
+    {
+      "ref": "working-tree-layered-health",
+      "summary": "Added selectable local, commerce API, channel-read API, and metered model layers; hardened resolved endpoint allowlists, redirect rejection, response contracts, cost labels, and tracked M/H event identity."
+    },
+    {
+      "ref": "0e990e7",
+      "summary": "Enforced promo provider scope after accepted composition, raised the bounded tester call ceiling to ten, and revised scenario contract 2026-09-10.2 for provider-backed promo claims, known-location progression, direct business address, and action-specific guided-surface applicability."
+    },
+    {
+      "ref": "working-tree-store-location-contract",
+      "summary": "Revised scenario contract 2026-09-10.3 so bare store or branch-location wording asks for the customer's free-form city or area without an unsolicited head-office address or installation picker; retained an explicit head-office-address negative control."
+    },
+    {
+      "ref": "working-tree-hydrated-history-gate",
+      "summary": "Added an authenticated, allowlisted hydrated tester route plus a metered layered-health sentinel whose redacted usage counts toward the shared run budget."
+    },
+    {
+      "ref": "working-tree-provider-event-cache-identity",
+      "summary": "Made provider message ID authoritative for channel-cache reuse so a new repeated phrase refreshes ManyChat history; made the protected route explicitly report its enforced return-only mode."
+    },
+    {
+      "ref": "working-tree-scope-and-composer-hardening",
+      "summary": "Enriched uniquely matched customer-authored installment scopes before provider execution and cache identity, sanitized only duplicate supporting-replacement sentences after model repair, revised scenario contract 2026-09-11.4, and made serial model execution the default semantic gate."
+    },
+    {
+      "ref": "working-tree-matched-action-and-empty-retry-hardening",
+      "summary": "Normalized baseline cost at matched case/action/occurrence grain with an 80 percent coverage floor, retained unmatched aggregate workload visibility, and granted generic empty-output recovery one bounded replacement round under a one-round deployed tool budget."
+    },
+    {
+      "ref": "working-tree-main-transport-retry",
+      "summary": "Enabled one bounded main-path retry for classified transient provider failures with observable backoff and shared provider-call budget accounting; semantic failures remain non-retryable."
+    },
+    {
+      "ref": "b180a74",
+      "summary": "Added semantic business-location classification and a deterministic post-render boundary for isolated explicit-address and ambiguous-store-location goals."
+    },
+    {
+      "ref": "working-tree-location-schema-and-faq-facts",
+      "summary": "Suppresses incompatible tool schemas before planning for isolated business-location goals and validates typed provider-required FAQ facts after composition while allowing natural-language variation."
+    },
+    {
+      "ref": "working-tree-business-location-renderer-ownership",
+      "summary": "Synchronizes a changed business-location boundary response into the channel renderer's preferred assistant field so rejected model prose cannot reappear after harness finalization."
+    },
+    {
+      "ref": "working-tree-complete-model-telemetry",
+      "summary": "Aggregates background extraction, active-memory compaction, and image evidence with main/composer usage; rejects missing component usage and unmetered retries; and exposes state-extraction and tool latency telemetry."
+    },
+    {
+      "ref": "working-tree-runtime-phase-telemetry",
+      "summary": "Adds bounded server runtime phase timings, per-phase and per-tool rollups, client-versus-handler overhead, hard missing-timing contracts, and turn-local structural duplicate scoring."
+    },
+    {
+      "ref": "working-tree-conditional-session-save",
+      "summary": "Replaces the post-lock Firestore transaction with an atomic snapshot-update-time precondition, splits state assembly from remote save timing, and supplies deterministic in-process promo-surface latency."
+    },
+    {
+      "ref": "working-tree-conditional-session-save-revert",
+      "summary": "Restores the transaction after an exact matched staging run showed no persistence improvement; retains split persistence timing and deterministic in-process promo-surface latency."
+    },
+    {
+      "ref": "working-tree-firestore-save-diagnostics",
+      "summary": "Adds content-free transaction attempt, read, body, commit-overhead, outcome, and slow-or-failed payload-size diagnostics to the existing Firestore CAS path plus a guarded isolated paired benchmark runner."
+    },
+    {
+      "ref": "working-tree-firestore-transport-observer",
+      "summary": "Preserves Firestore transaction and retry behavior while observing each begin and commit RPC attempt, process context, and retry-backoff remainder; adds an authenticated staging-only generated-data no-model probe and a Cloud Build Gunicorn worker substitution."
+    },
+    {
+      "ref": "working-tree-firestore-representation-probe",
+      "summary": "Adds an isolated staging-only comparison of runtime-shaped nested map, canonical JSON, and gzip JSON state through unchanged CAS semantics with rotating order, exact readback, stale-revision controls, and verified cleanup."
+    },
+    {
+      "ref": "working-tree-firestore-strategy-state-compatibility",
+      "summary": "Adds a dual legacy/canonical reader, hash-validated canonical JSON storage, configuration-selected writer, atomic opposite-representation deletion, bounded decode diagnostics, and a bidirectional deployed-format transition canary."
+    },
+    {
+      "ref": "working-tree-retry-metering-domain-projection",
+      "summary": "Aggregates content-free usage across every returned background-extraction attempt, preserves missing usage for exception-only calls, and removes the production product fallback domain in favor of normalized signal/ref selection plus bounded request_capability recovery."
+    },
+    {
+      "ref": "working-tree-promo-alternative-payment-deferral",
+      "summary": "Adds latest-customer canonical promo-alternative scope, provider-issued primary and alternative evidence, renderability guards, and relation-aware deferral of confirmed future payment preferences."
+    }
+  ],
+  "claims": [
+    {
+      "status": "confirmed",
+      "summary": "The evaluator implementation passes focused, Runtime V7, and full-repository local tests."
+    },
+    {
+      "status": "supported",
+      "summary": "The transport observer and staging-only no-model probe pass 74 focused and 1786 full-repository tests. Local Firestore measured 40 KB at 314/333 ms and 140 KB at 452/455 ms p50/p95 with one successful commit per save; Cloud Run A/B remains pending."
+    },
+    {
+      "status": "supported",
+      "summary": "The local 40 KiB runtime-shaped representation probe passed exact round trips, revision progression, stale-CAS rejection, and cleanup. Nested map, canonical JSON, and gzip JSON measured approximately 362, 220, and 162 ms p50 end-to-end; exact Cloud Run staging comparison remains pending."
+    },
+    {
+      "status": "confirmed",
+      "summary": "Exact 90173d2 staging comparison proves scalar state bypasses the Firestore encoding and GC pathology: 40 KiB nested versus canonical JSON p50 save was 6637 versus 58 ms, and 140 KiB was 18626 versus 91 ms, with all CAS and cleanup controls passing. Production representation remains unchanged."
+    },
+    {
+      "status": "supported",
+      "summary": "The compatibility bridge passes both generated real-Firestore migration directions locally, including pre-switch dual read, exact post-switch representation, stale-CAS no-mutation, configured non-CAS creation, and cleanup. Staging Release A and Release B remain required."
+    },
+    {
+      "status": "confirmed",
+      "summary": "Exact 6458fd6 staging Release A passed dual reading and canonical-to-nested rollback transition with one authoritative representation, stale-CAS no-mutation, non-CAS creation, exact cleanup, and unchanged safety settings."
+    },
+    {
+      "status": "confirmed",
+      "summary": "Exact 6458fd6 staging Release B passed the inverse nested-to-canonical transition, raw authoritative-shape checks, stale-CAS no-mutation, non-CAS creation, cleanup, identity, and safety checks; canonical persistence removed the observed multi-second save tail."
+    },
+    {
+      "status": "blocked",
+      "summary": "Live Cloud Run and VM promotion remain blocked despite 19 of 19 mechanical and 133 of 133 structural CS checks passing. Matrix usage exceeded the ceiling by 9655 reported tokens, two retry attempts were unmetered, and the available exact-live baseline has an incompatible timeout profile."
+    },
+    {
+      "status": "supported",
+      "summary": "The retry-metering and signal-driven production projection correction passes post-review edge hardening, all 1813 repository tests, Ruff, compilation, Cloud Build YAML parsing, strict audit, and the no-cost evaluator profile. Deployed token, retry, and customer-path behavior remain pending."
+    },
+    {
+      "status": "confirmed",
+      "summary": "Staging candidate 5b227d8 passed the three-case diagnostic model smoke with complete technical telemetry and automated CS structural checks."
+    },
+    {
+      "status": "confirmed",
+      "summary": "Staging 0e990e7 passed exact core health, five read-only commerce API contracts, and all targeted customer-correctness paths with zero observed HTTP, runtime, or tool errors."
+    },
+    {
+      "status": "blocked",
+      "summary": "Live and VM promotion remain blocked. Exact staging ffde9fe passed 19 of 19 mechanical contracts but exceeded the 95000 ms p95 limit by 341 ms, and its aggregate omitted paid supplemental model calls. The complete telemetry correction must deploy and pass a fresh exact-target gate."
+    },
+    {
+      "status": "confirmed",
+      "summary": "The local contract now separates ambiguous store-location clarification, explicit Gulong.PH or head-office address, and explicit installation or service-area requests; deployed model behavior has not yet been tested."
+    },
+    {
+      "status": "confirmed",
+      "summary": "Current Secret Manager-backed ManyChat message-history and profile reads passed for synthetic account 4843256405786522; the new protected route still requires deployed staging verification."
+    },
+    {
+      "status": "confirmed",
+      "summary": "Exact staging ffde9fe passed both location regressions and all 19 complete mechanical scenarios with zero HTTP, runtime, or tool errors; promotion remained blocked at 95341 ms p95."
+    },
+    {
+      "status": "confirmed",
+      "summary": "Fresh ManyChat history reads are authenticated and paginated, but new 20:48-20:55 activity contained only field/rule events; the latest actual inbound under subscriber 4843256405786522 remains 12:16:03."
+    },
+    {
+      "status": "blocked",
+      "summary": "Exact staging 1f9715a passed a three-path telemetry diagnostic, but seven responses used 926358 tokens and retained 27-40 seconds beyond measured model and tool latency. A phase-instrumented targeted rerun is required before another complete matrix or promotion."
+    },
+    {
+      "status": "blocked",
+      "summary": "Exact staging 3479955 localized p50/p95 session persistence to 29460/31908 ms in a six-response diagnostic. The schedule case passed; the journey had one composer fallback and two deterministic promo-surface timing gaps. Conditional session-save hardening requires exact-staging verification."
+    },
+    {
+      "status": "blocked",
+      "summary": "Exact staging e047694 passed both matched selected paths and all structural CS checks, but conditional writes did not improve remote save latency. The experiment is reverted; complete promotion remains blocked pending storage-safe latency work and a full green gate."
+    },
+    {
+      "status": "confirmed",
+      "summary": "A paired isolated 141 KB benchmark measured about 0.2 seconds absolute benefit from recursively exempting strategy_state indexes under maximal nested churn. Index fan-out is measurable but cannot explain the 20-35 second staging saves; compact or delta persistence is deferred pending deployed transaction-attempt diagnostics."
+    },
+    {
+      "status": "blocked",
+      "summary": "Exact staging 5cca58d completed the frozen matrix at 18 of 19 mechanical cases and 96.24 percent structural-CS proxy with zero operational errors. One explicit promo-alternative request omitted the gallery, and total usage exceeded the 2000000-token ceiling by 44679."
+    },
+    {
+      "status": "supported",
+      "summary": "The generalized promo-alternative and future-payment deferral patch passes all 1829 repository tests, Ruff, compilation, diff checks, and the deterministic no-cost evaluator. Exact staging behavior and token margin remain pending."
+    },
+    {
+      "status": "confirmed",
+      "summary": "Exact staging 1df9264 passed both affected mechanical scenarios with zero operational or telemetry errors. The partial diagnostic used 203926 tokens and 51793 ms p95; rendered review found one future-tense sentence inconsistent with the already-shown promo card."
+    },
+    {
+      "status": "supported",
+      "summary": "The campaign-only presentation correction passes its renderable positive and invalid-surface negative controls, 28 focused commercial tests, and all 1830 repository tests. Rebuilt targeted staging verification remains pending."
+    }
+  ],
+  "cost_ledger": [
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 17960,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 148189,
+      "model": "not exposed per call in aggregate tester telemetry",
+      "operation_id": "staging-5b227d8",
+      "output_tokens": 4690,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 10,
+      "task_type": "three-scenario staging smoke"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 318207,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 1807576,
+      "model": "not exposed per call in aggregate tester telemetry",
+      "operation_id": "staging-0e990e7",
+      "output_tokens": 53285,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 82,
+      "task_type": "15-case and 3-journey staging promotion cohort"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 266283,
+      "credential_alias": "live runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 1472560,
+      "model": "not exposed per call in aggregate tester telemetry",
+      "operation_id": "baseline-50e5975-20260911",
+      "output_tokens": 47537,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 67,
+      "task_type": "16-case and 3-journey live baseline cohort"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 284718,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 1300347,
+      "model": "not exposed per call in aggregate tester telemetry",
+      "operation_id": "complete-bff16bd-20260911",
+      "output_tokens": 39289,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 68,
+      "task_type": "16-case and 3-journey staging complete matrix"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 115698,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 754415,
+      "model": "not exposed per call in aggregate tester telemetry",
+      "operation_id": "serial-recheck-bff16bd-20260911",
+      "output_tokens": 17567,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 26,
+      "task_type": "two cases and one five-step journey serial staging recheck"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 261577,
+      "credential_alias": "live runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 1146251,
+      "model": "not exposed per call in aggregate tester telemetry",
+      "operation_id": "baseline-50e5975-full-20260911-151056",
+      "output_tokens": 41603,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 58,
+      "task_type": "16-case and 3-journey exact-live full baseline refresh"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 163889,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 1497829,
+      "model": "not exposed per call in aggregate tester telemetry",
+      "operation_id": "staging-1a073c8-complete-20260911-153139",
+      "output_tokens": 49728,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 70,
+      "task_type": "16-case and 3-journey exact-staging complete matrix"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 211150,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 1795484,
+      "model": "incomplete aggregate omitted supplemental model components",
+      "operation_id": "staging-ffde9fe-complete-20260911-202711",
+      "output_tokens": 51178,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 81,
+      "task_type": "16-case and 3-journey exact-staging matrix; withdrawn as incomplete usage evidence"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 73699,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 897133,
+      "model": "complete aggregate across deployed Runtime V7 model components",
+      "operation_id": "staging-1f9715a-telemetry-diagnostic-20260911-212950",
+      "output_tokens": 29225,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 41,
+      "task_type": "two cases and one five-step journey exact-staging telemetry diagnostic"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 209884,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 757937,
+      "model": "complete aggregate across deployed Runtime V7 model components",
+      "operation_id": "staging-3479955-phase-diagnostic-20260911-215922",
+      "output_tokens": 25597,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 35,
+      "task_type": "one case and one five-step journey exact-staging phase diagnostic"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 104829,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 713794,
+      "model": "complete aggregate across deployed Runtime V7 model components",
+      "operation_id": "staging-e047694-matched-persistence-20260911-223111",
+      "output_tokens": 26903,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 35,
+      "task_type": "matched one-case and five-step journey exact-staging persistence diagnostic"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": null,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 66282,
+      "model": "complete aggregate across deployed Runtime V7 model components",
+      "operation_id": "staging-6458fd6-targeted-product-20260912-141442",
+      "output_tokens": 2532,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 5,
+      "task_type": "exact Yokohama product-path staging smoke"
+    },
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 422763,
+      "credential_alias": "staging runtime identity",
+      "estimated_cost": null,
+      "input_tokens": 1936330,
+      "model": "complete aggregate with two unmetered provider retry attempts",
+      "operation_id": "staging-6458fd6-complete-20260912-142217",
+      "output_tokens": 73325,
+      "posted_cost": null,
+      "price_date": null,
+      "provider": "deployed Runtime V7 model stack",
+      "provider_calls": 131,
+      "task_type": "16-case and 3-journey exact-staging complete matrix"
+    }
+  ],
+  "investigation_id": "20260910-runtime-v7-promotion-health-evaluator",
+  "objective": "Build a cost-bounded canonical-value-aware promotion evaluator with deterministic mechanical and CS-quality scoring, technical health metrics, and a reviewable status report; defer scheduling and email delivery.",
+  "owner_agent": "Codex Sol",
+  "primary_repo": "D:\\Carlo\\LICA Auto\\assistant\\_codex_worktrees\\gulong-runtime-firestore-commit-transport-20260912",
+  "release_and_backfill": {
+    "backfill_status": "not_requested",
+    "deployment_status": "staging_release_b_verified_live_and_vm_blocked",
+    "rollback_gate": "Deploy the compatibility SHA first with nested_map_v1, verify dual-read and rollback controls, then trigger the same reader-capable code with canonical_json_v1. After canonical writes begin, roll back only to the dual-reader nested writer. Do not promote to live or VM until a targeted exact-product rerun and fresh serial complete scenario-contract 2026-09-11.4 artifact pass under the approved 95000 ms and combined 2000000-token ceilings against compatible exact-live 50e5975 evidence; retain separate VM rollback evidence."
+  },
+  "scope": [
+    "Runtime V7 deployed release-candidate evaluation",
+    "Mechanical, technical, and automated structural CS scoring over pre-verified scenarios",
+    "Local regression verification and staging diagnostic evaluation",
+    "Authenticated synthetic-account ManyChat loader and hydration-path verification"
+  ],
+  "sources": [
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-10T14:10:00+08:00",
+      "freshness": "current working tree",
+      "id": "local-test-evidence",
+      "kind": "pytest",
+      "location": "clean candidate worktree",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-10T18:55:52+08:00",
+      "freshness": "verified after deployment",
+      "id": "staging-api-health-0e990e7",
+      "kind": "Runtime core and read-only commerce API contracts",
+      "location": "local gitignored run runtime_v7_health_20260910_185552_618619",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-10T19:27:30+08:00",
+      "freshness": "exact candidate complete cohort",
+      "id": "staging-promotion-matrix-0e990e7",
+      "kind": "Runtime V7 promotion-health artifact",
+      "location": "local gitignored run runtime_v7_release_candidate_20260910_191208_521083",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-10T16:51:20+08:00",
+      "freshness": "verified after deployment",
+      "id": "staging-cloud-build",
+      "kind": "regional Cloud Build and Cloud Run health",
+      "location": "gulong-chatbot-459723/asia-southeast1/gulong-chatbot-runtime-staging",
+      "query_job_id": "d32db396-6cec-42a6-96b1-e7f370bd38ae"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-10T16:53:34+08:00",
+      "freshness": "exact candidate fresh-session run",
+      "id": "staging-model-smoke",
+      "kind": "Runtime V7 layered health artifact",
+      "location": "local gitignored run 20260910_165210_314602 / candidate 20260910_165210_818246",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T10:08:28+08:00",
+      "freshness": "current read-only probe",
+      "id": "channel-api-health-20260910",
+      "kind": "ManyChat message-history and profile schema health",
+      "location": "local gitignored run runtime_v7_health_20260910_201105_406378",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T11:02:08+08:00",
+      "freshness": "current read-only probe after local secret synchronization",
+      "id": "channel-api-health-20260911",
+      "kind": "ManyChat message-history and profile schema health",
+      "location": "local gitignored run runtime_v7_health_20260911_110059_057874",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T11:49:00+08:00",
+      "freshness": "fresh exact live baseline cohort",
+      "id": "baseline-50e5975-20260911",
+      "kind": "Runtime V7 promotion-health artifact",
+      "location": "local gitignored run runtime_v7_release_candidate_20260911_113610_954974",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T12:02:04+08:00",
+      "freshness": "verified after deployment",
+      "id": "staging-build-9aa1c46",
+      "kind": "Regional Cloud Build and Cloud Run revision/traffic health",
+      "location": "gulong-chatbot-459723/asia-southeast1/gulong-chatbot-runtime-staging",
+      "query_job_id": "3a1682e7-6eb5-4b74-9ac5-414e482faab1"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T12:05:42+08:00",
+      "freshness": "exact staging candidate read-only profile",
+      "id": "staging-api-health-9aa1c46",
+      "kind": "Core, commerce, and ManyChat read-only health artifact",
+      "location": "local gitignored run runtime_v7_health_20260911_120529_012770",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T12:06:28+08:00",
+      "freshness": "exact staging candidate protected hydration turn",
+      "id": "staging-hydrated-history-9aa1c46",
+      "kind": "Authenticated metered Runtime V7 hydration artifact",
+      "location": "local gitignored run runtime_v7_health_20260911_120549_103894",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T12:17:43+08:00",
+      "freshness": "fresh inbound present; exact staging candidate probe",
+      "id": "staging-hydrated-history-cache-defect-9aa1c46",
+      "kind": "Authenticated metered Runtime V7 hydration artifact",
+      "location": "local gitignored run runtime_v7_health_20260911_121720_233491",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T13:39:52+08:00",
+      "freshness": "exact staging candidate complete profile",
+      "id": "complete-bff16bd-20260911",
+      "kind": "Layered health and Runtime V7 promotion-health artifact",
+      "location": "local gitignored run runtime_v7_health_20260911_132924_318560",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T14:05:55+08:00",
+      "freshness": "serial affected-path staging rerun",
+      "id": "serial-recheck-bff16bd-20260911",
+      "kind": "Runtime V7 targeted promotion-health artifact",
+      "location": "local gitignored run runtime_v7_release_candidate_20260911_134858_645555",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T14:22:42+08:00",
+      "freshness": "exact staging candidate protected hydration turn",
+      "id": "staging-hydrated-history-1a073c8",
+      "kind": "Authenticated metered Runtime V7 hydration artifact",
+      "location": "local gitignored run runtime_v7_health_20260911_142210_476539",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T15:26:00+08:00",
+      "freshness": "fresh exact-live full baseline cohort",
+      "id": "baseline-50e5975-full-20260911-151056",
+      "kind": "Runtime V7 promotion-health artifact",
+      "location": "local gitignored run runtime_v7_release_candidate_20260911_151056_384858",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T15:48:00+08:00",
+      "freshness": "exact staging candidate complete profile",
+      "id": "staging-complete-1a073c8",
+      "kind": "Layered health and Runtime V7 promotion-health artifact",
+      "location": "local gitignored run runtime_v7_health_20260911_153005_686988",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T15:59:29+08:00",
+      "freshness": "current Secret Manager-backed read-only probe",
+      "id": "channel-api-health-1a073c8-20260911",
+      "kind": "ManyChat message-history and profile schema health",
+      "location": "local gitignored run runtime_v7_health_20260911_155916_673692",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T16:19:00+08:00",
+      "freshness": "verified after normal product-branch deployment",
+      "id": "staging-build-and-hydration-1412ada",
+      "kind": "Regional Cloud Build, Cloud Run identity, and protected hydration",
+      "location": "gulong-chatbot-459723/asia-southeast1/gulong-chatbot-runtime-staging and local run runtime_v7_health_20260911_161822_330797",
+      "query_job_id": "221226ce-7bcf-4358-940b-8e04aee74a07"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T16:50:00+08:00",
+      "freshness": "exact staging candidate complete profile",
+      "id": "staging-complete-2f7bdb1",
+      "kind": "Layered health and Runtime V7 promotion-health artifact",
+      "location": "local gitignored run runtime_v7_health_20260911_163116_459791",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T17:40:00+08:00",
+      "freshness": "exact staging candidate complete profile after normal deployment",
+      "id": "staging-complete-85fbf79",
+      "kind": "Cloud Build, Cloud Run identity, layered health, and Runtime V7 promotion-health artifact",
+      "location": "build b1cfcc7c-32bc-4b54-bb1b-3938ef59ed50; revision gulong-chatbot-runtime-staging-00442-fzv; local run runtime_v7_health_20260911_171434_420906",
+      "query_job_id": "b1cfcc7c-32bc-4b54-bb1b-3938ef59ed50"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T17:42:00+08:00",
+      "freshness": "current Secret Manager-backed canonical URL rerun",
+      "id": "channel-read-85fbf79",
+      "kind": "ManyChat message-history and profile schema health",
+      "location": "local gitignored run runtime_v7_health_20260911_174139_853220",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T18:40:00+08:00",
+      "freshness": "exact staging candidate complete profile after normal deployment",
+      "id": "staging-complete-daca2ea",
+      "kind": "Cloud Build, Cloud Run identity, layered health, and Runtime V7 promotion-health artifact",
+      "location": "build b36a2c60-0efc-4aef-ad42-8ab4ee076678; revision gulong-chatbot-runtime-staging-00443-bwd; local run runtime_v7_health_20260911_182245_473862",
+      "query_job_id": "b36a2c60-0efc-4aef-ad42-8ab4ee076678"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T19:40:00+08:00",
+      "freshness": "exact staging candidate complete profile after normal deployment",
+      "id": "staging-complete-b180a74",
+      "kind": "Cloud Build, Cloud Run identity, layered health, and Runtime V7 promotion-health artifact",
+      "location": "build cab18f89-97a0-4680-a4c7-d9d3a348cbf6; revision gulong-chatbot-runtime-staging-00444-rfn; local run runtime_v7_health_20260911_191534_251595",
+      "query_job_id": "cab18f89-97a0-4680-a4c7-d9d3a348cbf6"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T19:48:00+08:00",
+      "freshness": "current Secret Manager-backed browser-history read",
+      "id": "fresh-inbound-history-20260911-1948",
+      "kind": "ManyChat message-history health and visibility check",
+      "location": "local secret-safe read for subscriber 4843256405786522",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T20:12:00+08:00",
+      "freshness": "exact staging candidate targeted profile after normal deployment",
+      "id": "staging-targeted-b451b77",
+      "kind": "Cloud Build, Cloud Run identity, and targeted Runtime V7 promotion-health artifacts",
+      "location": "build f8073324-424e-4a94-a95f-163c2e823ae0; revision gulong-chatbot-runtime-staging-00445-m7q; local runs runtime_v7_release_candidate_20260911_200133_260443 and runtime_v7_release_candidate_20260911_201013_964382",
+      "query_job_id": "f8073324-424e-4a94-a95f-163c2e823ae0"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T21:15:00+08:00",
+      "freshness": "exact staging complete gate plus current Secret Manager-backed history read",
+      "id": "staging-complete-ffde9fe-and-history-recheck",
+      "kind": "Cloud Build, Cloud Run identity, layered health, promotion-health artifact, and ManyChat visibility check",
+      "location": "build 26142079-ec29-4702-9a2b-3aa1561516d5; revision gulong-chatbot-runtime-staging-00446-ctn; local runs runtime_v7_release_candidate_20260911_202325_607665 and runtime_v7_health_20260911_202551_624773",
+      "query_job_id": "26142079-ec29-4702-9a2b-3aa1561516d5"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T21:50:00+08:00",
+      "freshness": "exact staging targeted telemetry diagnostic after normal deployment",
+      "id": "staging-telemetry-diagnostic-1f9715a",
+      "kind": "Cloud Build, Cloud Run identity, and complete component-level model/tool telemetry artifact",
+      "location": "build 3423940b-af19-45d6-8ce1-665529f80b5e; revision gulong-chatbot-runtime-staging-00447-dhn; local artifact tmp/runtime_v7_telemetry_diagnostic_1f9715a/runtime_v7_release_candidate_20260911_212950_219650/summary.json",
+      "query_job_id": "3423940b-af19-45d6-8ce1-665529f80b5e"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T22:10:00+08:00",
+      "freshness": "exact staging phase diagnostic after normal deployment",
+      "id": "staging-phase-diagnostic-3479955",
+      "kind": "Cloud Build, Cloud Run identity, runtime phase telemetry, and complete model/tool usage artifact",
+      "location": "build 5df69ffb-4f13-4273-adf8-168b97ac0606; revision gulong-chatbot-runtime-staging-00448-sg7; local artifact tmp/runtime_v7_phase_diagnostic_3479955/runtime_v7_release_candidate_20260911_215922_736446/summary.json",
+      "query_job_id": "5df69ffb-4f13-4273-adf8-168b97ac0606"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T22:40:00+08:00",
+      "freshness": "exact staging matched persistence diagnostic after normal deployment",
+      "id": "staging-matched-persistence-e047694",
+      "kind": "Cloud Build, Cloud Run identity, matched runtime phase telemetry, and complete model/tool usage artifact",
+      "location": "build 42abd47d-9394-43de-8161-7084ec509b48; revision gulong-chatbot-runtime-staging-00449-6gs; local artifact tmp/runtime_v7_phase_diagnostic_e047694/runtime_v7_release_candidate_20260911_223111_021785/summary.json",
+      "query_job_id": "42abd47d-9394-43de-8161-7084ec509b48"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T22:55:00+08:00",
+      "freshness": "exact safe staging restoration after normal deployment",
+      "id": "staging-safe-restoration-8ed58df",
+      "kind": "Cloud Build, Cloud Run revision identity, traffic, and safety verification",
+      "location": "build e3732e12-6b17-4a0b-9ee2-7085158351ae; revision gulong-chatbot-runtime-staging-00450-6gv; digest sha256:5f0d0cd91a5b47e7262fa1144193da1b1f9768cc637835fc2e7615afea636668",
+      "query_job_id": "e3732e12-6b17-4a0b-9ee2-7085158351ae"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-11T23:40:00+08:00",
+      "freshness": "isolated synthetic paired benchmark with exact-document cleanup",
+      "id": "firestore-index-fanout-benchmark-20260911",
+      "kind": "Firestore transactional CAS latency and payload profile",
+      "location": "local gitignored artifacts tmp/runtime_v7_firestore_persistence_benchmark/paired_churn_141kb.json and paired_churn_diagnostics_141kb.json",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T09:28:00+08:00",
+      "freshness": "fresh local process against live Firestore with generated benchmark-only documents and exact cleanup",
+      "id": "firestore-transport-observer-local-20260912",
+      "kind": "Firestore begin and commit RPC attempt decomposition",
+      "location": "generated 40 KB and 140 KB transport probe runs 20260912T012743Z-4d307f47 and 20260912T012748Z-62cf8791",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T10:01:00+08:00",
+      "freshness": "exact staging product replay after four-worker restoration",
+      "id": "firestore-transport-observer-staging-81f7261",
+      "kind": "Cloud Run request, Firestore raw-RPC logs, and evaluator artifact",
+      "location": "builds 93497774-cc46-4e16-842d-404dc670e23e and 464b6a13-63ae-43d7-adea-f2741000a100; revision gulong-chatbot-runtime-staging-00455-8l7; local gitignored run runtime_v7_release_candidate_20260912_095930_342833",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T10:22:00+08:00",
+      "freshness": "exact staging commit-thread CPU and GC replay",
+      "id": "firestore-commit-thread-split-staging-bd050fa",
+      "kind": "Cloud Build, Cloud Run exact revision, evaluator artifact, and synthetic evaluator-document shape analysis",
+      "location": "build eef7164e-9234-482e-8c59-f577559f0ebd; revision gulong-chatbot-runtime-staging-00456-m8r; local gitignored run runtime_v7_release_candidate_20260912_102032_498603",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T11:39:00+08:00",
+      "freshness": "fresh local process against live Firestore with generated runtime-shaped benchmark documents and verified exact cleanup",
+      "id": "firestore-representation-probe-local-20260912",
+      "kind": "Firestore state-representation CAS comparison",
+      "location": "generated 40 KiB nested-map, canonical-JSON, and gzip-JSON benchmark with one warmup and three measured rounds",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T11:55:00+08:00",
+      "freshness": "exact staging revision with generated runtime-shaped state, unchanged CAS semantics, and verified zero-document cleanup",
+      "id": "firestore-representation-probe-staging-90173d2",
+      "kind": "Cloud Build, Cloud Run exact revision, protected benchmark response, and Firestore cleanup verification",
+      "location": "build 302bbf28-1c46-4a5a-b093-3744bc823c82; revision gulong-chatbot-runtime-staging-00457-8r6; runs 20260912T035214Z-99edb10f and 20260912T035312Z-e059ac8b",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T13:41:00+08:00",
+      "freshness": "fresh local process against live Firestore with generated benchmark-only documents and verified exact cleanup",
+      "id": "firestore-strategy-state-compatibility-local-20260912",
+      "kind": "Bidirectional Firestore representation transition and deterministic regression evidence",
+      "location": "clean worktree local runs for canonical-to-nested and nested-to-canonical configured-format canaries",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T14:04:00+08:00",
+      "freshness": "exact staging compatibility release with generated-data canary and verified cleanup",
+      "id": "staging-release-a-6458fd6",
+      "kind": "Cloud Build, Cloud Run identity and safety, health routes, and Firestore migration canary",
+      "location": "build 585fca36-5bb3-42a0-80f4-0aea6af35f74; revision gulong-chatbot-runtime-staging-00458-tj6; exact SHA 6458fd6; writer nested_map_v1",
+      "query_job_id": "585fca36-5bb3-42a0-80f4-0aea6af35f74"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T14:20:00+08:00",
+      "freshness": "exact staging canonical-writer release with migration canary and verified cleanup",
+      "id": "staging-release-b-6458fd6",
+      "kind": "Cloud Build, Cloud Run identity and safety, health routes, and Firestore migration canary",
+      "location": "build 31bc1064-be7d-412c-a1ff-26789008f3f0; revision gulong-chatbot-runtime-staging-00459-t6r; exact SHA 6458fd6; writer canonical_json_v1",
+      "query_job_id": "31bc1064-be7d-412c-a1ff-26789008f3f0"
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T14:40:00+08:00",
+      "freshness": "fresh exact-staging targeted, API, hydration, and complete serial evaluator artifacts",
+      "id": "staging-6458fd6-complete-20260912-142217",
+      "kind": "Runtime V7 layered promotion-health evaluator artifacts",
+      "location": "local gitignored artifacts runtime_v7_release_candidate_20260912_141442_498835 and runtime_v7_health_20260912_142049_767560",
+      "query_job_id": null
+    },
+    {
+      "bytes_billed": null,
+      "bytes_processed": null,
+      "cutoff": "2026-09-12T14:46:00+08:00",
+      "freshness": "fresh read-only Cloud Run and VM deployment identity inspection",
+      "id": "live-vm-hold-control-20260912",
+      "kind": "Cloud Run service description and IAP VM container inspection",
+      "location": "Cloud Run live revision gulong-chatbot-runtime-live-00106-vgr and VM container gulong-chatbot-runtime-shadow; both exact 50e5975",
+      "query_job_id": null
+    }
+  ],
+  "started_at": "2026-09-10T10:53:11+08:00",
+  "status": "release_gated",
+  "timezone": "Asia/Manila",
+  "title": "Runtime V7 Promotion Health Evaluator",
+  "updated_at": "2026-09-17T12:11:49+08:00",
+  "verification": [
+    "83 focused evaluator, release-matrix, and ingress tests passed",
+    "1575 Runtime V7 tests were included in the passing full-repository run",
+    "1654 full-repository tests passed",
+    "Ruff checks and script import/help smoke passed",
+    "93 focused evaluator, release-matrix, ingress, and affected full-path tests passed after hardening",
+    "1581 Runtime V7 tests were included in the post-hardening full-repository run",
+    "1660 full-repository tests passed after hardening",
+    "Python compilation, Ruff, diff checks, and the runtime change audit passed after hardening",
+    "179 focused evaluator, release-matrix, and choice-surface tests passed after feature-contract hardening",
+    "1589 Runtime V7 tests were included in the final feature-contract full-repository run",
+    "1668 full-repository tests passed after feature-contract hardening",
+    "193 layered/evaluator/intent/ingress/channel tests passed after API and identity hardening",
+    "The local layered profile passed 318 core and 159 intent/observability tests",
+    "1601 Runtime V7 tests were included in the final hardened full-repository run",
+    "1680 full-repository tests passed after layered health hardening",
+    "1698 full-repository tests passed for final candidate 5b227d8",
+    "Regional Cloud Build d32db396-6cec-42a6-96b1-e7f370bd38ae succeeded and staging revision gulong-chatbot-runtime-staging-00434-k6m serves 5b227d8 at 100 percent",
+    "Fresh-session staging smoke 20260910_165210_818246 passed 3 of 3 scenarios and 21 of 21 automated CS structural checks",
+    "Final smoke recorded zero HTTP, runtime, and tool errors; 152879 total tokens; p95 latency 36191 ms; and complete telemetry",
+    "1719 full-repository tests passed after scenario-contract 2026-09-10.2 hardening",
+    "Cloud Build cc7673d7-4e3a-480a-8383-4e4703a17bec succeeded and staging revision gulong-chatbot-runtime-staging-00435-2b2 serves exact 0e990e7 at 100 percent",
+    "Core health and five read-only commerce API contracts passed for exact staging 0e990e7",
+    "The complete cohort recorded zero HTTP, runtime, or tool errors and 100 percent telemetry; focused reruns passed all corrected customer-correctness contracts",
+    "The prior complete cohort observed p95 91788 ms and 1860861 total tokens; these are within the revised absolute limits while channel reads and the compatible 50e5975 baseline remain incomplete",
+    "37 focused promotion-health and layered-runner tests passed after retuning the hard ceilings to 95000 ms and 2000000 total tokens",
+    "Offline rescoring removed the prior absolute latency and token blockers but correctly retained immutable policy and scenario-contract mismatch blockers",
+    "The designated read-only profile probe returned HTTP 200 with the expected schema but exceeded its 10000 ms SLA; message history returned HTTP 401 through both probe and runtime loader",
+    "All 1722 repository tests, Ruff, JSON parsing, diff checks, and the strict behavioral change audit passed after the policy retune",
+    "Boundary tests confirm that 95000 ms and 2000000 tokens are inclusive and values above either ceiling block",
+    "Corrected scenario contract 2026-09-10.3 passed 70 focused evaluator and release-matrix tests plus all 1724 repository tests",
+    "The consolidated all-domain prompt remains within its size budget at 98930 of 99000 characters",
+    "Current Secret Manager-backed channel reads passed for messages and profile with HTTP 200 in 694 ms and 693 ms",
+    "The protected hydration gate passed 76 focused endpoint, runner, and ingress tests; the full repository passed 1732 tests",
+    "Fresh compatible live 50e5975 baseline produced integrity-valid evidence with 67 model calls, 1520097 total tokens, and p95 90296 ms; its legacy correctness result was 11 of 19",
+    "Cloud Build 3a1682e7-6eb5-4b74-9ac5-414e482faab1 succeeded and staging revision gulong-chatbot-runtime-staging-00436-kg4 serves exact 9aa1c46 at 100 percent",
+    "Green no-LLM staging artifact passed two core, five commerce, and two ManyChat read-only probes",
+    "Protected hydration reached exact staging with HTTP 200 and successful refresh but correctly failed because zero messages were usable inside the 30-day window; three model calls used 59725 tokens in 39090 ms",
+    "Fresh inbound verification returned six bounded messages, while exact staging 9aa1c46 reused a prior same-text cache entry and skipped refresh; the failed probe used 59323 tokens in 22468 ms",
+    "Provider-ID cache identity and explicit return-only evidence passed 77 focused tests, all 1733 repository tests, Ruff, and compilation locally",
+    "Exact staging f965edf hydrated six fresh ManyChat messages into eight model-facing messages with HTTP 200, return-only delivery, 59913 total tokens, and 39006 ms elapsed time",
+    "Exact staging bff16bd passed deterministic, core API, commerce API, channel-read, and hydrated-history layers; its three-worker complete matrix was held by one client timeout, one transient 502, one partial payment execution scope, and one renderer fallback",
+    "The serial affected-path rerun returned HTTP 200 with complete telemetry for all seven requests and p95 75605 ms; nonlinear product-first passed while payment scope and duplicate supporting prose reproduced",
+    "The installment-scope, supporting-copy sanitizer, evaluator-contract, and layered-runner hardenings passed 824 affected tests and all 1737 repository tests",
+    "Exact staging 1a073c8 refreshed six ManyChat messages through the protected hydration path and passed current message-history plus profile schema probes",
+    "Matched-action rescoring covered 18 of 21 live baseline actions and measured 1.76 percent fewer candidate tokens while retaining the 30.28 percent aggregate workload delta",
+    "Generic empty-output replacement-round and matched-action evaluator hardenings pass all 1741 repository tests, changed-file Ruff, compilation, and diff checks",
+    "Normal Cloud Build 221226ce-7bcf-4358-940b-8e04aee74a07 deployed exact staging 1412ada; both health routes and six-message protected hydration passed",
+    "Main-path classified transient retry hardening passes all 1742 repository tests, changed-file Ruff, compilation, and diff checks",
+    "Exact staging 2f7bdb1 passed deterministic, API, channel-read, and protected hydrated-history layers; its complete model matrix had zero operational errors and remained red only at 18 of 19 mechanical cases",
+    "Raw JSON-array response recovery and specialized bracketed-prose negative controls pass all 1743 repository tests, Ruff, and diff checks",
+    "Cloud Build b1cfcc7c-32bc-4b54-bb1b-3938ef59ed50 deployed exact 85fbf79 to staging revision gulong-chatbot-runtime-staging-00442-fzv at 100 percent and both health routes passed",
+    "Exact staging 85fbf79 passed 19 of 19 mechanical scenarios with zero matrix operational errors but exceeded the combined token ceiling by 8842 tokens, remained above the latency concern threshold, and used a timeout profile incompatible with the live baseline",
+    "Canonical ManyChat URL rerun passed both channel-read contracts; the prior HTTP 302 was local wrapper construction rather than deployed loader health",
+    "Selective product-policy projection retains product and mixed-domain contracts while reducing the order-only prompt by 12.04 percent; all 1744 repository tests, Ruff, and diff checks pass",
+    "Fresh Secret Manager-backed channel and hydrated-history probes passed, but ManyChat still showed 2026-09-11 12:16:03 Asia/Manila as the latest inbound for subscriber 4843256405786522; the newly reported messages were not yet observable",
+    "Normal Cloud Build b36a2c60-0efc-4aef-ad42-8ab4ee076678 deployed exact daca2ea to staging revision gulong-chatbot-runtime-staging-00443-bwd at 100 percent with verified return-only safety",
+    "Exact daca2ea stayed within 2000000 combined tokens and 95000 ms p95 but remained red at 17 of 19 for complementary explicit-address and ambiguous-store-location no-tool failures",
+    "The isolated business-location postcondition and JSON-array negative controls pass all 1762 repository tests locally; exact staging verification is pending",
+    "Normal Cloud Build cab18f89-97a0-4680-a4c7-d9d3a348cbf6 deployed exact b180a74 to staging revision gulong-chatbot-runtime-staging-00444-rfn at 100 percent with verified return-only safety",
+    "Exact b180a74 stayed within 2000000 combined tokens and 95000 ms p95 but remained red at 17 of 19 because the delivery composer omitted a required provider fact and the store-location turn invoked an incompatible picker; one root-health probe exceeded its API SLA",
+    "Pre-planning business-location tool suppression and typed FAQ required-fact enforcement pass all 1764 repository tests, Ruff, compilation, and diff checks locally",
+    "A 19:48 Secret Manager-backed history read returned HTTP 200 but still showed 2026-09-11 12:16:03 Asia/Manila as the latest inbound for subscriber 4843256405786522",
+    "Normal Cloud Build f8073324-424e-4a94-a95f-163c2e823ae0 deployed exact b451b77 to staging revision gulong-chatbot-runtime-staging-00445-m7q at 100 percent with verified return-only safety",
+    "Both delivery variants, province schedule, nonlinear product-first, and explicit address passed targeted staging checks; two initial location requests failed before HTTP during a temporary local DNS outage",
+    "The post-recovery bare store-location case exposed zero tools but the channel renderer preferred original assistant text over the guarded final response",
+    "Renderer ownership synchronization passes the channel-render regression and all 1764 repository tests locally; exact staging verification is pending",
+    "Normal Cloud Build 26142079-ec29-4702-9a2b-3aa1561516d5 deployed exact ffde9fe to staging revision gulong-chatbot-runtime-staging-00446-ctn at 100 percent with verified return-only safety",
+    "Exact ffde9fe passed both location regressions and all 19 complete mechanical scenarios with zero HTTP, runtime, or tool failures, but p95 was 95341 ms and the reported 1886073 combined tokens omitted paid supplemental model components",
+    "Complete model telemetry accounting and tool-latency observability pass all 1768 repository tests locally; exact staging verification is pending",
+    "A fresh 15-page Secret Manager-backed history read returned HTTP 200 throughout; new 20:48-20:55 activity contained field and rule events but no msgin event under subscriber 4843256405786522",
+    "Normal Cloud Build 3423940b-af19-45d6-8ce1-665529f80b5e deployed exact 1f9715a to staging revision gulong-chatbot-runtime-staging-00447-dhn at 100 percent with verified return-only safety",
+    "Exact 1f9715a diagnostic passed three paths and seven responses with zero operational errors, 41 model calls, 926358 total tokens, and 86913 ms p95; phase instrumentation is required before a complete rerun",
+    "Turn-local duplicate scoring and runtime phase/tool latency contracts pass all 1772 repository tests locally before staging deployment",
+    "Normal Cloud Build 5df69ffb-4f13-4273-adf8-168b97ac0606 deployed exact 3479955 to staging revision gulong-chatbot-runtime-staging-00448-sg7 at 100 percent with verified return-only safety",
+    "Exact 3479955 phase diagnostic measured 783534 tokens and 91253 ms p95 across six responses; session persistence dominated non-model latency at 29460/31908 ms p50/p95",
+    "Conditional Firestore session-save and deterministic promo-surface latency controls pass 176 focused and all 1777 repository tests; staging verification remains pending",
+    "Normal Cloud Build 42abd47d-9394-43de-8161-7084ec509b48 deployed exact e047694 to staging revision gulong-chatbot-runtime-staging-00449-6gs at 100 percent with verified return-only safety",
+    "Exact e047694 matched run passed both selected paths and all 14 structural CS checks with zero operational or telemetry errors and 740697 tokens, but remote session save remained 31834/35190 ms p50/p95",
+    "The no-benefit conditional-write experiment is reverted locally; transaction semantics plus phase split and deterministic surface latency pass all 1772 repository tests pending staging restoration",
+    "Normal product build e3732e12-6b17-4a0b-9ee2-7085158351ae restored exact safe staging 8ed58df on revision gulong-chatbot-runtime-staging-00450-6gv at 100 percent with both health routes and safety settings verified",
+    "Isolated maximal-churn Firestore benchmarking measured indexed versus strategy-state-exempt p95 at 695 versus 479 ms, ruling index fan-out out as the primary cause of 20-35 second deployed saves",
+    "Content-free Firestore transaction diagnostics and the guarded benchmark runner pass all 1780 repository tests plus focused checks, Ruff, compilation, and diff validation locally",
+    "Firestore transport observation and the staging-only no-model endpoint pass 74 focused and all 1786 repository tests; local 40 KB and 140 KB probes used one successful commit RPC per save, recorded about 1-2 ms unattributed overhead, and completed exact cleanup",
+    "Exact staging 81f7261 product replay passed with 68759 tokens and 60708 ms latency; its 18164 ms save contained one successful 17662 ms commit, zero retries, 17 ms unattributed time, and 16930 ms process CPU",
+    "Commit-thread versus other-thread CPU, GC, page-fault, and context-switch diagnostics pass 74 focused and all 1786 repository tests locally",
+    "Exact bd050fa staging replay passed with 69637 tokens and 62926 ms latency; its sole 17753 ms commit used 16350 ms current-thread CPU, only 20 ms other-thread CPU, and 487/44/2 zero-yield cyclic-GC collections",
+    "Local runtime-shaped representation comparison passed exact readback, hash, revision, stale-CAS, and cleanup checks; its directional 40 KiB p50 end-to-end timings were 362 ms nested map, 220 ms canonical JSON, and 162 ms gzip JSON",
+    "The representation probe passes seven focused tests and all 1790 repository tests plus Ruff, compilation, diff validation, manifest JSON parsing, and the strict behavioral-change audit",
+    "Normal product build 302bbf28-1c46-4a5a-b093-3744bc823c82 deployed exact 90173d2 to staging revision gulong-chatbot-runtime-staging-00457-8r6 at 100 percent with health identity and return-only safety verified",
+    "Exact staging representation runs reduced 40 KiB nested versus canonical JSON p50 save from 6637 to 58 ms and 140 KiB from 18626 to 91 ms; all readback, hash, revision, stale-CAS, and cleanup controls passed with zero benchmark documents remaining",
+    "The dual-reader and selectable-writer bridge passes 45 focused tests and all 1810 repository tests; both generated real-Firestore transition directions passed pre-switch read, exact post-switch shape, stale-CAS no-mutation, non-CAS creation, lock and inbox preservation, and exact cleanup",
+    "Normal product build 585fca36-5bb3-42a0-80f4-0aea6af35f74 deployed exact 6458fd6 to staging revision gulong-chatbot-runtime-staging-00458-tj6 with nested_map_v1; dual-read rollback transition, stale-CAS no-mutation, non-CAS creation, health, safety, and exact cleanup passed",
+    "Normal staging build 31bc1064-be7d-412c-a1ff-26789008f3f0 redeployed exact 6458fd6 to revision gulong-chatbot-runtime-staging-00459-t6r with canonical_json_v1; inverse migration, stale-CAS no-mutation, non-CAS creation, health, safety, and exact cleanup passed",
+    "The exact product smoke passed with a 57 ms session save and full product-card rendering evidence",
+    "The complete matrix passed 19 of 19 mechanical and 133 of 133 structural CS checks with zero operational or tool errors; persistence measured 79/119 ms p50/p95",
+    "Promotion remains blocked by 2009655 reported matrix tokens, two unmetered retries, 2101084 reported outer-layer tokens, and a timeout-incompatible exact-live baseline",
+    "Fresh read-only inspection confirmed Cloud Run live and the customer-facing VM both remain at exact 50e5975",
+    "Retry metering and signal-driven domain projection passed 6 focused checks, 752 affected-file tests, all 1812 repository tests, changed-file Ruff, compilation, and the no-cost evaluator profile",
+    "Independent review hardenings passed all 1813 repository tests, changed-file Ruff, compilation, Cloud Build YAML parsing, diff checks, and strict behavioral/customer-facing audit",
+    "Normal product build 6ecf1e9a-5055-4645-a9a4-142a848c7490 deployed exact 599b6ba to staging revision gulong-chatbot-runtime-staging-00460-vgp at 100 percent with canonical JSON persistence and return-only safety verified",
+    "Exact staging 599b6ba passed deterministic, API, channel-read, hydrated-history, contact, and delivery checks but correctly blocked when a cross-clause merged payment proposal produced only two of three independent provider scopes and typed claims",
+    "Cross-clause named-method recovery and three adjacent negative controls pass 905 affected-path tests, all 1817 repository tests, Ruff, compilation, diff checks, and the no-cost evaluator profile",
+    "Exact staging 5cca58d completed the frozen 19-scenario matrix at 18 of 19 mechanical passes, 96.24 percent structural-CS proxy, zero operational errors, 58133 ms p95 latency, and 2044679 tokens",
+    "Canonical promo-alternative scope, provider-issued evidence, renderability guards, and future-payment deferral pass all 1829 repository tests, Ruff, compilation, diff checks, and the deterministic no-cost evaluator",
+    "Exact staging 1df9264 passed both affected mechanical scenarios with zero operational or telemetry errors; the diagnostic used 203926 tokens and 51793 ms p95, while rendered review found future-tense prose beside an already-shown promo card",
+    "The campaign-only present-tense correction passes 28 focused commercial tests and all 1830 repository tests locally"
+  ]
+}

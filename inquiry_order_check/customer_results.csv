@@ -1,0 +1,13 @@
+Inquiry customer,Result,Order ID,Order date,Order status,Payment status,Quantity,SKU,Amount due,Branch,Match basis
+Jowel Pernada,Likely customer match,38946,2026-08-31T09:47:00,Fulfilled,Partial Payment,3,FRONWAY 205/55/ZR17 EURUS 08 95W,11921.9,GULONG HO,Name and tire size; Maribeth also matches location. Phone/email/plate not verified.
+Howard Keith,No matching order found,,,,,,,,,No matching name or supplied identifier in remarks
+Joebert Alcantara,No matching order found,,,,,,,,,No matching name or supplied identifier in remarks
+Maribeth Salvador,Likely customer match,38360,2026-08-14T22:41:00,New,Unpaid,4,RADAR 175/65/R14 DIMAX SPORT EV-C 86H,11228.8,RM4 MARIKINA,Name and tire size; Maribeth also matches location. Phone/email/plate not verified.
+Maribeth Salvador,Likely customer match,38359,2026-08-14T22:41:00,New,Unpaid,4,RADAR 175/65/R14 DIMAX SPORT EV-C 86H,11228.8,RM4 MARIKINA,Name and tire size; Maribeth also matches location. Phone/email/plate not verified.
+Maribeth Salvador,Likely customer match,38361,2026-08-14T22:42:00,Fulfilled,Fully Paid,4,RADAR 175/65/R14 DIMAX SPORT EV-C 86H,11228.8,RM4 MARIKINA,Name and tire size; Maribeth also matches location. Phone/email/plate not verified.
+Edgar Ramos Sandique,No matching order found,,,,,,,,,No matching name or supplied identifier in remarks
+Anthony Abucay,No matching order found,,,,,,,,,No matching name or supplied identifier in remarks
+Shen Buarao Esquivel,No matching order found,,,,,,,,,No matching name or supplied identifier in remarks
+Ryan Angeles,No matching order found,,,,,,,,,No matching name or supplied identifier in remarks
+Drew Catacutan,No matching order found,,,,,,,,,No matching name or supplied identifier in remarks
+Neil Manimtim,No matching order found,,,,,,,,,No matching name or supplied identifier in remarks

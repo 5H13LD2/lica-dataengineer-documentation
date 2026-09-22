@@ -1,0 +1,1 @@
+5-year warranty covering manufacturing defects and workmanship.

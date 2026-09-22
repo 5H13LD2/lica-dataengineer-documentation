@@ -1,0 +1,166 @@
+timeout: "1800s"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _REGION: asia-southeast1
+  _DATABASE: "(default)"
+  _JOB_NAME: gulong-promo-catalog-sync
+  _SCHEDULER_NAME: gulong-promo-catalog-hourly
+  _PUBLIC_BUCKET: gulong-chatbot-459723-promo-media
+  _RUNTIME_SERVICE_ACCOUNT: lica-aids@gulong-chatbot-459723.iam.gserviceaccount.com
+  _STAGING_ROUTER_FLOW_NAMESPACE: content20260719224556_101828
+  _LIVE_ROUTER_FLOW_NAMESPACE: content20260719225032_161939
+  _REVIEW_OAUTH_SECRET: ""
+  _REVIEW_SPREADSHEET_ID: ""
+  _IMAGE_TAG: staging-latest
+
+steps:
+  - id: Require router flow
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        if [ -z "${_STAGING_ROUTER_FLOW_NAMESPACE}" ] || [ -z "${_LIVE_ROUTER_FLOW_NAMESPACE}" ]; then
+          echo "Both staging and live router flow namespaces are required."
+          exit 1
+        fi
+
+  - id: Create public immutable media bucket
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        if ! gcloud storage buckets describe "gs://${_PUBLIC_BUCKET}" --project="$PROJECT_ID" >/dev/null 2>&1; then
+          gcloud storage buckets create "gs://${_PUBLIC_BUCKET}" \
+            --project="$PROJECT_ID" \
+            --location="${_REGION}" \
+            --uniform-bucket-level-access
+        fi
+        gcloud storage buckets add-iam-policy-binding "gs://${_PUBLIC_BUCKET}" \
+          --project="$PROJECT_ID" \
+          --member=allUsers \
+          --role=roles/storage.objectViewer
+
+  - id: Ensure Firestore vector index
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        EXISTING_JSON="$$(gcloud firestore indexes composite list \
+          --project="$PROJECT_ID" \
+          --database='${_DATABASE}' \
+          --format=json)"
+        if ! printf '%s' "$${EXISTING_JSON}" | python3 -c '
+        import json
+        import sys
+
+        indexes = json.load(sys.stdin)
+        found = any(
+            "/collectionGroups/promo_catalog_cards/indexes/" in index.get("name", "")
+            and any(
+                field.get("fieldPath") == "catalog_version_id"
+                and field.get("order") == "ASCENDING"
+                for field in index.get("fields", [])
+            )
+            and any(
+                field.get("fieldPath") == "embedding"
+                and int(field.get("vectorConfig", {}).get("dimension", 0)) == 768
+                for field in index.get("fields", [])
+            )
+            for index in indexes
+        )
+        raise SystemExit(0 if found else 1)
+        '; then
+          set +e
+          CREATE_OUTPUT="$$(gcloud firestore indexes composite create \
+            --project="$PROJECT_ID" \
+            --database='${_DATABASE}' \
+            --collection-group=promo_catalog_cards \
+            --query-scope=COLLECTION \
+            --field-config=order=ASCENDING,field-path=catalog_version_id \
+            --field-config=field-path=embedding,vector-config='{"dimension":"768","flat":"{}"}' \
+            --async 2>&1)"
+          CREATE_STATUS=$$?
+          set -e
+          printf '%s\n' "$${CREATE_OUTPUT}"
+          if [ "$${CREATE_STATUS}" -ne 0 ] && ! printf '%s' "$${CREATE_OUTPUT}" | grep -q ALREADY_EXISTS; then
+            exit "$${CREATE_STATUS}"
+          fi
+        fi
+
+  - id: Deploy hourly catalog job
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        ENV_VARS="GOOGLE_CLOUD_PROJECT=$PROJECT_ID,PROMO_STAGING_ROUTER_FLOW_NAMESPACE=${_STAGING_ROUTER_FLOW_NAMESPACE},PROMO_LIVE_ROUTER_FLOW_NAMESPACE=${_LIVE_ROUTER_FLOW_NAMESPACE},PYTHONUNBUFFERED=1,PYTHONUTF8=1"
+        if [ -n "${_REVIEW_SPREADSHEET_ID}" ]; then
+          ENV_VARS="$${ENV_VARS},PROMO_REVIEW_SPREADSHEET_ID=${_REVIEW_SPREADSHEET_ID}"
+        fi
+        SECRET_ARGS=()
+        if [ -n "${_REVIEW_OAUTH_SECRET}" ]; then
+          SECRET_ARGS+=("--set-secrets=PROMO_REVIEW_GOOGLE_OAUTH_JSON=${_REVIEW_OAUTH_SECRET}:latest")
+        else
+          SECRET_ARGS+=("--remove-secrets=PROMO_REVIEW_GOOGLE_OAUTH_JSON")
+        fi
+        gcloud run jobs deploy "${_JOB_NAME}" \
+          --project="$PROJECT_ID" \
+          --region="${_REGION}" \
+          --image="asia-southeast1-docker.pkg.dev/$PROJECT_ID/gulong-chatbot-runtime/gulong-chatbot-runtime:${_IMAGE_TAG}" \
+          --service-account="${_RUNTIME_SERVICE_ACCOUNT}" \
+          --command=python \
+          --args=-m,scripts.promo_catalog_sync,sync \
+          --task-timeout=30m \
+          --max-retries=1 \
+          --memory=2Gi \
+          --cpu=1 \
+          --set-env-vars="$${ENV_VARS}" \
+          "$${SECRET_ARGS[@]}"
+
+  - id: Grant scheduler job invocation
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - jobs
+      - add-iam-policy-binding
+      - ${_JOB_NAME}
+      - --project=$PROJECT_ID
+      - --region=${_REGION}
+      - --member=serviceAccount:${_RUNTIME_SERVICE_ACCOUNT}
+      - --role=roles/run.invoker
+
+  - id: Ensure hourly scheduler
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        URI="https://${_REGION}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/$PROJECT_ID/jobs/${_JOB_NAME}:run"
+        if gcloud scheduler jobs describe "${_SCHEDULER_NAME}" --project="$PROJECT_ID" --location="${_REGION}" >/dev/null 2>&1; then
+          gcloud scheduler jobs update http "${_SCHEDULER_NAME}" \
+            --project="$PROJECT_ID" \
+            --location="${_REGION}" \
+            --schedule="5 * * * *" \
+            --time-zone=Asia/Manila \
+            --uri="$${URI}" \
+            --http-method=POST \
+            --oauth-service-account-email="${_RUNTIME_SERVICE_ACCOUNT}" \
+            --oauth-token-scope=https://www.googleapis.com/auth/cloud-platform
+        else
+          gcloud scheduler jobs create http "${_SCHEDULER_NAME}" \
+            --project="$PROJECT_ID" \
+            --location="${_REGION}" \
+            --schedule="5 * * * *" \
+            --time-zone=Asia/Manila \
+            --uri="$${URI}" \
+            --http-method=POST \
+            --oauth-service-account-email="${_RUNTIME_SERVICE_ACCOUNT}" \
+            --oauth-token-scope=https://www.googleapis.com/auth/cloud-platform
+        fi

@@ -1,0 +1,147 @@
+{
+  "changes": [
+    {
+      "behavioral_scope": "runtime_customer_correctness_and_prompt_projection",
+      "change_id": "general-grounding-and-scoped-payment-contracts",
+      "deployment_status": "not_requested",
+      "files": [
+        "runtime_v7/model_contract.py",
+        "runtime_v7/runtime_harness.py",
+        "runtime_v7/state_signal_model.py"
+      ]
+    },
+    {
+      "behavioral_scope": "documentation_only",
+      "change_id": "port-missing-repair-observability-release-evidence",
+      "deployment_status": "already_deployed_in_prior_release",
+      "files": [
+        "docs/RELEASE_HISTORY.md",
+        "docs/IMPLEMENTATION_NOTES_RUNTIME_V2.md",
+        "docs/RUNTIME_V7_VERSION_HISTORY.md",
+        "docs/investigations/20260827-runtime-v7-repair-observability"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "delivery-policy-grounding",
+      "status": "supported_locally",
+      "summary": "Explicit delivery questions receive grounded policy evidence and named destinations retain an exact-address pending boundary."
+    },
+    {
+      "claim_id": "compound-payment-scope",
+      "status": "supported_locally",
+      "summary": "Distinct payment clauses retain method, brand, option, and term through hydration, deduplication, provider lookup, and composition."
+    },
+    {
+      "claim_id": "prompt-reduction",
+      "status": "supported_locally",
+      "summary": "Static main prompt size decreased against 50e5975 and the exact payment probe used one smaller composer attempt."
+    }
+  ],
+  "cost_ledger": [
+    {
+      "billing_cutoff": null,
+      "cached_input_tokens": 166349,
+      "credential_alias": "development GEMINI_API_KEY",
+      "estimated_cost_usd": 0.55626459,
+      "input_tokens": 1538236,
+      "model": "configured Runtime V7 Gemini models",
+      "operation_id": "runtime-v7-live-model-regression-20260909",
+      "output_tokens": 88419,
+      "posted_cost_usd": null,
+      "price_date": "2026-09-09",
+      "provider": "Google Gemini via LiteLLM",
+      "provider_calls": 115,
+      "task_type": "bounded local correctness and prompt-efficiency evaluation"
+    }
+  ],
+  "investigation_id": "20260909-runtime-v7-general-grounding-prompt-efficiency",
+  "objective": "Restore general policy and compound payment correctness, canonicalize FAQ obligations, port observability release documentation, and reduce main/composer prompt cost against 50e5975 without BigQuery changes.",
+  "owner_agent": "Codex Sol",
+  "primary_repo": "D:\\Carlo\\LICA Auto\\assistant\\_codex_worktrees\\gulong-runtime-general-grounding-prompt-efficiency-20260909",
+  "release_and_backfill": {
+    "backfill_status": "not_requested",
+    "deployment_status": "not_requested",
+    "rollback_gate": null
+  },
+  "scope": [
+    "explicit delivery policy grounding",
+    "exact-address serviceability boundary",
+    "compound payment FAQ call scope",
+    "FAQ obligation identity",
+    "main and final-composer prompt ownership",
+    "repair-observability release documentation",
+    "BigQuery explicitly excluded"
+  ],
+  "sources": [
+    {
+      "cutoff": "2026-09-09T15:55:30+08:00",
+      "freshness": "verified at investigation start",
+      "location": "origin/product b99d4ab and live revision gulong-chatbot-runtime-live-00106-vgr at 50e5975",
+      "source_id": "git-and-cloud-run-baseline",
+      "source_kind": "git_and_cloud_run"
+    },
+    {
+      "cutoff": "2026-09-09T18:10:33+08:00",
+      "freshness": "current local run artifacts",
+      "location": "tmp/runtime_v7_general_grounding_runs and tmp/runtime_v7_general_grounding_runs_final",
+      "source_id": "bounded-live-model-matrix",
+      "source_kind": "local_runtime_evaluation"
+    },
+    {
+      "cutoff": "2026-09-09T18:38:45+08:00",
+      "freshness": "current branch",
+      "location": "local isolated worktree",
+      "source_id": "runtime-v7-regression-suite",
+      "source_kind": "pytest"
+    }
+  ],
+  "started_at": "2026-09-09T15:55:16+08:00",
+  "status": "release_gated",
+  "timezone": "Asia/Manila",
+  "title": "Runtime V7 General Grounding and Prompt Efficiency",
+  "updated_at": "2026-09-09T18:38:45+08:00",
+  "verification": [
+    {
+      "coverage": [
+        "model to hydration to cache and deduplication to provider to composer",
+        "delivery and payment positive cases",
+        "adjacent negative controls"
+      ],
+      "result": "888 affected tests, all 1560 Runtime V7 tests, and all 1639 repository tests passed",
+      "status": "passed",
+      "verification_id": "local-regression-suite"
+    },
+    {
+      "coverage": [
+        "four explicit delivery questions",
+        "two delivery statements",
+        "original and reordered compound payment wording",
+        "single and unbranded payment controls"
+      ],
+      "result": "Target correctness contracts passed in final bounded probes; full customer-channel evaluation remains pending",
+      "status": "passed_with_release_gate",
+      "verification_id": "live-model-semantic-matrix"
+    },
+    {
+      "coverage": [
+        "latest full rendered BGC delivery turn",
+        "latest original and reordered compound payment turns"
+      ],
+      "result": "Target answers were grounded and understandable; delivery verbosity and regional phrasing remain broader quality-review items",
+      "status": "passed_with_scope_limit",
+      "verification_id": "human-cs-perspective-review"
+    },
+    {
+      "coverage": [
+        "static main prompt without optional domains",
+        "static main prompt with all domains",
+        "actual exact-payment composer usage"
+      ],
+      "result": "Main prompt reduced 15.5 percent and 5.3 percent respectively; payment composer input reduced from 8388 tokens over two attempts to 3886 in one attempt",
+      "status": "passed",
+      "verification_id": "prompt-efficiency-comparison"
+    }
+  ]
+}

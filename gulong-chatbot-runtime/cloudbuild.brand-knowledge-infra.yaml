@@ -1,0 +1,122 @@
+timeout: "1800s"
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _REGION: asia-southeast1
+  _DATABASE: "(default)"
+  _JOB_NAME: gulong-brand-knowledge-sync
+  _SCHEDULER_NAME: gulong-brand-knowledge-daily
+  _RUNTIME_SERVICE_ACCOUNT: lica-aids@gulong-chatbot-459723.iam.gserviceaccount.com
+
+steps:
+  - id: Ensure brand chunk vector index
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        EXISTING_JSON="$$(gcloud firestore indexes composite list \
+          --project="$PROJECT_ID" \
+          --database='${_DATABASE}' \
+          --format=json)"
+        if ! printf '%s' "$${EXISTING_JSON}" | python3 -c '
+        import json
+        import sys
+
+        indexes = json.load(sys.stdin)
+        found = any(
+            "/collectionGroups/brand_knowledge_chunks/indexes/" in index.get("name", "")
+            and any(
+                field.get("fieldPath") == "version_id"
+                and field.get("order") == "ASCENDING"
+                for field in index.get("fields", [])
+            )
+            and any(
+                field.get("fieldPath") == "embedding"
+                and int(field.get("vectorConfig", {}).get("dimension", 0)) == 768
+                for field in index.get("fields", [])
+            )
+            for index in indexes
+        )
+        raise SystemExit(0 if found else 1)
+        '; then
+          set +e
+          CREATE_OUTPUT="$$(gcloud firestore indexes composite create \
+            --project="$PROJECT_ID" \
+            --database='${_DATABASE}' \
+            --collection-group=brand_knowledge_chunks \
+            --query-scope=COLLECTION \
+            --field-config=order=ASCENDING,field-path=version_id \
+            --field-config=field-path=embedding,vector-config='{"dimension":"768","flat":"{}"}' \
+            --async 2>&1)"
+          CREATE_STATUS=$$?
+          set -e
+          printf '%s\n' "$${CREATE_OUTPUT}"
+          if [ "$${CREATE_STATUS}" -ne 0 ] && ! printf '%s' "$${CREATE_OUTPUT}" | grep -q ALREADY_EXISTS; then
+            exit "$${CREATE_STATUS}"
+          fi
+        fi
+
+  - id: Deploy daily brand sync job
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - jobs
+      - deploy
+      - ${_JOB_NAME}
+      - --project=$PROJECT_ID
+      - --region=${_REGION}
+      - --image=asia-southeast1-docker.pkg.dev/$PROJECT_ID/gulong-chatbot-runtime/gulong-chatbot-runtime:staging-latest
+      - --service-account=${_RUNTIME_SERVICE_ACCOUNT}
+      - --command=python
+      - --args=-m,scripts.brand_knowledge_sync
+      - --task-timeout=20m
+      - --max-retries=1
+      - --memory=1Gi
+      - --cpu=1
+      - --set-env-vars=GOOGLE_CLOUD_PROJECT=$PROJECT_ID,PYTHONUNBUFFERED=1,PYTHONUTF8=1
+
+  - id: Grant scheduler job invocation
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - jobs
+      - add-iam-policy-binding
+      - ${_JOB_NAME}
+      - --project=$PROJECT_ID
+      - --region=${_REGION}
+      - --member=serviceAccount:${_RUNTIME_SERVICE_ACCOUNT}
+      - --role=roles/run.invoker
+
+  - id: Ensure daily scheduler
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        URI="https://${_REGION}-run.googleapis.com/apis/run.googleapis.com/v1/namespaces/$PROJECT_ID/jobs/${_JOB_NAME}:run"
+        if gcloud scheduler jobs describe "${_SCHEDULER_NAME}" --project="$PROJECT_ID" --location="${_REGION}" >/dev/null 2>&1; then
+          gcloud scheduler jobs update http "${_SCHEDULER_NAME}" \
+            --project="$PROJECT_ID" \
+            --location="${_REGION}" \
+            --schedule="15 3 * * *" \
+            --time-zone=Asia/Manila \
+            --uri="$${URI}" \
+            --http-method=POST \
+            --oauth-service-account-email="${_RUNTIME_SERVICE_ACCOUNT}" \
+            --oauth-token-scope=https://www.googleapis.com/auth/cloud-platform
+        else
+          gcloud scheduler jobs create http "${_SCHEDULER_NAME}" \
+            --project="$PROJECT_ID" \
+            --location="${_REGION}" \
+            --schedule="15 3 * * *" \
+            --time-zone=Asia/Manila \
+            --uri="$${URI}" \
+            --http-method=POST \
+            --oauth-service-account-email="${_RUNTIME_SERVICE_ACCOUNT}" \
+            --oauth-token-scope=https://www.googleapis.com/auth/cloud-platform
+        fi
