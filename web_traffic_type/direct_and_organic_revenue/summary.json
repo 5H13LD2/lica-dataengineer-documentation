@@ -1,0 +1,108 @@
+{
+  "unmatched_order_ids": [
+    "39900",
+    "39109",
+    "39052"
+  ],
+  "matched_orders": 168,
+  "purchase_events": 282,
+  "net_sales_all_orders": "2916296.77",
+  "fulfilled_net_revenue": "1361702.96",
+  "gross_sales_all_orders": "3266252.4",
+  "order_date_min": "2026-08-26T14:54:00",
+  "order_date_max": "2026-09-24T12:49:00",
+  "campaigns": [
+    {
+      "Session campaign": "(direct)",
+      "unique_orders": 97,
+      "matched_orders": 94,
+      "purchase_events": 165,
+      "net_sales_all_orders": "1641585.54",
+      "fulfilled_orders": 42,
+      "fulfilled_net_revenue": "745748.76"
+    },
+    {
+      "Session campaign": "(organic)",
+      "unique_orders": 74,
+      "matched_orders": 74,
+      "purchase_events": 117,
+      "net_sales_all_orders": "1274711.23",
+      "fulfilled_orders": 34,
+      "fulfilled_net_revenue": "615954.20"
+    }
+  ],
+  "statuses": [
+    {
+      "order_status_raw": "Fulfilled",
+      "unique_orders": 76,
+      "matched_orders": 76,
+      "purchase_events": 142,
+      "net_sales_all_orders": "1361702.96",
+      "fulfilled_orders": 76,
+      "fulfilled_net_revenue": "1361702.96"
+    },
+    {
+      "order_status_raw": "Cancelled",
+      "unique_orders": 50,
+      "matched_orders": 50,
+      "purchase_events": 56,
+      "net_sales_all_orders": "833341.14",
+      "fulfilled_orders": 0,
+      "fulfilled_net_revenue": "0.00"
+    },
+    {
+      "order_status_raw": "New",
+      "unique_orders": 17,
+      "matched_orders": 17,
+      "purchase_events": 34,
+      "net_sales_all_orders": "270588.46",
+      "fulfilled_orders": 0,
+      "fulfilled_net_revenue": "0.00"
+    },
+    {
+      "order_status_raw": "For Return",
+      "unique_orders": 1,
+      "matched_orders": 1,
+      "purchase_events": 2,
+      "net_sales_all_orders": "31301.07",
+      "fulfilled_orders": 0,
+      "fulfilled_net_revenue": "0.00"
+    },
+    {
+      "order_status_raw": "For Refund",
+      "unique_orders": 2,
+      "matched_orders": 2,
+      "purchase_events": 3,
+      "net_sales_all_orders": "28975.00",
+      "fulfilled_orders": 0,
+      "fulfilled_net_revenue": "0.00"
+    },
+    {
+      "order_status_raw": "Processing",
+      "unique_orders": 16,
+      "matched_orders": 16,
+      "purchase_events": 31,
+      "net_sales_all_orders": "281703.13",
+      "fulfilled_orders": 0,
+      "fulfilled_net_revenue": "0.00"
+    },
+    {
+      "order_status_raw": "Pending",
+      "unique_orders": 6,
+      "matched_orders": 6,
+      "purchase_events": 9,
+      "net_sales_all_orders": "108685.01",
+      "fulfilled_orders": 0,
+      "fulfilled_net_revenue": "0.00"
+    },
+    {
+      "order_status_raw": "Unmatched",
+      "unique_orders": 3,
+      "matched_orders": 0,
+      "purchase_events": 5,
+      "net_sales_all_orders": "0",
+      "fulfilled_orders": 0,
+      "fulfilled_net_revenue": "0"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "rows": 267,
+  "matched": 264,
+  "included": 262,
+  "net": "4799816.25",
+  "fulfilled": "2091465.29",
+  "channels": [
+    {
+      "Channel": "Google Ads",
+      "Orders": 67.0,
+      "Net sales": 1473109.48,
+      "Fulfilled orders": 26.0,
+      "Fulfilled net revenue": 510707.5,
+      "Fulfillment rate": 0.3880597014925373,
+      "Cancelled orders": 18.0,
+      "Cancelled net value": 328191.94,
+      "Open net value": 623269.5,
+      "Return refund net value": 10940.54,
+      "Net value per order": 21986.70865671642,
+      "Fulfilled value share": 0.34668672419377816
+    },
+    {
+      "Channel": "Direct & Organic",
+      "Orders": 167.0,
+      "Net sales": 2862122.66,
+      "Fulfilled orders": 75.0,
+      "Fulfilled net revenue": 1307528.85,
+      "Fulfillment rate": 0.4491017964071856,
+      "Cancelled orders": 50.0,
+      "Cancelled net value": 833341.14,
+      "Open net value": 660976.6,
+      "Return refund net value": 60276.07,
+      "Net value per order": 17138.45904191617,
+      "Fulfilled value share": 0.45683885889083453
+    },
+    {
+      "Channel": "Referral",
+      "Orders": 28.0,
+      "Net sales": 464584.11,
+      "Fulfilled orders": 10.0,
+      "Fulfilled net revenue": 273228.94,
+      "Fulfillment rate": 0.35714285714285715,
+      "Cancelled orders": 11.0,
+      "Cancelled net value": 132243.91,
+      "Open net value": 48170.72,
+      "Return refund net value": 10940.54,
+      "Net value per order": 16592.289642857144,
+      "Fulfilled value share": 0.5881151208550804
+    }
+  ],
+  "customer_types": [
+    {
+      "Customer type": "Chatbot",
+      "Orders": 1.0,
+      "Net sales": 71428.57,
+      "Fulfilled orders": 0.0,
+      "Fulfilled net revenue": 0.0,
+      "Fulfillment rate": 0.0,
+      "Cancelled orders": 0.0,
+      "Cancelled net value": 0.0,
+      "Open net value": 71428.57,
+      "Return refund net value": 0.0,
+      "Net value per order": 71428.57,
+      "Fulfilled value share": 0.0
+    },
+    {
+      "Customer type": "Fb",
+      "Orders": 9.0,
+      "Net sales": 144461.16,
+      "Fulfilled orders": 8.0,
+      "Fulfilled net revenue": 128788.48,
+      "Fulfillment rate": 0.8888888888888888,
+      "Cancelled orders": 0.0,
+      "Cancelled net value": 0.0,
+      "Open net value": 15672.68,
+      "Return refund net value": 0.0,
+      "Net value per order": 16051.24,
+      "Fulfilled value share": 0.8915093856369422
+    },
+    {
+      "Customer type": "Website",
+      "Orders": 252.0,
+      "Net sales": 4583926.52,
+      "Fulfilled orders": 103.0,
+      "Fulfilled net revenue": 1962676.81,
+      "Fulfillment rate": 0.4087301587301587,
+      "Cancelled orders": 79.0,
+      "Cancelled net value": 1293776.99,
+      "Open net value": 1245315.57,
+      "Return refund net value": 82157.15,
+      "Net value per order": 18190.184603174603,
+      "Fulfilled value share": 0.42816498070741327
+    }
+  ],
+  "insights": [
+    "Direct & Organic contributes 62.5% of fulfilled net revenue (\u20b11,307,529).",
+    "Cancelled orders represent \u20b11,293,777, or 27.0% of September order value. Review cancellation reasons before increasing acquisition spend.",
+    "Open orders hold \u20b11,332,417. Prioritize payment and fulfillment follow-up; this value is not a revenue forecast.",
+    "Week 4 averages \u20b1169,322 per day versus \u20b1196,039 in Week 3 (-13.6%). Three-day coverage and weekday mix limit comparison.",
+    "Week 4 has no fulfilled revenue in this snapshot. These recent order cohorts have had less time to fulfill; this is not evidence of zero eventual sales.",
+    "8 fulfilled orders are partially paid. Fulfilled revenue uses full order value and is not cash collected.",
+    "Backend customer type is an operational classification (Website/Fb/Chatbot), not new versus returning customer and not the analytics acquisition channel.",
+    "No advertising spend, clicks or session denominators were supplied. ROAS, CAC and visitor-to-order conversion cannot be calculated from these exports."
+  ]
+}

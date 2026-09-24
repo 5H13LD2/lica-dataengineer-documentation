@@ -1,0 +1,7 @@
+﻿order_status_raw,unique_orders,purchase_events,net_sales_all_orders,fulfilled_orders,fulfilled_net_revenue
+Fulfilled,27,47,537761.07,27,537761.07
+New,13,28,429307.34,0,0.00
+Pending,5,10,80720.91,0,0.00
+Processing,4,8,113241.25,0,0.00
+Cancelled,18,21,328191.94,0,0.00
+For Return,1,2,10940.54,0,0.00
